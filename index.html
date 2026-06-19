@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v3.7</title>
+    <title>YouTube NetFree Scan Control Hub v3.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -21,13 +21,12 @@
 </head>
 <body class="custom-scrollbar p-4 md:p-6 font-sans">
 
-    <!-- סרגל עליון -->
     <header class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-800">
         <div class="flex items-center gap-3">
             <i class="fas fa-brain-circuit text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 3.7</h1>
-                <p class="text-xs text-zinc-400">נסיגה ממוקדת לחסומים (10 לאחור), דילוג חסינות של 30 סרטונים ללא סטייה ומניעת לופים</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 3.8</h1>
+                <p class="text-xs text-zinc-400">בקרת סטייה לאחר 20 חסומים ברצף, והצגת ערוצים אחרונים שנבדקו תמיד בראש הרשימה</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -47,7 +46,6 @@
         </div>
     </header>
 
-    <!-- פנל סיכום אנליטי גלובלי -->
     <section class="max-w-7xl mx-auto mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between">
             <div>
@@ -72,13 +70,12 @@
         </div>
     </section>
 
-    <!-- פקדים גלובליים -->
     <section class="max-w-7xl mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-zinc-400">בקרת תור כללית:</span>
             <span id="globalStatusBadge" class="text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">מערכת במנוחה</span>
-            <span id="anomalyIndicator" class="hidden text-xs font-bold px-2 py-1 bg-red-950 border border-red-800 text-red-400 rounded-lg animate-bounce"><i class="fas fa-exclamation-triangle ml-1"></i> מפעיל קירור ונסיגה ממוקדת של 10 חסומים לאחור...</span>
-            <span id="bypassIndicator" class="hidden text-xs font-bold px-2 py-1 bg-amber-950 border border-amber-800 text-amber-400 rounded-lg animate-pulse"><i class="fas fa-shield-alt ml-1"></i> מצב חסינות פעיל: רץ 30 סרטונים ללא בקרת סטייה</span>
+            <span id="anomalyIndicator" class="hidden text-xs font-bold px-2 py-1 bg-red-950 border border-red-800 text-red-400 rounded-lg animate-bounce"><i class="fas fa-exclamation-triangle ml-1"></i> זוהתה סטיית קצב (20 חסומים ברצף)! מפעיל קירור של 8 שניות ונסיגה...</span>
+            <span id="bypassIndicator" class="hidden text-xs font-bold px-2 py-1 bg-amber-950 border border-amber-800 text-amber-400 rounded-lg animate-pulse"><i class="fas fa-shield-alt ml-1"></i> מצב חסינות פעיל: רץ 30 סרטונים ללא בדיקת סטייה</span>
         </div>
         <div class="flex gap-2">
             <button onclick="pauseGlobalScanner()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"><i class="fas fa-pause"></i> השהה סריקה</button>
@@ -88,7 +85,6 @@
     </section>
 
     <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- עמודה ימנית -->
         <div class="lg:col-span-6 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
                 <div class="flex justify-between items-center mb-3">
@@ -136,7 +132,6 @@
                 </div>
             </div>
 
-            <!-- פנל סרטונים בודדים -->
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
                 <h2 class="text-base font-bold mb-1 flex items-center gap-2 text-indigo-400"><i class="fas fa-play-circle"></i> ניהול סרטונים בודדים (ללא ערוץ)</h2>
                 <div class="flex gap-2 mt-2">
@@ -146,7 +141,6 @@
             </div>
         </div>
 
-        <!-- עמודה שמאלית -->
         <div class="lg:col-span-6 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
                 <h2 class="text-sm font-bold mb-3 flex items-center gap-2 text-indigo-400"><i class="fas fa-photo-film"></i> סרטונים בודדים רשומים (<span id="standaloneCountLabel">0</span>)</h2>
@@ -166,7 +160,6 @@
         </div>
     </main>
 
-    <!-- אזור חיפוש ערוצים תחתון רחב -->
     <section class="max-w-7xl mx-auto mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
         <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i class="fas fa-search text-blue-400"></i> חיפוש מורחב לחיסכון בעלויות API (מציג עד 50 תוצאות בבקשה בודדת)</h2>
         <div class="flex gap-2 max-w-xl mb-4">
@@ -176,7 +169,6 @@
         <div id="channelSearchResults" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 max-h-[450px] overflow-y-auto custom-scrollbar pr-1 hidden"></div>
     </section>
 
-    <!-- מודאל עריכה ידנית -->
     <div id="editChannelModal" class="fixed inset-0 z-[400] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-3xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
@@ -210,7 +202,6 @@
         </div>
     </div>
 
-    <!-- מודאל מפתחות API -->
     <div id="configModal" class="fixed inset-0 z-[300] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-key text-blue-500"></i> ניהול מפתחות YouTube API</h2>
@@ -282,13 +273,12 @@
             });
         }
 
-        // --- מנגנון בדיקה מקבילית אנליטית גרסה 3.7 - הגנה מפני לופים וחסינות ל-30 סרטונים ---
+        // --- מנגנון בדיקה מקבילית אנליטית גרסה 3.8 - הפעלה רק לאחר 20 חסומים ברצף ---
         async function processBatchParallel(videoIds, progressCallback, isBlockedOnlyMode = false) {
             let results = { open: [], blocked: [] };
             let index = 0;
             let recentBlockedSequence = 0; 
             
-            // משתני שליטה פנימיים למניעת הלופ
             let hasRolledBackInThisChain = false; 
             let bypassDeviationProtectionCount = 0; 
 
@@ -305,7 +295,6 @@
                         break;
                     }
 
-                    // [מצב חסינות] הפחתת המונה אם אנחנו תחת השבתת הגנה זמנית
                     if (bypassDeviationProtectionCount > 0) {
                         bypassDeviationProtectionCount--;
                         if (bypassDeviationProtectionCount === 0) {
@@ -313,36 +302,33 @@
                         }
                     }
 
-                    // [בקרת סטייה - מופעלת רק בסריקה מלאה ולא בסריקת חסומים בלבד]
-                    if (!isBlockedOnlyMode && bypassDeviationProtectionCount === 0 && recentBlockedSequence >= 5) {
+                    // [תיקון קפדני לבקשתך] בקרת סטייה מופעלת רק לאחר 20 חסומים ברצף
+                    if (!isBlockedOnlyMode && bypassDeviationProtectionCount === 0 && recentBlockedSequence >= 20) {
                         
-                        // מקרה א': זו פעם ראשונה ברצף הנוכחי - מבצעים קירור ונסיגה ממוקדת לאחור
                         if (!hasRolledBackInThisChain) {
                             document.getElementById('anomalyIndicator').classList.remove('hidden');
-                            await sleep(8000);   // המתנת קירור של 8 שניות לבקשתך
+                            await sleep(8000);   
                             
-                            let rollbackSteps = 10; // חזרה של 10 סרטונים לאחור לבקשתך
+                            let rollbackSteps = 10; // חזרה של 10 סרטונים לאחור
                             let targetIndex = Math.max(0, index - rollbackSteps - 3); 
                             
-                            // [נסיגה ממוקדת לחסומים בלבד] - מסירים מהרשימות רק את מזהי החסומים שהיו בחלון הנסיגה
                             let rolledBackSliceIds = videoIds.slice(targetIndex, index);
                             results.blocked = results.blocked.filter(id => !rolledBackSliceIds.includes(id));
-                            results.open = results.open.filter(id => !rolledBackSliceIds.includes(id)); // ליתר ביטחון
+                            results.open = results.open.filter(id => !rolledBackSliceIds.includes(id)); 
                             
                             rebuildLiveDisplayLists(results);
                             
                             index = targetIndex; 
-                            recentBlockedSequence = 0; // איפוס מונה
-                            hasRolledBackInThisChain = true; // הדלקת דגל המונע לופ
+                            recentBlockedSequence = 0; 
+                            hasRolledBackInThisChain = true; 
                             
                             document.getElementById('anomalyIndicator').classList.add('hidden');
                             continue;
                         } 
-                        // מקרה ב': המערכת כבר ביצעה נסיגה ובכל זאת נתקעה שוב (הסרטונים חסומים באמת!) - מפעילים חסינות ל-30 סרטונים
                         else {
-                            hasRolledBackInThisChain = false; // איפוס הדגל לסבבים הבאים בערוץ
-                            recentBlockedSequence = 0; // איפוס המונה
-                            bypassDeviationProtectionCount = 30; // הגדרת חסינות ל-30 סרטונים הבאים
+                            hasRolledBackInThisChain = false; 
+                            recentBlockedSequence = 0; 
+                            bypassDeviationProtectionCount = 30; // חסינות ל-30 סרטונים
                             document.getElementById('bypassIndicator').classList.remove('hidden');
                         }
                     }
@@ -362,7 +348,7 @@
 
                     if (status === 'unblocked') {
                         if(!results.open.includes(vId)) results.open.push(vId);
-                        recentBlockedSequence = 0; 
+                        recentBlockedSequence = 0; // כל סרטון פתוח מאפס מיידית את המונה
                         document.getElementById('liveOpenCount').innerText = results.open.length;
                         appendLiveList('liveOpenList', vId, 'emerald', false);
                     } else {
@@ -515,7 +501,6 @@
                 else { alert(`שגיאה: ה-API חסום לחלוטין ברשת.`); return; }
             }
 
-            // סריקה מלאה רגילה - מעבירים פאלס בפרמטר השלישי (בקרת הסטייה פעילה ומאובטחת)
             const scanResults = await processBatchParallel(allVideoIds, (processed, total) => {
                 const pct = Math.round((processed / total) * 100); updateProgress(pct, 100, `סריקה פעילה ומאובטחת: ${processed}/${total}`);
             }, false);
@@ -525,7 +510,8 @@
             db[channelId] = {
                 title: channelTitle, totalVideos: allVideoIds.length,
                 openVideos: scanResults.open, blockedVideos: scanResults.blocked,
-                scannedAt: new Date().toLocaleDateString('he-IL')
+                scannedAt: new Date().toLocaleDateString('he-IL'),
+                updatedTimestamp: Date.now() // הזרקת חותמת זמן לצורך מיון כרונולוגי הפוך
             };
             localStorage.setItem('yt_scanned_db_v3', JSON.stringify(db));
             renderScannedDatabaseGrid(); calculateGlobalStats();
@@ -538,7 +524,6 @@
             document.getElementById('liveChannelName').innerText = channelTitle; document.getElementById('liveScanType').innerText = "עדכון חסומים בלבד";
             document.getElementById('liveOfficialCount').innerText = existingData.totalVideos; document.getElementById('liveTotalVideos').innerText = targetVideoIds.length;
 
-            // סריקת חסומים בלבד - מעבירים טרו בפרמטר השלישי כדי לנטרל לחלוטין את בקרת הסטייה לבקשתך
             const scanResults = await processBatchParallel(targetVideoIds, (processed, total) => {
                 const pct = Math.round((processed / total) * 100); updateProgress(pct, 100, `סריקה ממוקדת: ${processed}/${total}`);
             }, true);
@@ -547,6 +532,9 @@
 
             scanResults.open.forEach(vId => { if (!existingData.openVideos.includes(vId)) existingData.openVideos.push(vId); });
             existingData.blockedVideos = scanResults.blocked;
+            existingData.scannedAt = new Date().toLocaleDateString('he-IL');
+            existingData.updatedTimestamp = Date.now(); // עדכון חותמת זמן להקפצה למעלה
+
             db[channelId] = existingData;
             localStorage.setItem('yt_scanned_db_v3', JSON.stringify(db));
             renderScannedDatabaseGrid(); calculateGlobalStats();
@@ -582,7 +570,7 @@
             queue.forEach((item, index) => {
                 const div = document.createElement('div'); div.className = "flex justify-between items-center bg-zinc-900 border border-zinc-800 p-2 rounded-xl text-[11px]";
                 div.innerHTML = `
-                    <div class="truncate max-w-[50%]"><span class="font-bold text-zinc-300 block truncate text-xs">${item.title}</span><span class="text-[9px] text-zinc-500 font-normal">${item.mode === 'blocked_only' ? 'חסומים בלבד' : 'ערוץ מלא'} | ${index === 0 ? (globalPause ? 'מושהה כללית' : (item.status === 'paused' ? 'מושהה פרטנית' : 'סורק كעת...')) : 'ממתין'}</span></div>
+                    <div class="truncate max-w-[50%]"><span class="font-bold text-zinc-300 block truncate text-xs">${item.title}</span><span class="text-[9px] text-zinc-500 font-normal">${item.mode === 'blocked_only' ? 'חסומים בלבד' : 'ערוץ מלא'} | ${index === 0 ? (globalPause ? 'מושהה כללית' : (item.status === 'paused' ? 'מושהה פרטנית' : 'סורק כעת...')) : 'ממתין'}</span></div>
                     <div class="flex gap-1">
                         <button onclick="toggleChannelPause(${index})" class="${item.status === 'paused' ? 'bg-indigo-950 text-indigo-400 border border-indigo-900' : 'bg-amber-950 text-amber-400 border border-amber-900'} px-2 py-1 rounded font-bold text-[10px]">${item.status === 'paused' ? 'המשך' : 'השהה'}</button>
                         <button onclick="cancelChannelInQueue(${index})" class="bg-rose-950 text-rose-400 border border-rose-900 px-2 py-1 rounded font-bold text-[10px]">בטל</button>
@@ -627,6 +615,7 @@
             const data = db[activeEditingChannelId];
             if (currentType === 'open') { data.openVideos = data.openVideos.filter(v => v !== id); if(!data.blockedVideos.includes(id)) data.blockedVideos.push(id); } 
             else { data.blockedVideos = data.blockedVideos.filter(v => v !== id); if(!data.openVideos.includes(id)) data.openVideos.push(id); }
+            db[activeEditingChannelId].updatedTimestamp = Date.now(); // הקפצה למעלה בעקבות שינוי ידני
             localStorage.setItem('yt_scanned_db_v3', JSON.stringify(db)); renderModalVideoLists(); calculateGlobalStats();
         }
         function addVideoManually(type) {
@@ -635,6 +624,7 @@
             data.openVideos = data.openVideos.filter(v => v !== vId); data.blockedVideos = data.blockedVideos.filter(v => v !== vId);
             if (type === 'open') data.openVideos.push(vId); else data.blockedVideos.push(vId);
             data.totalVideos = data.openVideos.length + data.blockedVideos.length;
+            db[activeEditingChannelId].updatedTimestamp = Date.now();
             localStorage.setItem('yt_scanned_db_v3', JSON.stringify(db)); idInput.value = ''; renderModalVideoLists(); calculateGlobalStats();
         }
 
@@ -648,7 +638,7 @@
         function importFullBackup(event) {
             const file = event.target.files[0]; if (!file) return;
             const r = new FileReader(); r.onload = (e) => {
-                try { db = JSON.parse(e.target.result); if(!db._standalone_videos) db._standalone_videos = {"open":[], "blocked":[]}; localStorage.setItem('yt_scanned_db_v3', JSON.stringify(db)); renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); alert("המאגר שוחזר בהצלחה!"); } catch(err) { alert("שגיאה קובץ."); }
+                try { db = JSON.parse(e.target.result); if(!db._standalone_videos) db._standalone_videos = {"open":[], "blocked":[]}; localStorage.setItem('yt_scanned_db_v3', JSON.stringify(db)); renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); alert("המאגר שוחזר בהצלחה!"); } catch(err) { alert("שגיאה."); }
             }; r.readAsText(file);
         }
         function triggerDownload(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
@@ -666,18 +656,27 @@
             } return null;
         }
 
+        // --- תיקון ומיון המאגר המקומי בסדר כרונולוגי הפוך (החדשים/מעודכנים ביותר למעלה!) ---
         function renderScannedDatabaseGrid() {
             const grid = document.getElementById('scannedDatabaseGrid'); const searchFilter = document.getElementById('localDbSearchInput').value.trim().toLowerCase();
             let keys = Object.keys(db).filter(k => k !== "_standalone_videos");
             if (searchFilter) keys = keys.filter(cid => db[cid].title && db[cid].title.toLowerCase().includes(searchFilter));
+            
+            // [תיקון המיון לבקשתך] מיון קשיח לפי חותמת הזמן - הערוץ האחרון שעודכן יופיע ראשון למעלה
+            keys.sort((a, b) => {
+                let timeA = db[a].updatedTimestamp || 0;
+                let timeB = db[b].updatedTimestamp || 0;
+                return timeB - timeA; 
+            });
+
             if(keys.length === 0) { grid.innerHTML = '<div class="col-span-full text-center py-6 text-zinc-600 text-xs">אין תוצאות.</div>'; return; }
             grid.innerHTML = '';
             keys.forEach(cid => {
-                const item = db[cid]; const div = document.createElement('div'); div.className = "bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex flex-col justify-between";
+                const item = db[cid]; const div = document.createElement('div'); div.className = "bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex flex-col justify-between shadow-sm hover:border-zinc-700 transition";
                 let blockedCount = item.blockedVideos ? item.blockedVideos.length : 0;
                 div.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-start gap-2 mb-1"><h4 class="font-bold text-xs text-white truncate max-w-[70%]" title="${item.title}">${item.title}</h4></div>
+                        <div class="flex justify-between items-start gap-2 mb-1"><h4 class="font-bold text-xs text-white truncate max-w-[70%]" title="${item.title}">${item.title}</h4><span class="text-[9px] bg-zinc-950 text-zinc-500 font-mono px-1 py-0.5 rounded border border-zinc-800">${item.scannedAt || 'לא ידוע'}</span></div>
                         <div class="grid grid-cols-3 gap-1 text-center my-2 text-[10px] font-bold">
                             <div class="bg-zinc-950 p-1 rounded text-zinc-400">${item.totalVideos} <span>סרטונים</span></div>
                             <div class="bg-emerald-950/20 p-1 rounded text-emerald-400">${item.openVideos.length} <span>פתוחים</span></div>
