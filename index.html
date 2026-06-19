@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v4.5</title>
+    <title>YouTube NetFree Scan Control Hub v4.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -25,8 +25,8 @@
         <div class="flex items-center gap-3">
             <i class="fas fa-bolt text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 4.5</h1>
-                <p class="text-xs text-zinc-400">תיקון סופי לבאג קריסת החיפוש, איחוד מפתח זיכרון גלובלי (v4) ויציבות מקסימלית</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 4.6</h1>
+                <p class="text-xs text-zinc-400">ניהול תור מורחב, זיהוי סיום מכסת מפתחות API והתראות חכמות בעברית</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -215,7 +215,6 @@
     <div id="netfreeTesterContainer" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0;"></div>
 
     <script>
-        // תיקון קריטי: איחור קריאה אחיד ומלא ל-yt_scanned_db_v4 בכל רחבי הסקריפט
         let db = JSON.parse(localStorage.getItem('yt_scanned_db_v4') || '{"_standalone_videos": {"open": [], "blocked": []}}');
         if(!db._standalone_videos) db._standalone_videos = {"open": [], "blocked": []};
         
@@ -445,6 +444,10 @@
             updateProgress(10, 100, `מתחבר לנתוני השרת...`);
             let officialVideoCount = 0;
             const channelStatsData = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${key}`);
+            
+            // אם הוחזר null בעקבות סיום מפתחות, הפונקציה הראשית תזהה ותעצור
+            if(channelStatsData === "QUOTA_EXHAUSTED") return;
+
             if (channelStatsData && channelStatsData.items && channelStatsData.items.length > 0) {
                 officialVideoCount = parseInt(channelStatsData.items[0].statistics.videoCount || 0, 10);
                 document.getElementById('liveOfficialCount').innerText = officialVideoCount;
@@ -456,6 +459,9 @@
             do {
                 const tokenParam = nextPageToken ? `&pageToken=${nextPageToken}` : "";
                 const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=50${tokenParam}&key=${key}`);
+                
+                if(data === "QUOTA_EXHAUSTED") return; // עצירת חירום
+
                 if (data && data.items && data.items.length > 0) {
                     data.items.forEach(item => { 
                         const vId = item.snippet?.resourceId?.videoId; 
@@ -532,7 +538,6 @@
             return null; 
         }
 
-        // --- שחזור ותיקון לוגיקת החיפוש המקורית קשיחה ומסונכרנת ---
         async function searchChannels() {
             let q = document.getElementById('channelSearchInput').value.trim(); if (!q) return;
             const target = document.getElementById('channelSearchResults');
@@ -543,6 +548,9 @@
             if (directChannelId) { apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${directChannelId}`; }
 
             const data = await fetchWithRotation((key) => `${apiUrl}&key=${key}`);
+            
+            if(data === "QUOTA_EXHAUSTED") return; 
+
             if (!data || !data.items || data.items.length === 0) { target.innerHTML = '<div class="col-span-full text-center py-12 text-xs text-zinc-500 font-bold text-rose-400">לא נמצא ערוץ תואם. נסה לחפש לפי שם הערוץ המדויק.</div>'; return; }
             target.innerHTML = '';
             
@@ -645,15 +653,55 @@
 
         function toggleConfigModal() { const m = document.getElementById('configModal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; if(m.style.display === 'flex') document.getElementById('apiKeysTextArea').value = apiKeys.join('\n'); }
         function saveApiKeys() { apiKeys = document.getElementById('apiKeysTextArea').value.split('\n').map(l => l.trim()).filter(l => l.length > 0); localStorage.setItem('yt_api_keys_v2', JSON.stringify(apiKeys)); currentKeyIndex = 0; document.getElementById('keyCountLabel').innerText = apiKeys.length; toggleConfigModal(); }
+        
+        // --- [חדש] מנגנון רוטציה חכם עם זיהוי סיום מכסה מלא גלובלי ---
         async function fetchWithRotation(urlBuilder) {
+            if(apiKeys.length === 0) {
+                alert("אנא הגדר לפחות מפתח API אחד בלשונית ניהול מפתחות.");
+                handleQuotaExhaustionStop();
+                return "QUOTA_EXHAUSTED";
+            }
+            
             let attempts = 0;
             while (attempts < apiKeys.length) {
                 try {
-                    const res = await fetch(urlBuilder(apiKeys[currentKeyIndex]));
-                    if (res.status === 403) { currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length; attempts++; continue; }
+                    const url = urlBuilder(apiKeys[currentKeyIndex]);
+                    const res = await fetch(url);
+                    
+                    // זיהוי שגיאת Quota (קוד 403)
+                    if (res.status === 403) {
+                        const errJson = await res.json();
+                        // וידוא שהסיבה היא אכן סיום המכסה היומית
+                        if(errJson.error?.errors?.[0]?.reason === 'quotaExceeded') {
+                            console.warn(`מפתח מספר ${currentKeyIndex + 1} הגיע למכסתו הכללית. מעביר למפתח הבא...`);
+                            currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+                            attempts++;
+                            continue;
+                        }
+                    }
+                    
+                    if (!res.ok) { return null; }
                     return await res.json();
                 } catch (e) { return null; }
-            } return null;
+            }
+            
+            // הגעה לכאן אומרת שכל הבקשות מכל המפתחות חזרו עם שגיאת מכסה (Quota)
+            alert("⚠️ שגיאה: נגמרה מכסת ה-API (Quota) בכל המפתחות שהוזנו במערכת! הסריקה הופסקה.");
+            handleQuotaExhaustionStop();
+            return "QUOTA_EXHAUSTED";
+        }
+
+        // ניקוי ועצירת התור במקרה של סיום מכסה
+        function handleQuotaExhaustionStop() {
+            queue = [];
+            isProcessing = false;
+            globalPause = false;
+            document.getElementById('spinnerIcon').classList.add('hidden');
+            updateProgress(0, 100, "הסריקה נבלמה: מכסת מפתחות ה-API הסתיימה.");
+            document.getElementById('liveChannelName').innerText = "-";
+            document.getElementById('liveScanType').innerText = "-";
+            updateGlobalStatus();
+            renderQueue();
         }
 
         function renderScannedDatabaseGrid() {
