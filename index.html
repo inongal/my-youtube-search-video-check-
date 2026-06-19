@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v4.3</title>
+    <title>YouTube NetFree Scan Control Hub v4.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -21,13 +21,12 @@
 </head>
 <body class="custom-scrollbar p-4 md:p-6 font-sans">
 
-    <!-- סרגל עליון -->
     <header class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-800">
         <div class="flex items-center gap-3">
             <i class="fas fa-bolt text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 4.3</h1>
-                <p class="text-xs text-zinc-400">הפעלת מצב ערוץ מאושר גורף בתחילת התהליך לפני פנייה ל-API למניעת חסימות רשת</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 4.4</h1>
+                <p class="text-xs text-zinc-400">שחזור לוגיקת החיפוש והחילוץ המקורית (סדרת גרסאות 3) ליציבות מלאה בכל סוגי הערוצים</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -47,7 +46,6 @@
         </div>
     </header>
 
-    <!-- פנל סיכום אנליטי גלובלי -->
     <section class="max-w-7xl mx-auto mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between">
             <div>
@@ -72,7 +70,6 @@
         </div>
     </section>
 
-    <!-- פקדים גלובליים -->
     <section class="max-w-7xl mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-zinc-400">בקרת תור כללית:</span>
@@ -86,7 +83,6 @@
     </section>
 
     <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- עמודה ימנית -->
         <div class="lg:col-span-6 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
                 <div class="flex justify-between items-center mb-3">
@@ -134,7 +130,6 @@
                 </div>
             </div>
 
-            <!-- פנל סרטונים בודדים -->
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
                 <h2 class="text-base font-bold mb-1 flex items-center gap-2 text-indigo-400"><i class="fas fa-play-circle"></i> ניהול סרטונים בודדים (ללא ערוץ)</h2>
                 <div class="flex gap-2 mt-2">
@@ -144,7 +139,6 @@
             </div>
         </div>
 
-        <!-- עמודה שמאלית -->
         <div class="lg:col-span-6 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
                 <h2 class="text-sm font-bold mb-3 flex items-center gap-2 text-indigo-400"><i class="fas fa-photo-film"></i> סרטונים בודדים רשומים (<span id="standaloneCountLabel">0</span>)</h2>
@@ -164,10 +158,9 @@
         </div>
     </main>
 
-    <!-- אזור הוספת וחיפוש ערוצים משודרג -->
     <section class="max-w-7xl mx-auto mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
         <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i class="fas fa-search text-blue-400"></i> הוספת ערוץ ישירה (לפי כתובת URL / מזהה) או חיפוש חופשי</h2>
-        <p class="text-xs text-zinc-500 mb-3">ניתן להדביק קישור ערוץ מלא, מזהה ערוץ (UC...) או לחפש לפי שם כדי לחסוך זמן פנייה.</p>
+        <p class="text-xs text-zinc-500 mb-3">ניתן להדביק קישור ערוץ מלא, מזהה ערוץ (UC...) או לחפש לפי שם ללא הגבלת רשת.</p>
         <div class="flex flex-col sm:flex-row gap-2 max-w-2xl mb-4">
             <input type="text" id="channelSearchInput" placeholder="הדבק כתובת ערוץ, מזהה ערוץ או שם לחיפוש..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm outline-none focus:border-zinc-700 font-mono sm:font-sans">
             <button onclick="searchChannels()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-sm transition whitespace-nowrap">מעבד / חפש ערוץ</button>
@@ -175,7 +168,6 @@
         <div id="channelSearchResults" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 max-h-[450px] overflow-y-auto custom-scrollbar pr-1 hidden"></div>
     </section>
 
-    <!-- מודאל עריכה ידנית -->
     <div id="editChannelModal" class="fixed inset-0 z-[400] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-3xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
@@ -209,7 +201,6 @@
         </div>
     </div>
 
-    <!-- מודאל מפתחות API -->
     <div id="configModal" class="fixed inset-0 z-[300] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-key text-blue-500"></i> ניהול מפתחות YouTube API</h2>
@@ -403,28 +394,15 @@
             localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderStandaloneVideos(); calculateGlobalStats();
         }
 
-        function pushToQueue(id, title, mode = 'full') {
-            if (queue.some(q => q.id === id && q.mode === mode)) return;
-            queue.push({ id, title, status: 'pending', mode: mode }); renderQueue();
-            if (!isProcessing) processQueueNext();
+        function toggleNetfreeWhitelist(channelId) {
+            if(!db[channelId]) return;
+            db[channelId].isNetfreeWhitelisted = !db[channelId].isNetfreeWhitelisted;
+            localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db));
+            renderScannedDatabaseGrid(); calculateGlobalStats();
         }
 
-        async function processQueueNext() {
-            if (queue.length === 0) { isProcessing = false; document.getElementById('spinnerIcon').classList.add('hidden'); document.getElementById('liveChannelName').innerText = "-"; document.getElementById('liveScanType').innerText = "-"; updateGlobalStatus(); return; }
-            if(globalPause) { await new Promise(r => setTimeout(r, 1000)); return processQueueNext(); }
-            isProcessing = true; document.getElementById('spinnerIcon').classList.remove('hidden'); updateGlobalStatus(); renderQueue();
-            const current = queue[0];
-            if(current.status === 'paused') { await new Promise(r => setTimeout(r, 1000)); return processQueueNext(); }
-            try { 
-                if (current.mode === 'blocked_only') await scanChannelBlockedOnly(current.id, current.title);
-                else await scanChannelVideosMssive(current.id, current.title); 
-            } catch (err) { console.error(err); }
-            queue.shift(); processQueueNext();
-        }
-
-        // --- סריקה משוכללת v4.3: טיפול מוקדם ומעקף API לערוץ פתוח בנטפרי ---
+        // --- שחזור חילוץ הסרטונים המקורי מסדרת גרסאות 3 (UU Playlist - playlistItems API) ---
         async function scanChannelVideosMssive(channelId, channelTitle) {
-            // [פיצ'ר משודרג] בדיקה מוקדמת האם הערוץ מוגדר כמאושר גורף במערכת
             const isWhitelisted = db[channelId]?.isNetfreeWhitelisted || false;
 
             document.getElementById('liveChannelName').innerText = channelTitle; 
@@ -432,33 +410,27 @@
             document.getElementById('liveOfficialCount').innerText = "..."; document.getElementById('liveTotalVideos').innerText = "...";
             document.getElementById('liveOpenCount').innerText = "0"; document.getElementById('liveBlockedCount').innerText = "0";
 
-            // מקרה א': הערוץ מאושר גורף וכבר יש לנו רשימת סרטונים מקומית שלו - נבצע החלה מיידית ללא פנייה לשרתי API כלל!
+            // טיפול מוקדם ללא פנייה ל-API לערוצים מאושרים גורף קיימים
             if (isWhitelisted && db[channelId] && (db[channelId].openVideos || db[channelId].blockedVideos)) {
-                updateProgress(20, 100, `ערוץ מאושר מראש. משחזר ומאשר רשימה מקומית...`);
+                updateProgress(20, 100, `משחזר ומאשר רשימה מקומית...`);
                 let localCombinedIds = [...(db[channelId].openVideos || []), ...(db[channelId].blockedVideos || [])];
-                
                 document.getElementById('liveTotalVideos').innerText = localCombinedIds.length;
                 document.getElementById('liveOfficialCount').innerText = localCombinedIds.length;
-                
                 localCombinedIds.forEach(vId => appendLiveList('liveOpenList', vId, 'emerald'));
                 document.getElementById('liveOpenCount').innerText = localCombinedIds.length;
                 
                 db[channelId] = {
-                    title: channelTitle,
-                    totalVideos: localCombinedIds.length,
-                    openVideos: localCombinedIds, // הפיכת כולם לפתוחים אוטומטית
-                    blockedVideos: [],
-                    scannedAt: new Date().toLocaleDateString('he-IL'),
-                    updatedTimestamp: Date.now(),
+                    title: channelTitle, totalVideos: localCombinedIds.length,
+                    openVideos: localCombinedIds, blockedVideos: [],
+                    scannedAt: new Date().toLocaleDateString('he-IL'), updatedTimestamp: Date.now(),
                     isNetfreeWhitelisted: true
                 };
                 localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db));
-                updateProgress(100, 100, `הסתיים בהצלחה: כל ${localCombinedIds.length} הסרטונים אושרו ללא API.`);
+                updateProgress(100, 100, `הסתיים בהצלחה (אישור מהיר).`);
                 renderScannedDatabaseGrid(); calculateGlobalStats();
                 return;
             }
 
-            // מקרה ב': סריקה רגילה או ערוץ מאושר שעדיין אין לו סרטונים במאגר המקומי (פנייה רגילה לפלייליסט)
             updateProgress(10, 100, `מתחבר לנתוני השרת...`);
             let officialVideoCount = 0;
             const channelStatsData = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${key}`);
@@ -467,14 +439,19 @@
                 document.getElementById('liveOfficialCount').innerText = officialVideoCount;
             } else { document.getElementById('liveOfficialCount').innerText = "עיבוד אדפטיבי"; }
 
+            // [שחזור גרסה 3] חילוץ מלא ויציב דרך פלייליסט ה-Uploads הרשמי
             const uploadsPlaylistId = channelId.replace(/^UC/, 'UU');
             let allVideoIds = []; let nextPageToken = ""; let safetyCounter = 0;
             
             do {
                 const tokenParam = nextPageToken ? `&pageToken=${nextPageToken}` : "";
+                // פנייה לנתיב playlistItems היציב והקפדני
                 const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=50${tokenParam}&key=${key}`);
                 if (data && data.items && data.items.length > 0) {
-                    data.items.forEach(item => { const vId = item.snippet?.resourceId?.videoId; if (vId && !allVideoIds.includes(vId)) allVideoIds.push(vId); });
+                    data.items.forEach(item => { 
+                        const vId = item.snippet?.resourceId?.videoId; 
+                        if (vId && !allVideoIds.includes(vId)) allVideoIds.push(vId); 
+                    });
                     nextPageToken = data.nextPageToken || "";
                 } else { nextPageToken = ""; }
                 safetyCounter++; if(safetyCounter > 200) break; 
@@ -510,8 +487,7 @@
             db[channelId] = {
                 title: channelTitle, totalVideos: allVideoIds.length,
                 openVideos: scanResults.open, blockedVideos: scanResults.blocked,
-                scannedAt: new Date().toLocaleDateString('he-IL'),
-                updatedTimestamp: Date.now(),
+                scannedAt: new Date().toLocaleDateString('he-IL'), updatedTimestamp: Date.now(),
                 isNetfreeWhitelisted: isWhitelisted 
             };
             localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db));
@@ -533,11 +509,9 @@
 
             scanResults.open.forEach(vId => { if (!existingData.openVideos.includes(vId)) existingData.openVideos.push(vId); });
             existingData.blockedVideos = scanResults.blocked;
-            existingData.scannedAt = new Date().toLocaleDateString('he-IL');
-            existingData.updatedTimestamp = Date.now(); 
+            existingData.scannedAt = new Date().toLocaleDateString('he-IL'); existingData.updatedTimestamp = Date.now(); 
 
-            db[channelId] = existingData;
-            localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db));
+            db[channelId] = existingData; localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db));
             renderScannedDatabaseGrid(); calculateGlobalStats();
         }
 
@@ -549,12 +523,14 @@
             return null; 
         }
 
+        // --- [שחזור גרסה 3] לוגיקת חיפוש חופשי קלאסית ונכונה דרך search API של יוטיוב ---
         async function searchChannels() {
             let q = document.getElementById('channelSearchInput').value.trim(); if (!q) return;
             const target = document.getElementById('channelSearchResults');
             target.innerHTML = '<div class="col-span-full text-center py-12 text-xs text-zinc-500 animate-pulse"><i class="fas fa-circle-notch fa-spin ml-2"></i>מפענח ומחפש נתונים מיוטיוב...</div>'; target.classList.remove('hidden');
             
             const directChannelId = extractChannelId(q);
+            // שחזור מלא של השאילתות המקוריות היציבות
             let apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(q)}&maxResults=50`;
             if (directChannelId) { apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${directChannelId}`; }
 
@@ -576,13 +552,6 @@
                     </div>`;
                 target.appendChild(div); 
             });
-        }
-
-        function toggleNetfreeWhitelist(channelId) {
-            if(!db[channelId]) return;
-            db[channelId].isNetfreeWhitelisted = !db[channelId].isNetfreeWhitelisted;
-            localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db));
-            renderScannedDatabaseGrid(); calculateGlobalStats();
         }
 
         function renderQueue() {
@@ -661,7 +630,7 @@
         function importFullBackup(event) {
             const file = event.target.files[0]; if (!file) return;
             const r = new FileReader(); r.onload = (e) => {
-                try { db = JSON.parse(e.target.result); if(!db._standalone_videos) db._standalone_videos = {"open":[], "blocked":[]}; localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); alert("המאגר שוחזר בהצלחה!"); } catch(err) { alert("שגיאה בקובץ."); }
+                try { db = JSON.parse(e.target.result); if(!db._standalone_videos) db._standalone_videos = {"open":[], "blocked":[]}; localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); alert("המאגר שוחזר בהצלחה!"); } catch(err) { alert("שגיאה."); }
             }; r.readAsText(file);
         }
         function triggerDownload(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
@@ -730,7 +699,7 @@
                 grid.appendChild(div);
             });
         }
-        function deleteChannel(id) { if(confirm("להסיר ערוץ זה?")) { delete db[id]; localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderScannedDatabaseGrid(); searchChannels(); calculateGlobalStats(); } }
+        function deleteChannel(id) { if(confirm("להסיר ערוץ זה מהמאגר המקומי?")) { delete db[id]; localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderScannedDatabaseGrid(); searchChannels(); calculateGlobalStats(); } }
 
         window.onload = () => { document.getElementById('keyCountLabel').innerText = apiKeys.length; renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); };
     </script>
