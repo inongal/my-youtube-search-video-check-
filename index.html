@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v4.8</title>
+    <title>YouTube NetFree Scan Control Hub v4.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -26,8 +26,8 @@
         <div class="flex items-center gap-3">
             <i class="fas fa-bolt text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 4.8</h1>
-                <p class="text-xs text-zinc-400">הוספת ערוץ מאושר גורף ואישור אוטומטי של כל הסרטונים ישירות מדף החיפוש</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 4.9</h1>
+                <p class="text-xs text-zinc-400">תיקון באג הקפצת אתר נטפרי באמצעות חסימת ניווט עליון (Top Navigation Sandbox Bypass)</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -76,7 +76,7 @@
     <section class="max-w-7xl mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-zinc-400">בקרת תור כללית:</span>
-            <span id="globalStatusBadge" class="text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">מערכת במנוחה</span>
+            <span id="globalStatusBadge" class="text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">Mערכת במנוחה</span>
         </div>
         <div class="flex gap-2">
             <button onclick="pauseGlobalScanner()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"><i class="fas fa-pause"></i> השהה סריקה</button>
@@ -119,7 +119,7 @@
 
                     <div class="bg-zinc-950 p-2 border border-zinc-900 rounded-xl flex flex-col justify-between items-center h-[280px]">
                         <span class="text-[10px] text-zinc-500 font-bold"><i class="fas fa-play text-blue-400 ml-1"></i> נגן QA מוגדל - בדיקה חיה</span>
-                        <div class="w-full h-[190px] bg-black rounded-lg overflow-hidden border border-zinc-800 flex items-center justify-center relative">
+                        <div class="w-full h-[190px] bg-black rounded-lg overflow-hidden border border-zinc-800 flex items-center justify-center relative font-sans">
                             <div id="mainQaPlayerFrame" class="w-full h-full"></div>
                             <div id="mainQaPlayerPlaceholder" class="absolute inset-0 flex items-center justify-center text-zinc-600 text-[10px] bg-zinc-950 p-4 text-center">
                                 לחץ על כפתור נגן ברשימה החיה או בעריכה כדי לבדוק
@@ -153,7 +153,7 @@
 
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 md:p-5">
                 <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
-                    <h2 class="text-base font-bold flex items-center gap-2 flex-shrink-0"><i class="fas fa-server text-zinc-400"></i> ערוצים רשומים במערכת</h2>
+                    <h2 class="text-base font-bold flex items-center gap-2 flex-shrink-0"><i class="fas fa-server text-zinc-400"></i> הערוצים המקומיים שלך</h2>
                     <div class="relative w-full sm:max-w-xs">
                         <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-zinc-500 text-xs"><i class="fas fa-filter"></i></span>
                         <input type="text" id="localDbSearchInput" oninput="renderScannedDatabaseGrid()" placeholder="חפש ברשימת הערוצים..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl pr-8 pl-3 py-1.5 text-xs outline-none focus:border-zinc-700 text-right">
@@ -164,7 +164,7 @@
         </div>
     </main>
 
-    <!-- אזור הוספת וחיפוש ערוצים משודרג -->
+    <!-- אזור הוספת וחיפוש ערוצים -->
     <section class="max-w-7xl mx-auto mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
         <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i class="fas fa-search text-blue-400"></i> הוספת ערוץ ישירה (לפי כתובת URL / מזהה) או חיפוש חופשי</h2>
         <div class="flex flex-col sm:flex-row gap-2 max-w-2xl mb-4">
@@ -220,6 +220,7 @@
         </div>
     </div>
 
+    <!-- אזור בדיקה נסתר - הוספת כותרות אבטחה קשיחות למניעת פריצת חלון -->
     <div id="netfreeTesterContainer" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0;"></div>
 
     <script>
@@ -252,6 +253,7 @@
             document.getElementById('globalOpenPercentage').innerText = `${percentage}%`;
         }
 
+        // --- תיקון קריטי: הוספת הגבלת sandbox דינמית על כל ה-iframes של הבדיקה הנסתרת ---
         function checkSingleVideoNetfree(videoId, slotIndex) {
             return new Promise((resolve) => {
                 let resolved = false;
@@ -270,7 +272,12 @@
                     height: '1', width: '1', videoId: videoId,
                     playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'origin': window.location.origin },
                     events: {
-                        'onReady': (event) => { event.target.playVideo(); },
+                        'onReady': (event) => { 
+                            // הגנה מפני השתלטות חלון: שלילת הרשאת allow-top-navigation מהנגן הנסתר
+                            const frame = document.getElementById(testerId);
+                            if(frame) frame.setAttribute('sandbox', 'allow-scripts ' + 'allow-same-origin ' + 'allow-forms ' + 'allow-presentation');
+                            event.target.playVideo(); 
+                        },
                         'onError': () => { if (!resolved) { resolved = true; cleanup(); resolve('blocked'); } },
                         'onStateChange': (event) => {
                             if ((event.data === 1 || event.data === 3) && !resolved) { resolved = true; cleanup(); resolve('unblocked'); }
@@ -344,10 +351,20 @@
             list.insertBefore(div, list.firstChild);
         }
 
+        // --- הוספת הגנות סנדבוקס לנגן המרכזי למניעת השתלטות חלון ---
         function playVideoInMainQa(videoId) {
             document.getElementById('mainQaPlayerPlaceholder').style.display = 'none';
             if (mainQaPlayerInstance) { try { mainQaPlayerInstance.destroy(); } catch(e){} }
-            mainQaPlayerInstance = new YT.Player('mainQaPlayerFrame', { height: '100%', width: '100%', videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 1 } });
+            mainQaPlayerInstance = new YT.Player('mainQaPlayerFrame', { 
+                height: '100%', width: '100%', videoId: videoId, 
+                playerVars: { 'autoplay': 1, 'controls': 1 },
+                events: {
+                    'onReady': () => {
+                        const mainFrame = document.getElementById('mainQaPlayerFrame');
+                        if(mainFrame) mainFrame.setAttribute('sandbox', 'allow-scripts ' + 'allow-same-origin ' + 'allow-forms ' + 'allow-presentation');
+                    }
+                }
+            });
         }
 
         function pauseGlobalScanner() { globalPause = true; updateGlobalStatus(); renderQueue(); }
@@ -421,7 +438,6 @@
             queue.shift(); processQueueNext();
         }
 
-        // --- סריקה משוכללת מבוססת UU פלייליסט ---
         async function scanChannelVideosMssive(channelId, channelTitle) {
             const isWhitelisted = db[channelId]?.isNetfreeWhitelisted || false;
 
@@ -517,7 +533,6 @@
             renderScannedDatabaseGrid(); calculateGlobalStats();
         }
 
-        // [פיצ'ר חדש] הפעלת הוספה מהירה ואישור אוטומטי של כל הסרטונים ישירות מדף החיפוש
         async function whitelistChannelDirectlyFromSearch(channelId, channelTitle) {
             if(db[channelId]) {
                 db[channelId].isNetfreeWhitelisted = true;
@@ -551,7 +566,7 @@
             db[channelId] = {
                 title: channelTitle,
                 totalVideos: allVideoIds.length,
-                openVideos: allVideoIds, // אישור גורף של כל המזהים ללא בדיקת נגן חיה
+                openVideos: allVideoIds, 
                 blockedVideos: [],
                 scannedAt: new Date().toLocaleDateString('he-IL'),
                 updatedTimestamp: Date.now(),
@@ -621,9 +636,8 @@
                     <div class="flex items-center gap-3 truncate flex-1 w-full"><img src="${snip.thumbnails?.default?.url}" class="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 border border-zinc-700"><div class="truncate"><h4 class="font-bold text-xs text-white truncate" title="${snip.title}">${snip.title}</h4></div></div>
                     <div class="flex flex-wrap gap-1.5 flex-shrink-0 w-full sm:w-auto justify-end" id="search-badge-${cid}">
                         ${isAlreadyScanned ? `
-                            <span class="text-[11px] bg-emerald-950 text-emerald-400 font-bold px-2 py-1 rounded-lg border border-emerald-800"><i class="fas fa-check-circle ml-1"></i> ✓ קיים במאגר</span>
+                            <span class="text-[11px] bg-emerald-950 text-emerald-400 font-bold px-2 py-1 rounded-lg border border-emerald-800"><i class="fas fa-check-circle ml-1"></i> ✓ קים במאגר</span>
                         ` : `
-                            <!-- [פיצ'ר חדש] כפתור אישור גורף ישיר מדף החיפוש ללא בדיקה -->
                             <button onclick="whitelistChannelDirectlyFromSearch('${cid}', '${snip.title.replace(/'/g, "\\'")}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] px-2.5 py-1.5 rounded-lg font-bold transition shadow-md"><i class="fas fa-shield-check ml-1"></i> אישור גורף (מהיר)</button>
                             <button onclick="pushToQueue('${cid}', '${snip.title.replace(/'/g, "\\'")}', 'full')" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-2.5 py-1.5 rounded-lg font-bold transition">בחר וסרוק</button>
                         `}
@@ -640,7 +654,7 @@
             queue.forEach((item, index) => {
                 const div = document.createElement('div'); div.className = "flex justify-between items-center bg-zinc-900 border border-zinc-800 p-2 rounded-xl text-[11px]";
                 div.innerHTML = `
-                    <div class="truncate max-w-[50%]" id="queue-item-title-${item.id}"><span class="font-bold text-zinc-300 block truncate text-xs">${item.title}</span><span class="text-[9px] text-zinc-500 font-normal">${item.mode === 'blocked_only' ? 'חסומים בלבד' : 'ערוץ מלא'} | ${index === 0 ? (globalPause ? 'מושהה כללית' : (item.status === 'paused' ? 'מושהה פרטנית' : 'סורק كעת...')) : 'ממתין'}</span></div>
+                    <div class="truncate max-w-[50%]" id="queue-item-title-${item.id}"><span class="font-bold text-zinc-300 block truncate text-xs">${item.title}</span><span class="text-[9px] text-zinc-500 font-normal">${item.mode === 'blocked_only' ? 'חסומים בלבד' : 'ערוץ מלא'} | ${index === 0 ? (globalPause ? 'מושהה כללית' : (item.status === 'paused' ? 'מושהה פרטנית' : 'סורק כעת...')) : 'ממתין'}</span></div>
                     <div class="flex gap-1">
                         <button onclick="toggleChannelPause(${index})" class="${item.status === 'paused' ? 'bg-indigo-950 text-indigo-400 border border-indigo-900' : 'bg-amber-950 text-amber-400 border border-amber-900'} px-2 py-1 rounded font-bold text-[10px]">${item.status === 'paused' ? 'המשך' : 'השהה'}</button>
                         <button onclick="cancelChannelInQueue(${index})" class="bg-rose-950 text-rose-400 border border-rose-900 px-2 py-1 rounded font-bold text-[10px]">בטל</button>
@@ -664,10 +678,22 @@
             if(modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); modalQaPlayerInstance = null; } catch(e){} }
             document.getElementById('editChannelModal').style.display = 'none'; activeEditingChannelId = null; renderScannedDatabaseGrid(); 
         }
+        
+        // --- הוספת הגנות סנדבוקס לנגן שבתוך חלון העריכה למניעת השתלטות חלון ---
         function playVideoInModalQa(videoId) {
             if (modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); } catch(e){} }
-            modalQaPlayerInstance = new YT.Player('modalQaPlayerFrame', { height: '100%', width: '100%', videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 1 } });
+            modalQaPlayerInstance = new YT.Player('modalQaPlayerFrame', { 
+                height: '100%', width: '100%', videoId: videoId, 
+                playerVars: { 'autoplay': 1, 'controls': 1 },
+                events: {
+                    'onReady': () => {
+                        const modalFrame = document.getElementById('modalQaPlayerFrame');
+                        if(modalFrame) modalFrame.setAttribute('sandbox', 'allow-scripts ' + 'allow-same-origin ' + 'allow-forms ' + 'allow-presentation');
+                    }
+                }
+            });
         }
+
         function renderModalVideoLists() {
             const data = db[activeEditingChannelId];
             document.getElementById('modalOpenCount').innerText = data.openVideos.length; document.getElementById('modalBlockedCount').innerText = data.blockedVideos.length;
