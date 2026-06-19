@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v4.6</title>
+    <title>YouTube NetFree Scan Control Hub v4.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -23,10 +23,10 @@
 
     <header class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-800">
         <div class="flex items-center gap-3">
-            <i class="fas fa-bolt text-blue-500 text-3xl animate-pulse"></i>
+            <i class="fas fa-bug text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 4.6</h1>
-                <p class="text-xs text-zinc-400">ניהול תור מורחב, זיהוי סיום מכסת מפתחות API והתראות חכמות בעברית</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 4.7</h1>
+                <p class="text-xs text-zinc-400">מנגנון Deep Error Console לחילוץ והצגת הודעות שגיאה מדויקות משרתי גוגל</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -215,6 +215,7 @@
     <div id="netfreeTesterContainer" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0;"></div>
 
     <script>
+        // וידוא סנכרון מלא וקשיח על v4 בכל הקוד
         let db = JSON.parse(localStorage.getItem('yt_scanned_db_v4') || '{"_standalone_videos": {"open": [], "blocked": []}}');
         if(!db._standalone_videos) db._standalone_videos = {"open": [], "blocked": []};
         
@@ -445,8 +446,7 @@
             let officialVideoCount = 0;
             const channelStatsData = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${key}`);
             
-            // אם הוחזר null בעקבות סיום מפתחות, הפונקציה הראשית תזהה ותעצור
-            if(channelStatsData === "QUOTA_EXHAUSTED") return;
+            if(channelStatsData === "QUOTA_EXHAUSTED" || channelStatsData === null) return;
 
             if (channelStatsData && channelStatsData.items && channelStatsData.items.length > 0) {
                 officialVideoCount = parseInt(channelStatsData.items[0].statistics.videoCount || 0, 10);
@@ -460,7 +460,7 @@
                 const tokenParam = nextPageToken ? `&pageToken=${nextPageToken}` : "";
                 const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=50${tokenParam}&key=${key}`);
                 
-                if(data === "QUOTA_EXHAUSTED") return; // עצירת חירום
+                if(data === "QUOTA_EXHAUSTED" || data === null) return; 
 
                 if (data && data.items && data.items.length > 0) {
                     data.items.forEach(item => { 
@@ -549,7 +549,10 @@
 
             const data = await fetchWithRotation((key) => `${apiUrl}&key=${key}`);
             
-            if(data === "QUOTA_EXHAUSTED") return; 
+            if(data === "QUOTA_EXHAUSTED" || data === null) {
+                target.innerHTML = '<div class="col-span-full text-center py-12 text-xs text-rose-500 font-bold">החיפוש נבלם עקב שגיאת שרת. בדוק את חלון ההתראה.</div>';
+                return;
+            } 
 
             if (!data || !data.items || data.items.length === 0) { target.innerHTML = '<div class="col-span-full text-center py-12 text-xs text-zinc-500 font-bold text-rose-400">לא נמצא ערוץ תואם. נסה לחפש לפי שם הערוץ המדויק.</div>'; return; }
             target.innerHTML = '';
@@ -654,12 +657,11 @@
         function toggleConfigModal() { const m = document.getElementById('configModal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; if(m.style.display === 'flex') document.getElementById('apiKeysTextArea').value = apiKeys.join('\n'); }
         function saveApiKeys() { apiKeys = document.getElementById('apiKeysTextArea').value.split('\n').map(l => l.trim()).filter(l => l.length > 0); localStorage.setItem('yt_api_keys_v2', JSON.stringify(apiKeys)); currentKeyIndex = 0; document.getElementById('keyCountLabel').innerText = apiKeys.length; toggleConfigModal(); }
         
-        // --- [חדש] מנגנון רוטציה חכם עם זיהוי סיום מכסה מלא גלובלי ---
+        // --- [משודרג ומדויק] מנגנון רוטציה שמפענח ומקפיץ חלון עם תוכן השגיאה המדויק מיוטיוב ---
         async function fetchWithRotation(urlBuilder) {
             if(apiKeys.length === 0) {
-                alert("אנא הגדר לפחות מפתח API אחד בלשונית ניהול מפתחות.");
-                handleQuotaExhaustionStop();
-                return "QUOTA_EXHAUSTED";
+                alert("⚠️ שגיאה: לא נמצאו מפתחות API תקינים במערכת! אנא לחץ על כפתור 'מפתחות API' למעלה והזן לפחות מפתח אחד.");
+                handleQuotaExhaustionStop(); return "QUOTA_EXHAUSTED";
             }
             
             let attempts = 0;
@@ -668,40 +670,53 @@
                     const url = urlBuilder(apiKeys[currentKeyIndex]);
                     const res = await fetch(url);
                     
-                    // זיהוי שגיאת Quota (קוד 403)
-                    if (res.status === 403) {
-                        const errJson = await res.json();
-                        // וידוא שהסיבה היא אכן סיום המכסה היומית
-                        if(errJson.error?.errors?.[0]?.reason === 'quotaExceeded') {
+                    if (!res.ok) {
+                        const errJson = await res.json().catch(() => null);
+                        const googleErrorReason = errJson?.error?.errors?.[0]?.reason || "לא צוין";
+                        const googleErrorMessage = errJson?.error?.message || "אין הודעה מפורטת";
+                        const googleStatusCode = res.status;
+
+                        // הדפסת לוג פנימי
+                        console.error(`Google API Error: Code ${googleStatusCode}, Reason: ${googleErrorReason}, Msg: ${googleErrorMessage}`);
+
+                        // מקרה א': המכסה נגמרה
+                        if (googleStatusCode === 403 && googleErrorReason === 'quotaExceeded') {
                             console.warn(`מפתח מספר ${currentKeyIndex + 1} הגיע למכסתו הכללית. מעביר למפתח הבא...`);
                             currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
                             attempts++;
                             continue;
                         }
+                        
+                        // מקרה ב': כל שגיאה קריטית אחרת (מפתח שגוי, חסימת כתובת, חסימת נטפרי) - מקפיצים התראה מדויקת לבקשתך
+                        alert(`🛑 שגיאת שרת רשמית של YouTube API:\n\n` +
+                              `• קוד סטטוס (Status): ${googleStatusCode}\n` +
+                              `• סיבת שגיאה (Reason): ${googleErrorReason}\n` +
+                              `• פירוט (Message): ${googleErrorMessage}\n\n` +
+                              `* אם מופיע API key not valid - סימן שהעתקת מפתח שגוי.\n` +
+                              `* אם מופיע שגיאת רשת/חסימה - ודא שנטפרי לא חסמה את הפעולה.`);
+                        
+                        return null;
                     }
                     
-                    if (!res.ok) { return null; }
                     return await res.json();
-                } catch (e) { return null; }
+                } catch (e) {
+                    // טיפול בשגיאות רשת חסימת דפדפן (כמו CORS או רשת חסומה לחלוטין של נטפרי)
+                    alert(`🌐 שגיאת חיבור פיזית (Network Error):\n\nהדפדפן נכשל ביצירת קשר עם שרתי יוטיוב. הדבר נובע בדרך כלל מחסימת קודים או נתיבים קשיחה של נטפרי ברמת חומת האש, או שמפתח ה-API לא מוגדר נכון בקונסול.`);
+                    return null;
+                }
             }
             
-            // הגעה לכאן אומרת שכל הבקשות מכל המפתחות חזרו עם שגיאת מכסה (Quota)
             alert("⚠️ שגיאה: נגמרה מכסת ה-API (Quota) בכל המפתחות שהוזנו במערכת! הסריקה הופסקה.");
             handleQuotaExhaustionStop();
             return "QUOTA_EXHAUSTED";
         }
 
-        // ניקוי ועצירת התור במקרה של סיום מכסה
         function handleQuotaExhaustionStop() {
-            queue = [];
-            isProcessing = false;
-            globalPause = false;
+            queue = []; isProcessing = false; globalPause = false;
             document.getElementById('spinnerIcon').classList.add('hidden');
             updateProgress(0, 100, "הסריקה נבלמה: מכסת מפתחות ה-API הסתיימה.");
-            document.getElementById('liveChannelName').innerText = "-";
-            document.getElementById('liveScanType').innerText = "-";
-            updateGlobalStatus();
-            renderQueue();
+            document.getElementById('liveChannelName').innerText = "-"; document.getElementById('liveScanType').innerText = "-";
+            updateGlobalStatus(); renderQueue();
         }
 
         function renderScannedDatabaseGrid() {
@@ -755,7 +770,7 @@
                 grid.appendChild(div);
             });
         }
-        function deleteChannel(id) { if(confirm("להסיר ערוץ זה?")) { delete db[id]; localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderScannedDatabaseGrid(); searchChannels(); calculateGlobalStats(); } }
+        function deleteChannel(id) { if(confirm("להסיר ערוץ זה מהמאגר המקומי?")) { delete db[id]; localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderScannedDatabaseGrid(); searchChannels(); calculateGlobalStats(); } }
 
         window.onload = () => { document.getElementById('keyCountLabel').innerText = apiKeys.length; renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); };
     </script>
