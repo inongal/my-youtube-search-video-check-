@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v3.8</title>
+    <title>YouTube NetFree Scan Control Hub v3.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -21,12 +21,13 @@
 </head>
 <body class="custom-scrollbar p-4 md:p-6 font-sans">
 
+    <!-- סרגל עליון -->
     <header class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-800">
         <div class="flex items-center gap-3">
-            <i class="fas fa-brain-circuit text-blue-500 text-3xl animate-pulse"></i>
+            <i class="fas fa-bolt text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 3.8</h1>
-                <p class="text-xs text-zinc-400">בקרת סטייה לאחר 20 חסומים ברצף, והצגת ערוצים אחרונים שנבדקו תמיד בראש הרשימה</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 3.9</h1>
+                <p class="text-xs text-zinc-400">ריצה רציפה וחלקה ללא בקרת סטייה, השהיית קצב מובנית והצגת ערוצים מעודכנים בראש הרשימה</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -46,6 +47,7 @@
         </div>
     </header>
 
+    <!-- פנל סיכום אנליטי גלובלי -->
     <section class="max-w-7xl mx-auto mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between">
             <div>
@@ -70,12 +72,11 @@
         </div>
     </section>
 
+    <!-- פקדים גלובליים -->
     <section class="max-w-7xl mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-zinc-400">בקרת תור כללית:</span>
             <span id="globalStatusBadge" class="text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">מערכת במנוחה</span>
-            <span id="anomalyIndicator" class="hidden text-xs font-bold px-2 py-1 bg-red-950 border border-red-800 text-red-400 rounded-lg animate-bounce"><i class="fas fa-exclamation-triangle ml-1"></i> זוהתה סטיית קצב (20 חסומים ברצף)! מפעיל קירור של 8 שניות ונסיגה...</span>
-            <span id="bypassIndicator" class="hidden text-xs font-bold px-2 py-1 bg-amber-950 border border-amber-800 text-amber-400 rounded-lg animate-pulse"><i class="fas fa-shield-alt ml-1"></i> מצב חסינות פעיל: רץ 30 סרטונים ללא בדיקת סטייה</span>
         </div>
         <div class="flex gap-2">
             <button onclick="pauseGlobalScanner()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"><i class="fas fa-pause"></i> השהה סריקה</button>
@@ -85,6 +86,7 @@
     </section>
 
     <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- עמודה ימנית -->
         <div class="lg:col-span-6 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
                 <div class="flex justify-between items-center mb-3">
@@ -132,6 +134,7 @@
                 </div>
             </div>
 
+            <!-- פנל סרטונים בודדים -->
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
                 <h2 class="text-base font-bold mb-1 flex items-center gap-2 text-indigo-400"><i class="fas fa-play-circle"></i> ניהול סרטונים בודדים (ללא ערוץ)</h2>
                 <div class="flex gap-2 mt-2">
@@ -141,6 +144,7 @@
             </div>
         </div>
 
+        <!-- עמודה שמאלית -->
         <div class="lg:col-span-6 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
                 <h2 class="text-sm font-bold mb-3 flex items-center gap-2 text-indigo-400"><i class="fas fa-photo-film"></i> סרטונים בודדים רשומים (<span id="standaloneCountLabel">0</span>)</h2>
@@ -160,6 +164,7 @@
         </div>
     </main>
 
+    <!-- אזור חיפוש ערוצים תחתון רחב -->
     <section class="max-w-7xl mx-auto mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
         <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i class="fas fa-search text-blue-400"></i> חיפוש מורחב לחיסכון בעלויות API (מציג עד 50 תוצאות בבקשה בודדת)</h2>
         <div class="flex gap-2 max-w-xl mb-4">
@@ -169,6 +174,7 @@
         <div id="channelSearchResults" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 max-h-[450px] overflow-y-auto custom-scrollbar pr-1 hidden"></div>
     </section>
 
+    <!-- מודאל עריכה ידנית -->
     <div id="editChannelModal" class="fixed inset-0 z-[400] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-3xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
@@ -202,6 +208,7 @@
         </div>
     </div>
 
+    <!-- מודאל מפתחות API -->
     <div id="configModal" class="fixed inset-0 z-[300] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-key text-blue-500"></i> ניהול מפתחות YouTube API</h2>
@@ -273,16 +280,12 @@
             });
         }
 
-        // --- מנגנון בדיקה מקבילית אנליטית גרסה 3.8 - הפעלה רק לאחר 20 חסומים ברצף ---
-        async function processBatchParallel(videoIds, progressCallback, isBlockedOnlyMode = false) {
+        // --- מנגנון בדיקה מקבילית יציבה ללא בקרת סטייה (ביטול מוחלט לבקשתך) ---
+        async function processBatchParallel(videoIds, progressCallback) {
             let results = { open: [], blocked: [] };
             let index = 0;
-            let recentBlockedSequence = 0; 
-            
-            let hasRolledBackInThisChain = false; 
-            let bypassDeviationProtectionCount = 0; 
-
             const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
             document.getElementById('liveOpenList').innerHTML = '';
             document.getElementById('liveBlockedList').innerHTML = '';
 
@@ -295,44 +298,6 @@
                         break;
                     }
 
-                    if (bypassDeviationProtectionCount > 0) {
-                        bypassDeviationProtectionCount--;
-                        if (bypassDeviationProtectionCount === 0) {
-                            document.getElementById('bypassIndicator').classList.add('hidden');
-                        }
-                    }
-
-                    // [תיקון קפדני לבקשתך] בקרת סטייה מופעלת רק לאחר 20 חסומים ברצף
-                    if (!isBlockedOnlyMode && bypassDeviationProtectionCount === 0 && recentBlockedSequence >= 20) {
-                        
-                        if (!hasRolledBackInThisChain) {
-                            document.getElementById('anomalyIndicator').classList.remove('hidden');
-                            await sleep(8000);   
-                            
-                            let rollbackSteps = 10; // חזרה של 10 סרטונים לאחור
-                            let targetIndex = Math.max(0, index - rollbackSteps - 3); 
-                            
-                            let rolledBackSliceIds = videoIds.slice(targetIndex, index);
-                            results.blocked = results.blocked.filter(id => !rolledBackSliceIds.includes(id));
-                            results.open = results.open.filter(id => !rolledBackSliceIds.includes(id)); 
-                            
-                            rebuildLiveDisplayLists(results);
-                            
-                            index = targetIndex; 
-                            recentBlockedSequence = 0; 
-                            hasRolledBackInThisChain = true; 
-                            
-                            document.getElementById('anomalyIndicator').classList.add('hidden');
-                            continue;
-                        } 
-                        else {
-                            hasRolledBackInThisChain = false; 
-                            recentBlockedSequence = 0; 
-                            bypassDeviationProtectionCount = 30; // חסינות ל-30 סרטונים
-                            document.getElementById('bypassIndicator').classList.remove('hidden');
-                        }
-                    }
-
                     const currentIdx = index++;
                     const vId = videoIds[currentIdx];
                     if(!vId) continue;
@@ -340,6 +305,7 @@
                     const tempElementId = `live-item-${vId}`;
                     createLiveTestingRow(vId, tempElementId);
                     
+                    // השהיה ליניארית קבועה ויציבה של 1000ms
                     await sleep(1000); 
                     const status = await checkSingleVideoNetfree(vId, workerId);
                     
@@ -348,14 +314,12 @@
 
                     if (status === 'unblocked') {
                         if(!results.open.includes(vId)) results.open.push(vId);
-                        recentBlockedSequence = 0; // כל סרטון פתוח מאפס מיידית את המונה
                         document.getElementById('liveOpenCount').innerText = results.open.length;
-                        appendLiveList('liveOpenList', vId, 'emerald', false);
+                        appendLiveList('liveOpenList', vId, 'emerald');
                     } else {
                         if(!results.blocked.includes(vId)) results.blocked.push(vId);
-                        recentBlockedSequence++; 
                         document.getElementById('liveBlockedCount').innerText = results.blocked.length;
-                        appendLiveList('liveBlockedList', vId, 'rose', false);
+                        appendLiveList('liveBlockedList', vId, 'rose');
                     }
                     progressCallback(results.open.length + results.blocked.length, videoIds.length);
                 }
@@ -363,7 +327,6 @@
 
             const workers = Array(Math.min(3, videoIds.length)).fill(null).map((_, idx) => worker(idx));
             await Promise.all(workers);
-            document.getElementById('bypassIndicator').classList.add('hidden');
             return results;
         }
 
@@ -376,18 +339,11 @@
             list.insertBefore(div, list.firstChild);
         }
 
-        function rebuildLiveDisplayLists(results) {
-            document.getElementById('liveOpenList').innerHTML = ''; document.getElementById('liveBlockedList').innerHTML = '';
-            document.getElementById('liveOpenCount').innerText = results.open.length; document.getElementById('liveBlockedCount').innerText = results.blocked.length;
-            results.open.forEach(id => appendLiveList('liveOpenList', id, 'emerald', true));
-            results.blocked.forEach(id => appendLiveList('liveBlockedList', id, 'rose', true));
-        }
-
-        function appendLiveList(targetId, vId, color, isRebuild = false) {
+        function appendLiveList(targetId, vId, color) {
             const list = document.getElementById(targetId); const div = document.createElement('div');
             div.className = `flex justify-between items-center bg-${color}-950/20 px-2 py-0.5 rounded border border-${color}-900/30 mb-1`;
             div.innerHTML = `<span>${vId}</span><button onclick="playVideoInMainQa('${vId}')" class="text-blue-400 font-bold hover:underline text-[9px]">📺 נגן</button>`;
-            if(isRebuild) list.appendChild(div); else list.insertBefore(div, list.firstChild);
+            list.insertBefore(div, list.firstChild);
         }
 
         function playVideoInMainQa(videoId) {
@@ -503,7 +459,7 @@
 
             const scanResults = await processBatchParallel(allVideoIds, (processed, total) => {
                 const pct = Math.round((processed / total) * 100); updateProgress(pct, 100, `סריקה פעילה ומאובטחת: ${processed}/${total}`);
-            }, false);
+            });
 
             if(queue[0] && queue[0].status === 'cancelled') return;
 
@@ -511,7 +467,7 @@
                 title: channelTitle, totalVideos: allVideoIds.length,
                 openVideos: scanResults.open, blockedVideos: scanResults.blocked,
                 scannedAt: new Date().toLocaleDateString('he-IL'),
-                updatedTimestamp: Date.now() // הזרקת חותמת זמן לצורך מיון כרונולוגי הפוך
+                updatedTimestamp: Date.now() 
             };
             localStorage.setItem('yt_scanned_db_v3', JSON.stringify(db));
             renderScannedDatabaseGrid(); calculateGlobalStats();
@@ -526,14 +482,14 @@
 
             const scanResults = await processBatchParallel(targetVideoIds, (processed, total) => {
                 const pct = Math.round((processed / total) * 100); updateProgress(pct, 100, `סריקה ממוקדת: ${processed}/${total}`);
-            }, true);
+            });
 
             if(queue[0] && queue[0].status === 'cancelled') return;
 
             scanResults.open.forEach(vId => { if (!existingData.openVideos.includes(vId)) existingData.openVideos.push(vId); });
             existingData.blockedVideos = scanResults.blocked;
             existingData.scannedAt = new Date().toLocaleDateString('he-IL');
-            existingData.updatedTimestamp = Date.now(); // עדכון חותמת זמן להקפצה למעלה
+            existingData.updatedTimestamp = Date.now(); 
 
             db[channelId] = existingData;
             localStorage.setItem('yt_scanned_db_v3', JSON.stringify(db));
@@ -615,7 +571,7 @@
             const data = db[activeEditingChannelId];
             if (currentType === 'open') { data.openVideos = data.openVideos.filter(v => v !== id); if(!data.blockedVideos.includes(id)) data.blockedVideos.push(id); } 
             else { data.blockedVideos = data.blockedVideos.filter(v => v !== id); if(!data.openVideos.includes(id)) data.openVideos.push(id); }
-            db[activeEditingChannelId].updatedTimestamp = Date.now(); // הקפצה למעלה בעקבות שינוי ידני
+            db[activeEditingChannelId].updatedTimestamp = Date.now(); 
             localStorage.setItem('yt_scanned_db_v3', JSON.stringify(db)); renderModalVideoLists(); calculateGlobalStats();
         }
         function addVideoManually(type) {
@@ -656,13 +612,11 @@
             } return null;
         }
 
-        // --- תיקון ומיון המאגר המקומי בסדר כרונולוגי הפוך (החדשים/מעודכנים ביותר למעלה!) ---
         function renderScannedDatabaseGrid() {
             const grid = document.getElementById('scannedDatabaseGrid'); const searchFilter = document.getElementById('localDbSearchInput').value.trim().toLowerCase();
             let keys = Object.keys(db).filter(k => k !== "_standalone_videos");
             if (searchFilter) keys = keys.filter(cid => db[cid].title && db[cid].title.toLowerCase().includes(searchFilter));
             
-            // [תיקון המיון לבקשתך] מיון קשיח לפי חותמת הזמן - הערוץ האחרון שעודכן יופיע ראשון למעלה
             keys.sort((a, b) => {
                 let timeA = db[a].updatedTimestamp || 0;
                 let timeB = db[b].updatedTimestamp || 0;
