@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v7.5</title>
+    <title>YouTube NetFree Scan Control Hub v7.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -23,12 +23,13 @@
 </head>
 <body class="custom-scrollbar p-4 md:p-6 font-sans">
 
+    <!-- סרגל עליון -->
     <header class="max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-800">
         <div class="flex items-center gap-3">
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.5</h1>
-                <p class="text-xs text-zinc-400">תיקון חסימת החיבור לגוגל, הגנת זיכרון אוטומטית לתור המשימות, וייצוא נתונים יציב</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.6</h1>
+                <p class="text-xs text-zinc-400">גיבוי מיידי של ערוצים בהמתנה בתור ותיקון קשיח לכפתור הסרת ערוץ מהמאגר</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -48,6 +49,7 @@
         </div>
     </header>
 
+    <!-- פנל שליטה גוגל דרייב -->
     <section class="max-w-[1600px] mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-md">
         <div class="flex items-center gap-3">
             <div class="p-2 bg-blue-600/10 text-blue-400 rounded-xl border border-blue-900/30">
@@ -71,6 +73,7 @@
         </div>
     </section>
 
+    <!-- שורת סיכום אנליטית מורחבת -->
     <section class="max-w-[1600px] mx-auto mb-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow">
             <span class="text-[11px] text-zinc-500 block">ערוצים רשומים</span>
@@ -97,7 +100,7 @@
             <span id="statsVideosScannedHourly" class="text-xl font-bold font-mono text-indigo-400">0</span>
         </div>
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow ring-1 ring-zinc-800">
-            <span class="text-[11px] text-teal-400 font-bold block"><i class="fas fa-shield-halved ml-1"></i>ערוצים מאושרים</span>
+            <span class="text-[11px] text-teal-400 font-bold block"><i class="fas fa-teal-halved ml-1"></i>ערוצים מאושרים</span>
             <span id="statsWhitelistedChannelsCount" class="text-xl font-bold font-mono text-teal-400">0</span>
         </div>
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow ring-1 ring-zinc-800">
@@ -106,6 +109,7 @@
         </div>
     </section>
 
+    <!-- פקדים גלובליים -->
     <section class="max-w-[1600px] mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-4 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-900 pb-3">
             <div class="flex items-center gap-3">
@@ -151,6 +155,7 @@
     </section>
 
     <main class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- העמודה הימנית -->
         <div class="lg:col-span-4 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-md">
                 <div class="flex justify-between items-center mb-3">
@@ -181,7 +186,7 @@
                     <div id="progressBarFill" class="bg-gradient-to-l from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-200" style="width: 0%"></div>
                 </div>
                 <div class="flex justify-between text-[10px] text-zinc-400 mb-3 px-1">
-                    <span id="progressText">Meyarecet Muhana.</span>
+                    <span id="progressText">מערכת מוכנה.</span>
                     <span id="progressPercentage">0%</span>
                 </div>
 
@@ -214,6 +219,7 @@
                 </div>
             </div>
 
+            <!-- פנל סרטונים בודדים -->
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-md">
                 <h2 class="text-base font-bold mb-1 flex items-center gap-2 text-indigo-400"><i class="fas fa-play-circle"></i> ניהול סרטונים בודדים (ללא ערוץ)</h2>
                 <div class="flex gap-2 mt-2">
@@ -225,6 +231,7 @@
             </div>
         </div>
 
+        <!-- עמודה שמאלית -->
         <div class="lg:col-span-8 space-y-6">
             <section class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-md flex flex-col h-full">
                 <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i class="fas fa-search text-blue-400"></i> הוספת ערוץ ישירה או חיפוש חופשי</h2>
@@ -233,6 +240,7 @@
                     <button onclick="searchChannels()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-sm transition whitespace-nowrap"><i class="fas fa-magic ml-1"></i> מעבד / חפש ערוץ</button>
                 </div>
                 
+                <!-- פנל הוספה המונית -->
                 <div class="border-t border-zinc-800/80 pt-4 mt-1">
                     <div class="text-xs font-bold text-zinc-300 flex items-center gap-1.5 mb-2">
                         <i class="fas fa-folder-plus text-amber-500"></i> הוספת רשימת ערוצים המונית (כל ערוץ בשורה)
@@ -243,6 +251,7 @@
                     </button>
                 </div>
 
+                <!-- תיבת פלט שגיאות ואי-הצלחות מובנית במסך -->
                 <div id="bulkErrorFeedbackWrapper" class="mt-4 border-t border-zinc-800/80 pt-4 flex-1 flex flex-col">
                     <div class="text-xs font-bold text-rose-400 flex items-center gap-1.5 mb-1.5">
                         <i class="fas fa-exclamation-triangle"></i> דוח שגיאות ודילוגים (ערוצים שלא נמצאו ביוטיוב)
@@ -255,6 +264,7 @@
         </div>
     </main>
 
+    <!-- אזור הערוצים המקומיים התחתון -->
     <section class="max-w-[1600px] mx-auto mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 pb-3 border-b border-zinc-900">
             <div class="flex items-center gap-4 flex-wrap">
@@ -264,7 +274,7 @@
                 </div>
                 
                 <div class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl text-xs">
-                    <span class="text-zinc-500 font-bold"><i class="fas fa-sort-amount-down ml-1"></i>מיין לפי:</span>
+                    <span class="text-zinc-500 font-bold"><i class="fas fa-sort-amount-down ml-1"></i>mיין לפי:</span>
                     <select id="localDbSortSelect" onchange="renderScannedDatabaseGrid()" class="bg-transparent text-white font-bold outline-none cursor-pointer">
                         <option value="timestamp" class="bg-zinc-900">תאריך עדכון אחרון</option>
                         <option value="scans" class="bg-zinc-900">כמות סריקות ערוץ (עולה)</option>
@@ -281,6 +291,7 @@
         <div id="scannedDatabaseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[750px] overflow-y-auto pr-1 custom-scrollbar"></div>
     </section>
 
+    <!-- מודאל ידני ועריכה -->
     <div id="editChannelModal" class="fixed inset-0 z-[400] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-3xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
@@ -314,6 +325,7 @@
         </div>
     </div>
 
+    <!-- מודאל הגדרות גוגל דרייב API -->
     <div id="driveConfigModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-md bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-lg font-bold mb-2 flex items-center gap-2 text-blue-400"><i class="fab fa-google-drive"></i> הגדרות חיבור ל-Google Drive</h2>
@@ -334,6 +346,7 @@
         </div>
     </div>
 
+    <!-- מודאל מפתחות יוטיוב API -->
     <div id="configModal" class="fixed inset-0 z-[300] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-key text-blue-500"></i> ניהול מפתחות YouTube API</h2>
@@ -355,7 +368,7 @@
         let apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
         let currentKeyIndex = 0;
         
-        // טעינת רשימת התור השמורה מקומית כדי לאפשר המשכיות לאחר הפסקה/רענון
+        // שחזור יציב של התור השמור בלוקאל סטורג'
         let queue = JSON.parse(localStorage.getItem('yt_active_queue_backup') || '[]');
         let isProcessing = false;
         let globalPause = false; 
@@ -622,7 +635,6 @@
             }
         }
 
-        // שימוש במנוע הנגנים הסטטי והבטוח מגרסה 5.8/6.0 למניעת קריסות postMessage
         function checkSingleVideoNetfree(videoId, slotIndex) {
             return new Promise((resolve) => {
                 let resolved = false; const testerId = `tester-slot-${slotIndex}-${videoId}`;
@@ -707,16 +719,18 @@
             if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים לסריקת חסומים.`); else alert("אין סרטונים חסומים במאגר.");
         }
 
-        // שמירה וגיבוי מקומי אוטומטי של תור המשימות בכל עדכון
+        // שיפור אבסולוטי: גיבוי מיידי גם עבור ערוצים שנמצאים במצב המתנה בתור לבקשתך
         function pushToQueue(id, title, mode = 'full') {
             if (queue.some(q => q.id === id && q.mode === mode)) return;
             queue.push({ id: id, title: title, status: 'pending', mode: mode }); 
-            renderQueue(); calculateGlobalStats();
-            if (!isProcessing) processQueueNext();
+            
+            // גיבוי מיידי של התור המלא ללוקאל סטורג'
+            localStorage.setItem('yt_active_queue_backup', JSON.stringify(queue));
+            
+            renderQueue(); calculateGlobalStats(); if (!isProcessing) processQueueNext();
         }
 
         async function processQueueNext() {
-            // עדכון גיבוי התור בלוקאל סטורג' כדי לאפשר התחלה מחדש לאחר הפסקה
             localStorage.setItem('yt_active_queue_backup', JSON.stringify(queue));
 
             if (queue.length === 0) { 
@@ -842,6 +856,14 @@
         function triggerQueueFromSearch(cid, encodedTitle) { let decodedTitle = decodeURIComponent(escape(atob(encodedTitle))); pushToQueue(cid, decodedTitle, 'full'); }
         function triggerQueueFromGrid(cid, encodedTitle, mode) { let decodedTitle = decodeURIComponent(escape(atob(encodedTitle))); pushToQueue(cid, decodedTitle, mode); }
 
+        // תיקון קשיח לפונקציית המחיקה: דואג להסיר סופית מהלוקאל סטורג' ולבצע סנכרון דריסה מלא לענן ללא השארת עקבות
+        function deleteChannel(id) { 
+            if(confirm("להסיר ערוץ זה מהדפדפן ומההיסטוריה ב-Google Drive לצמיתות?")) { 
+                delete db[id]; 
+                saveDatabaseAndTriggerSync(true); 
+            } 
+        }
+
         function renderScannedDatabaseGrid() {
             const grid = document.getElementById('scannedDatabaseGrid'); const searchFilter = document.getElementById('localDbSearchInput').value.trim().toLowerCase();
             const sortMode = document.getElementById('localDbSortSelect').value;
@@ -929,18 +951,14 @@
         function handleQuotaExhaustionStop() { queue = []; isProcessing = false; globalPause = false; document.getElementById('spinnerIcon').classList.add('hidden'); updateProgress(0, 100, "הסריקה נבלמה."); updateGlobalStatus(); renderQueue(); }
 
         setInterval(refreshHourlyScanRate, 30000);
-        
         window.onload = () => { 
             apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
             document.getElementById('keyCountLabel').innerText = apiKeys.length; 
             renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); 
-            // הפעלת האתחול היציב עבור גוגל דרייב API שהושמט קודם
             initGoogleDriveLibraries(); 
-            
-            // בדיקה האם יש תור משימות שממתין לחידוש פעולה מהגיבוי המקומי
             if (queue.length > 0) {
                 renderQueue();
-                logErrorToConsoleOnScreen(`[תור שוחזר] נמצאו ${queue.length} משימות בזיכרון המקומי, מוכן להמשך פעולה.`);
+                logErrorToConsoleOnScreen(`[תור שוחזר] נמצאו ${queue.length} משימות ממתינות בזיכרון, לחץ על 'חדש הכל' להמשך.`);
             }
         };
     </script>
