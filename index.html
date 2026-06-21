@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v6.1</title>
+    <title>YouTube NetFree Scan Control Hub v6.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -23,12 +23,13 @@
 </head>
 <body class="custom-scrollbar p-4 md:p-6 font-sans">
 
+    <!-- סרגל עליון -->
     <header class="max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-800">
         <div class="flex items-center gap-3">
-            <i class="fas fa-hourglass-half text-blue-500 text-3xl animate-pulse"></i>
+            <i class="fas fa-bolt text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 6.1</h1>
-                <p class="text-xs text-zinc-400">סריקת חסומים בלבד מוגדרת כעת קבוע למעבר יחיד ומהיר בלבד ללא אימות כפול</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 6.2</h1>
+                <p class="text-xs text-zinc-400">הקבלה מלאה לגרסה 5.8, כיתובים בעברית, חיזוי זמן משוער וסריקת חסומים מהירה בשלב אחד</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -48,6 +49,7 @@
         </div>
     </header>
 
+    <!-- פנל שליטה גוגל דרייב - משוחזר במלואו מגרסה 5.8 -->
     <section class="max-w-[1600px] mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-md">
         <div class="flex items-center gap-3">
             <div class="p-2 bg-blue-600/10 text-blue-400 rounded-xl border border-blue-900/30">
@@ -71,6 +73,7 @@
         </div>
     </section>
 
+    <!-- פנל סיכום אנליטי גלובלי -->
     <section class="max-w-[1600px] mx-auto mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between shadow-lg">
             <div>
@@ -102,10 +105,11 @@
         </div>
     </section>
 
+    <!-- פקדים גלובליים -->
     <section class="max-w-[1600px] mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div class="flex items-center gap-3">
             <span class="text-xs font-bold text-zinc-400">בקרת תור כללית:</span>
-            <span id="globalStatusBadge" class="text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-500">מערכת במנוחה</span>
+            <span id="globalStatusBadge" class="text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">מערכת במנוחה</span>
         </div>
         <div class="flex flex-wrap gap-2">
             <button onclick="pushAllBlockedToQueue()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-md">
@@ -118,6 +122,7 @@
     </section>
 
     <main class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- עמודה ימנית -->
         <div class="lg:col-span-4 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-md">
                 <div class="flex justify-between items-center mb-3">
@@ -125,6 +130,7 @@
                     <span id="queueProgressLabel" class="text-xs bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">0 משימות בתור</span>
                 </div>
                 
+                <!-- רכיב דילוג סריקה שנייה -->
                 <div class="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl mb-3 flex items-center justify-between shadow-inner">
                     <label for="skipPhase2Checkbox" class="text-xs font-bold text-amber-400 flex items-center gap-2 cursor-pointer select-none">
                         <i class="fas fa-bolt"></i> דלג על אימות חסומים בסריקת ערוץ מלא
@@ -138,6 +144,7 @@
                     <div class="flex justify-between"><span class="text-zinc-500">יעד מונה רשמי:</span> <span id="liveOfficialCount" class="font-mono text-zinc-300 font-bold">0</span></div>
                     <div class="flex justify-between"><span class="text-zinc-500">סרטונים שחולצו:</span> <span id="liveTotalVideos" class="font-mono text-zinc-300">0</span></div>
                     
+                    <!-- רכיב חיזוי זמן משוער לסיום -->
                     <div class="flex justify-between border-t border-zinc-800/60 pt-2 mt-1 bg-zinc-900/30 p-1 rounded">
                         <span class="text-amber-400 font-bold"><i class="fas fa-clock ml-1"></i> זמן משוער לסיום:</span> 
                         <span id="liveEstimatedTimeRemaining" class="font-mono font-bold text-white">-</span>
@@ -181,6 +188,7 @@
                 </div>
             </div>
 
+            <!-- פנל סרטונים בודדים -->
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-md">
                 <h2 class="text-base font-bold mb-1 flex items-center gap-2 text-indigo-400"><i class="fas fa-play-circle"></i> ניהול סרטונים בודדים (ללא ערוץ)</h2>
                 <div class="flex gap-2 mt-2">
@@ -192,6 +200,7 @@
             </div>
         </div>
 
+        <!-- עמודה שמאלית -->
         <div class="lg:col-span-8 space-y-6">
             <section class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-md">
                 <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i class="fas fa-search text-blue-400"></i> הוספת ערוץ ישירה או חיפוש חופשי</h2>
@@ -204,6 +213,7 @@
         </div>
     </main>
 
+    <!-- אזור הערוצים המקומיים התחתון -->
     <section class="max-w-[1600px] mx-auto mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 pb-3 border-b border-zinc-900">
             <div class="flex items-center gap-2">
@@ -218,6 +228,7 @@
         <div id="scannedDatabaseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[750px] overflow-y-auto pr-1 custom-scrollbar"></div>
     </section>
 
+    <!-- מודאל ידני ועריכה -->
     <div id="editChannelModal" class="fixed inset-0 z-[400] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-3xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
@@ -251,6 +262,7 @@
         </div>
     </div>
 
+    <!-- מודאל הגדרות גוגל דרייב API -->
     <div id="driveConfigModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-md bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-lg font-bold mb-2 flex items-center gap-2 text-blue-400"><i class="fab fa-google-drive"></i> הגדרות חיבור ל-Google Drive</h2>
@@ -271,6 +283,7 @@
         </div>
     </div>
 
+    <!-- מודאל מפתחות יוטיוב API -->
     <div id="configModal" class="fixed inset-0 z-[300] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-key text-blue-500"></i> ניהול מפתחות YouTube API</h2>
@@ -352,7 +365,7 @@
                     callback: (tokenResponse) => {
                         if (tokenResponse.error !== undefined) { throw (tokenResponse); }
                         googleAccessToken = tokenResponse.access_token;
-                        document.getElementById('btnDriveAuth').innerText = "✓ Mequbar LeGoogle";
+                        document.getElementById('btnDriveAuth').innerText = "✓ מחובר לגוגל";
                         document.getElementById('btnDriveAuth').className = "bg-emerald-600/20 text-emerald-400 border border-emerald-800 px-4 py-1.5 rounded-xl text-xs font-bold cursor-default";
                         document.getElementById('btnDriveSync').disabled = false;
                         document.getElementById('btnDriveSync').className = "bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md";
@@ -533,10 +546,10 @@
         function resumeGlobalScanner() { globalPause = false; updateGlobalStatus(); renderQueue(); }
         
         function cancelGlobalScanner() { 
-            if(confirm("להסיר את כל המשימות ולרוקן את התור כעת?")) { 
+            if(confirm("להסיר את כל המשימות ולרוקן את התור كעת?")) { 
                 queue = []; isProcessing = false; globalPause = false; 
                 document.getElementById('spinnerIcon').classList.add('hidden'); 
-                updateProgress(0, 100, "הסריקה בוטלה לבקשת המשתמש."); 
+                updateProgress(0, 100, "הסריקה בבוטלה."); 
                 document.getElementById('liveChannelName').innerText = "-"; 
                 document.getElementById('liveScanType').innerText = "-"; 
                 document.getElementById('liveEstimatedTimeRemaining').innerText = "-";
@@ -634,16 +647,15 @@
             saveDatabaseAndTriggerSync();
         }
 
+        // שינוי קבוע: מעבר יחיד ומהיר בלבד ללא סבבי הצלבה ואימות נוספים
         async function scanChannelBlockedOnly(channelId, channelTitle) {
             const existingData = db[channelId]; if (!existingData || !existingData.blockedVideos || existingData.blockedVideos.length === 0) return;
-            
             const targetVideoIds = [...existingData.blockedVideos]; 
             document.getElementById('liveChannelName').innerText = channelTitle; 
             document.getElementById('liveScanType').innerText = "עדכון חסומים (מעבר יחיד)";
             document.getElementById('liveOfficialCount').innerText = existingData.totalVideos; 
             document.getElementById('liveTotalVideos').innerText = targetVideoIds.length;
             
-            // מעבר יחיד וקבוע בלבד ללא הצלבות נוספות
             let scanResults = await processBatchParallel(targetVideoIds, (processed, total) => { 
                 const pct = Math.round((processed / total) * 100); 
                 updateProgress(pct, 100, `סריקה מהירה: ${processed}/${total}`); 
@@ -727,12 +739,6 @@
         function renderStandaloneVideos() { const container = document.getElementById('standaloneVideosContainer'); if(!container) return; const total = db._standalone_videos.open.length + db._standalone_videos.blocked.length; document.getElementById('standaloneCountLabel').innerText = total; if(total === 0) { container.innerHTML = '<p class="text-xs text-zinc-600 p-2 w-full text-center">אין סרטונים בודדים</p>'; return; } container.innerHTML = ''; db._standalone_videos.open.forEach(id => container.appendChild(createStandaloneBadge(id, 'emerald'))); db._standalone_videos.blocked.forEach(id => container.appendChild(createStandaloneBadge(id, 'rose'))); }
         function createStandaloneBadge(id, color) { const span = document.createElement('div'); span.className = `bg-${color}-950/40 text-${color}-400 text-[11px] font-mono px-2 py-1 rounded-lg border border-${color}-900/50 flex items-center gap-1.5`; span.innerHTML = `<span>${id}</span><button onclick="playVideoInMainQa('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-play text-[8px]"></i></button><button onclick="deleteStandaloneVideo('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-times text-[9px]"></i></button>`; return span; }
         function deleteStandaloneVideo(id) { db._standalone_videos.open = db._standalone_videos.open.filter(v => v !== id); db._standalone_videos.blocked = db._standalone_videos.blocked.filter(v => v !== id); localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderStandaloneVideos(); calculateGlobalStats(); }
-
-        function openEditModal(channelId) { activeEditingChannelId = channelId; document.getElementById('editModalTitle').innerText = `ניהול ידני: ${db[channelId].title}`; activeModalPlayingVideoId = null; renderModalVideoLists(); document.getElementById('editChannelModal').style.display = 'flex'; }
-        function closeEditModal() { if(modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); modalQaPlayerInstance = null; } catch(e){} } document.getElementById('editChannelModal').style.display = 'none'; activeEditingChannelId = null; activeModalPlayingVideoId = null; renderScannedDatabaseGrid(); }
-        function playVideoInModalQa(videoId) { activeModalPlayingVideoId = videoId; renderModalVideoLists(); if (modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); } catch(e){} } modalQaPlayerInstance = new YT.Player('modalQaPlayerFrame', { height: '100%', width: '100%', videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 1 }, events: { 'onReady': () => { const modalFrame = document.getElementById('modalQaPlayerFrame'); if(modalFrame) modalFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); } } }); }
-        function renderModalVideoLists() { const data = db[activeEditingChannelId]; document.getElementById('modalOpenCount').innerText = data.openVideos.length; document.getElementById('modalBlockedCount').innerText = data.blockedVideos.length; const openTarget = document.getElementById('modalOpenList'); const blockedTarget = document.getElementById('modalBlockedList'); openTarget.innerHTML = ''; blockedTarget.innerHTML = ''; data.openVideos.forEach(id => openTarget.appendChild(createVideoBadgeElement(id, 'open'))); data.blockedVideos.forEach(id => blockedTarget.appendChild(createVideoBadgeElement(id, 'blocked'))); }
-        function createVideoBadgeElement(id, currentType) { const isPlayingNow = (activeModalPlayingVideoId === id); const div = document.createElement('div'); if(isPlayingNow) { div.className = "bg-blue-600/30 p-2 border-2 border-blue-500 rounded-lg flex justify-between items-center mb-1 ring-1 ring-blue-400 animate-pulse text-blue-200 font-bold"; } else { div.className = "bg-zinc-950 p-2 border border-zinc-800 rounded-lg flex justify-between items-center mb-1 hover:border-zinc-700 transition text-zinc-300"; } div.innerHTML = `<span class="truncate pl-2 max-w-[50%] flex items-center gap-1">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce"></i>' : ''}<span>${id}</span></span><div class="flex gap-1 flex-shrink-0"><button onclick="playVideoInModalQa('${id}')" class="text-blue-400 bg-blue-950/40 px-2 py-0.5 border border-blue-900/50 rounded text-[10px] font-bold">📺 נגן</button><button onclick="toggleVideoStatusManual('${id}', '${currentType}')" class="text-zinc-400 bg-zinc-900 px-2 py-0.5 border border-zinc-800 rounded text-[10px]">שנה</button></div>`; return div; }
 
         function exportCleanJSON() { let cleanDb = {}; Object.keys(db).forEach(key => { if(key === "_standalone_videos") { cleanDb["_standalone_videos"] = db[key].open; } else { cleanDb[key] = { title: db[key].title, openVideos: db[key].openVideos }; } }); triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanDb, null, 2)), "netfree_approved_channels_clean.json"); }
         function exportFullBackup() { triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)), "system_full_backup.json"); }
