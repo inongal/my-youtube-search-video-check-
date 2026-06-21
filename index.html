@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v7.4</title>
+    <title>YouTube NetFree Scan Control Hub v7.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -27,8 +27,8 @@
         <div class="flex items-center gap-3">
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.4</h1>
-                <p class="text-xs text-zinc-400">שיקום מלא למערכת היציבה: פתרון קריסת נגני הבדיקה, פענוח אבסולוטי של קישורי @, ודוח שגיאות מובנה</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.5</h1>
+                <p class="text-xs text-zinc-400">תיקון חסימת החיבור לגוגל, הגנת זיכרון אוטומטית לתור המשימות, וייצוא נתונים יציב</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -181,7 +181,7 @@
                     <div id="progressBarFill" class="bg-gradient-to-l from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-200" style="width: 0%"></div>
                 </div>
                 <div class="flex justify-between text-[10px] text-zinc-400 mb-3 px-1">
-                    <span id="progressText">מערכת מוכנה.</span>
+                    <span id="progressText">Meyarecet Muhana.</span>
                     <span id="progressPercentage">0%</span>
                 </div>
 
@@ -237,7 +237,7 @@
                     <div class="text-xs font-bold text-zinc-300 flex items-center gap-1.5 mb-2">
                         <i class="fas fa-folder-plus text-amber-500"></i> הוספת רשימת ערוצים המונית (כל ערוץ בשורה)
                     </div>
-                    <textarea id="bulkChannelsTextArea" rows="5" placeholder="הדבק רשימת ערוצים, קישורים, או ידיות @ - אחד בכל שורה..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 outline-none text-left font-mono text-xs focus:border-zinc-700 custom-scrollbar mb-2" dir="ltr"></textarea>
+                    <textarea id="bulkChannelsTextArea" rows="5" placeholder="הדבק רשימת ערוצים, קישורים, או ידיות @howridiculous - אחד בכל שורה..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 outline-none text-left font-mono text-xs focus:border-zinc-700 custom-scrollbar mb-2" dir="ltr"></textarea>
                     <button onclick="processBulkChannelsInsertion()" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
                         <i class="fas fa-play-circle"></i> פתח, פענח והכנס את כל הרשימה לתור לסריקה
                     </button>
@@ -355,7 +355,8 @@
         let apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
         let currentKeyIndex = 0;
         
-        let queue = [];
+        // טעינת רשימת התור השמורה מקומית כדי לאפשר המשכיות לאחר הפסקה/רענון
+        let queue = JSON.parse(localStorage.getItem('yt_active_queue_backup') || '[]');
         let isProcessing = false;
         let globalPause = false; 
         let activeEditingChannelId = null;
@@ -381,8 +382,6 @@
             if (input.startsWith('UC') && input.length >= 24) return { type: 'id', value: input }; 
             const matchChannel = input.match(/\/channel\/(UC[a-zA-Z0-9_-]{22})/);
             if (matchChannel) return { type: 'id', value: matchChannel[1] };
-            
-            // תומך כעת בפירוק אחיד של ידית במגוון קישורים
             const matchHandle = input.match(/(?:youtube\.com\/)?@([a-zA-Z0-9_.-]+)/);
             if (matchHandle) return { type: 'handle', value: matchHandle[1] };
             if (input.startsWith('@')) return { type: 'handle', value: input.substring(1) };
@@ -433,13 +432,10 @@
             consoleBox.scrollTop = consoleBox.scrollHeight; 
         }
 
-        // שינוי לוגיקת החילוץ של Handle: שימוש בחיפוש חכם במידה ושרת גוגל מונע קריאה ישירה
         async function resolveYoutubeChannelIdFromHandle(handleName) {
-            // סבב 1: ניסיון ישיר דרך השדה הרשמי החדש
             let data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=snippet&forHandle=${encodeURIComponent(handleName)}&key=${key}`);
             if (data && data.items && data.items.length > 0) return { id: data.items[0].id, title: data.items[0].snippet.title };
             
-            // סבב 2 גיבוי: חילוץ דרך שאילתת חיפוש ממוקדת של ה-Handle (עוקף באג של גוגל)
             let backupData = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=3&q=${encodeURIComponent('@' + handleName)}&key=${key}`);
             if (backupData && backupData.items && backupData.items.length > 0) {
                 return { id: backupData.items[0].id.channelId, title: backupData.items[0].snippet.title };
@@ -503,6 +499,44 @@
             currentLiveOpenIds.forEach(id => appendLiveList('liveOpenList', id, 'emerald')); currentLiveBlockedIds.forEach(id => appendLiveList('liveBlockedList', id, 'rose'));
             calculateGlobalStats(); renderScannedDatabaseGrid(); if (googleAccessToken) syncWithGoogleDrive();
         }
+
+        function toggleDriveConfigModal() {
+            const m = document.getElementById('driveConfigModal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            if(m.style.display === 'flex') {
+                document.getElementById('driveClientIdInput').value = driveConfig.clientId || "";
+                document.getElementById('driveApiKeyInput').value = driveConfig.apiKey || "";
+            }
+        }
+
+        function saveDriveConfig() {
+            driveConfig.clientId = document.getElementById('driveClientIdInput').value.trim();
+            driveConfig.apiKey = document.getElementById('driveApiKeyInput').value.trim();
+            localStorage.setItem('yt_drive_config', JSON.stringify(driveConfig));
+            toggleDriveConfigModal(); initGoogleDriveLibraries();
+        }
+
+        function initGoogleDriveLibraries() {
+            if (!driveConfig.clientId || !driveConfig.apiKey) {
+                document.getElementById('driveStatusLabel').innerText = "הנתונים נשמרים מקומית בדפדפן (לא מחובר לענן)."; return;
+            }
+            try {
+                googleTokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file',
+                    callback: (tokenResponse) => {
+                        if (tokenResponse.error !== undefined) { throw (tokenResponse); }
+                        googleAccessToken = tokenResponse.access_token;
+                        document.getElementById('btnDriveAuth').innerText = "✓ מחובר לגוגל";
+                        document.getElementById('btnDriveAuth').className = "bg-emerald-600/20 text-emerald-400 border border-emerald-800 px-4 py-1.5 rounded-xl text-xs font-bold cursor-default";
+                        document.getElementById('btnDriveSync').disabled = false;
+                        document.getElementById('btnDriveSync').className = "bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md";
+                        document.getElementById('driveStatusLabel').innerText = "מחובר בהצלחה לענן!"; syncWithGoogleDrive();
+                    },
+                });
+                document.getElementById('driveStatusLabel').innerText = "מפתחות הדרייב טעונים. מוכן לחיבור אימות.";
+            } catch(e) { console.error(e); }
+        }
+
+        function handleAuthClick() { if (googleTokenClient === null) return alert("הזן קודם מפתחות בהגדרות ענן."); googleTokenClient.requestAccessToken({prompt: 'consent'}); }
 
         async function syncWithGoogleDrive(isDeletionSync = false) {
             if (!googleAccessToken) return;
@@ -588,35 +622,19 @@
             }
         }
 
-        // שחזור קשיח ומלא לנגן ה-API הסטטי היציב והרשמי שעוקף חסימות אוריג'ין ו-postMessage
+        // שימוש במנוע הנגנים הסטטי והבטוח מגרסה 5.8/6.0 למניעת קריסות postMessage
         function checkSingleVideoNetfree(videoId, slotIndex) {
             return new Promise((resolve) => {
                 let resolved = false; const testerId = `tester-slot-${slotIndex}-${videoId}`;
                 const testerDiv = document.createElement('div'); testerDiv.id = testerId;
                 document.getElementById('netfreeTesterContainer').appendChild(testerDiv);
-                let tempPlayer; 
-                let timeout = setTimeout(() => { if (!resolved) { resolved = true; cleanup(); resolve('blocked'); } }, 7000);
-                
-                function cleanup() { 
-                    clearTimeout(timeout); 
-                    if (tempPlayer && typeof tempPlayer.destroy === 'function') { try { tempPlayer.destroy(); } catch(e){} } 
-                    if (testerDiv && testerDiv.parentNode) testerDiv.remove(); 
-                }
-                
-                tempPlayer = new YT.Player(testerId, { 
-                    height: '1', width: '1', videoId: videoId, 
-                    playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'origin': window.location.origin },
+                let tempPlayer; let timeout = setTimeout(() => { if (!resolved) { resolved = true; cleanup(); resolve('blocked'); } }, 7000);
+                function cleanup() { clearTimeout(timeout); if (tempPlayer && typeof tempPlayer.destroy === 'function') { try { tempPlayer.destroy(); } catch(e){} } if (testerDiv && testerDiv.parentNode) testerDiv.remove(); }
+                tempPlayer = new YT.Player(testerId, { height: '1', width: '1', videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'origin': window.location.origin },
                     events: {
-                        'onReady': (event) => { 
-                            const frame = document.getElementById(testerId); 
-                            if(frame) frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); 
-                            event.target.playVideo(); 
-                        },
+                        'onReady': (event) => { const frame = document.getElementById(testerId); if(frame) frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); event.target.playVideo(); },
                         'onError': () => { if (!resolved) { resolved = true; cleanup(); resolve('blocked'); } },
-                        'onStateChange': (event) => { 
-                            // אם הסרטון התחיל להתנגן (1) או להיטען (3), הוא פתוח בנטפרי בוודאות
-                            if ((event.data === 1 || event.data === 3) && !resolved) { resolved = true; cleanup(); resolve('unblocked'); } 
-                        }
+                        'onStateChange': (event) => { if ((event.data === 1 || event.data === 3) && !resolved) { resolved = true; cleanup(); resolve('unblocked'); } }
                     }
                 });
             });
@@ -689,13 +707,18 @@
             if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים לסריקת חסומים.`); else alert("אין סרטונים חסומים במאגר.");
         }
 
+        // שמירה וגיבוי מקומי אוטומטי של תור המשימות בכל עדכון
         function pushToQueue(id, title, mode = 'full') {
             if (queue.some(q => q.id === id && q.mode === mode)) return;
             queue.push({ id: id, title: title, status: 'pending', mode: mode }); 
-            renderQueue(); calculateGlobalStats(); if (!isProcessing) processQueueNext();
+            renderQueue(); calculateGlobalStats();
+            if (!isProcessing) processQueueNext();
         }
 
         async function processQueueNext() {
+            // עדכון גיבוי התור בלוקאל סטורג' כדי לאפשר התחלה מחדש לאחר הפסקה
+            localStorage.setItem('yt_active_queue_backup', JSON.stringify(queue));
+
             if (queue.length === 0) { 
                 isProcessing = false; document.getElementById('spinnerIcon').classList.add('hidden'); 
                 document.getElementById('liveChannelName').innerText = "-"; document.getElementById('liveScanType').innerText = "-"; 
@@ -906,10 +929,19 @@
         function handleQuotaExhaustionStop() { queue = []; isProcessing = false; globalPause = false; document.getElementById('spinnerIcon').classList.add('hidden'); updateProgress(0, 100, "הסריקה נבלמה."); updateGlobalStatus(); renderQueue(); }
 
         setInterval(refreshHourlyScanRate, 30000);
+        
         window.onload = () => { 
             apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
             document.getElementById('keyCountLabel').innerText = apiKeys.length; 
-            renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); initGoogleDriveLibraries(); 
+            renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); 
+            // הפעלת האתחול היציב עבור גוגל דרייב API שהושמט קודם
+            initGoogleDriveLibraries(); 
+            
+            // בדיקה האם יש תור משימות שממתין לחידוש פעולה מהגיבוי המקומי
+            if (queue.length > 0) {
+                renderQueue();
+                logErrorToConsoleOnScreen(`[תור שוחזר] נמצאו ${queue.length} משימות בזיכרון המקומי, מוכן להמשך פעולה.`);
+            }
         };
     </script>
 </body>
