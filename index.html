@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v7.3</title>
+    <title>YouTube NetFree Scan Control Hub v7.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -25,10 +25,10 @@
 
     <header class="max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-800">
         <div class="flex items-center gap-3">
-            <i class="fas fa-chart-line text-blue-500 text-3xl animate-pulse"></i>
+            <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.3</h1>
-                <p class="text-xs text-zinc-400">תיקון קשיח להוספה המונית, תור סריקה פעיל ללא דילוגים, ותיבת דוח שגיאות מובנית במסך</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.4</h1>
+                <p class="text-xs text-zinc-400">שיקום מלא למערכת היציבה: פתרון קריסת נגני הבדיקה, פענוח אבסולוטי של קישורי @, ודוח שגיאות מובנה</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -97,7 +97,7 @@
             <span id="statsVideosScannedHourly" class="text-xl font-bold font-mono text-indigo-400">0</span>
         </div>
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow ring-1 ring-zinc-800">
-            <span class="text-[11px] text-teal-400 font-bold block"><i class="fas fa-teal-halved ml-1"></i>ערוצים מאושרים</span>
+            <span class="text-[11px] text-teal-400 font-bold block"><i class="fas fa-shield-halved ml-1"></i>ערוצים מאושרים</span>
             <span id="statsWhitelistedChannelsCount" class="text-xl font-bold font-mono text-teal-400">0</span>
         </div>
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow ring-1 ring-zinc-800">
@@ -237,7 +237,7 @@
                     <div class="text-xs font-bold text-zinc-300 flex items-center gap-1.5 mb-2">
                         <i class="fas fa-folder-plus text-amber-500"></i> הוספת רשימת ערוצים המונית (כל ערוץ בשורה)
                     </div>
-                    <textarea id="bulkChannelsTextArea" rows="5" placeholder="הדבק רשימת ערוצים, קישורים, או ידיות @howridiculous - אחד בכל שורה..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 outline-none text-left font-mono text-xs focus:border-zinc-700 custom-scrollbar mb-2" dir="ltr"></textarea>
+                    <textarea id="bulkChannelsTextArea" rows="5" placeholder="הדבק רשימת ערוצים, קישורים, או ידיות @ - אחד בכל שורה..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 outline-none text-left font-mono text-xs focus:border-zinc-700 custom-scrollbar mb-2" dir="ltr"></textarea>
                     <button onclick="processBulkChannelsInsertion()" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
                         <i class="fas fa-play-circle"></i> פתח, פענח והכנס את כל הרשימה לתור לסריקה
                     </button>
@@ -381,13 +381,16 @@
             if (input.startsWith('UC') && input.length >= 24) return { type: 'id', value: input }; 
             const matchChannel = input.match(/\/channel\/(UC[a-zA-Z0-9_-]{22})/);
             if (matchChannel) return { type: 'id', value: matchChannel[1] };
+            
+            // תומך כעת בפירוק אחיד של ידית במגוון קישורים
             const matchHandle = input.match(/(?:youtube\.com\/)?@([a-zA-Z0-9_.-]+)/);
             if (matchHandle) return { type: 'handle', value: matchHandle[1] };
             if (input.startsWith('@')) return { type: 'handle', value: input.substring(1) };
             return { type: 'search', value: input }; 
         }
 
-        // פונקציית עיבוד המונית יציבה שיוצרת את התור ומפעילה את המנוע כראוי
+        function toggleBulkInputArea() { const area = document.getElementById('bulkInputArea'); area.classList.toggle('hidden'); }
+
         async function processBulkChannelsInsertion() {
             const text = document.getElementById('bulkChannelsTextArea').value.trim();
             if (!text) return alert("אנא הדבק רשימת קישורים בתיבה תחילה.");
@@ -395,9 +398,9 @@
             if(lines.length === 0) return;
             
             document.getElementById('bulkChannelsTextArea').value = '';
-            document.getElementById('bulkErrorLogConsole').value = ''; // איפוס הקונסולה על המסך
+            document.getElementById('bulkErrorLogConsole').value = ''; 
             
-            updateProgress(0, 100, `מעבד ומפענח ${lines.length} ערוצים...`);
+            updateProgress(0, 100, `מעבד ומפענח ${lines.length} ערוצים לתור...`);
             
             for (let item of lines) {
                 const parsed = extractChannelIdOrHandle(item);
@@ -415,14 +418,13 @@
                     if (resolved) {
                         pushToQueue(resolved.id, resolved.title, 'full');
                     } else {
-                        logErrorToConsoleOnScreen(`[דילוג] החיפוש נכשיל עבור: "${parsed.value}"`);
+                        logErrorToConsoleOnScreen(`[דילוג] החיפוש נכשל עבור: "${parsed.value}"`);
                     }
                 }
             }
             calculateGlobalStats();
         }
 
-        // הדפסת השגיאות ישירות לתוך קונסולת ה-Textarea שעל המסך
         function logErrorToConsoleOnScreen(msg) {
             const consoleBox = document.getElementById('bulkErrorLogConsole');
             if(!consoleBox) return;
@@ -431,9 +433,17 @@
             consoleBox.scrollTop = consoleBox.scrollHeight; 
         }
 
+        // שינוי לוגיקת החילוץ של Handle: שימוש בחיפוש חכם במידה ושרת גוגל מונע קריאה ישירה
         async function resolveYoutubeChannelIdFromHandle(handleName) {
-            const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=snippet&forHandle=${encodeURIComponent(handleName)}&key=${key}`);
+            // סבב 1: ניסיון ישיר דרך השדה הרשמי החדש
+            let data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=snippet&forHandle=${encodeURIComponent(handleName)}&key=${key}`);
             if (data && data.items && data.items.length > 0) return { id: data.items[0].id, title: data.items[0].snippet.title };
+            
+            // סבב 2 גיבוי: חילוץ דרך שאילתת חיפוש ממוקדת של ה-Handle (עוקף באג של גוגל)
+            let backupData = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=3&q=${encodeURIComponent('@' + handleName)}&key=${key}`);
+            if (backupData && backupData.items && backupData.items.length > 0) {
+                return { id: backupData.items[0].id.channelId, title: backupData.items[0].snippet.title };
+            }
             return null;
         }
 
@@ -453,7 +463,7 @@
                     if(scansCount < maxScansLimit && blockedCount > 0) { pushToQueue(cid, db[cid].title, 'blocked_only'); totalAdded++; }
                 }
             });
-            if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים.`); else alert("לא נמצאו ערוצים מתאימים.");
+            if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים שעמדו בתנאי.`); else alert("לא נמצאו ערוצים מתאימים.");
         }
 
         function pushFilteredDaysAgoChannelsToQueue() {
@@ -466,7 +476,7 @@
                     if(updatedTime >= timeLimitMs) { pushToQueue(cid, db[cid].title, 'full'); totalAdded++; }
                 }
             });
-            if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים.`); else alert("לא נמצאו ערוצים מתאימים.");
+            if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים שעמדו בתנאי.`); else alert("לא נמצאו ערוצים מתאימים.");
         }
 
         function appendLiveList(targetId, vId, color) {
@@ -578,6 +588,40 @@
             }
         }
 
+        // שחזור קשיח ומלא לנגן ה-API הסטטי היציב והרשמי שעוקף חסימות אוריג'ין ו-postMessage
+        function checkSingleVideoNetfree(videoId, slotIndex) {
+            return new Promise((resolve) => {
+                let resolved = false; const testerId = `tester-slot-${slotIndex}-${videoId}`;
+                const testerDiv = document.createElement('div'); testerDiv.id = testerId;
+                document.getElementById('netfreeTesterContainer').appendChild(testerDiv);
+                let tempPlayer; 
+                let timeout = setTimeout(() => { if (!resolved) { resolved = true; cleanup(); resolve('blocked'); } }, 7000);
+                
+                function cleanup() { 
+                    clearTimeout(timeout); 
+                    if (tempPlayer && typeof tempPlayer.destroy === 'function') { try { tempPlayer.destroy(); } catch(e){} } 
+                    if (testerDiv && testerDiv.parentNode) testerDiv.remove(); 
+                }
+                
+                tempPlayer = new YT.Player(testerId, { 
+                    height: '1', width: '1', videoId: videoId, 
+                    playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'origin': window.location.origin },
+                    events: {
+                        'onReady': (event) => { 
+                            const frame = document.getElementById(testerId); 
+                            if(frame) frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); 
+                            event.target.playVideo(); 
+                        },
+                        'onError': () => { if (!resolved) { resolved = true; cleanup(); resolve('blocked'); } },
+                        'onStateChange': (event) => { 
+                            // אם הסרטון התחיל להתנגן (1) או להיטען (3), הוא פתוח בנטפרי בוודאות
+                            if ((event.data === 1 || event.data === 3) && !resolved) { resolved = true; cleanup(); resolve('unblocked'); } 
+                        }
+                    }
+                });
+            });
+        }
+
         async function processBatchParallel(videoIds, progressCallback) {
             let results = { open: [], blocked: [] }; let index = 0; const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
             document.getElementById('liveOpenList').innerHTML = ''; document.getElementById('liveBlockedList').innerHTML = '';
@@ -667,7 +711,7 @@
                 currentLiveChannelId = current.id;
                 if (current.mode === 'blocked_only') await scanChannelBlockedOnly(current.id, current.title);
                 else await scanChannelVideosMssive(current.id, current.title); 
-            } catch (err) { console.error(err); logErrorToConsoleOnScreen(`שגיאת קריסת מערכת קשה בערוץ: ${current.title}`); }
+            } catch (err) { console.error(err); logErrorToConsoleOnScreen(`שגיאת קריסה זמנית בערוץ: ${current.title}`); }
             if(queue.length > 0 && queue[0].id === current.id && queue[0].mode === current.mode) { queue.shift(); }
             processQueueNext();
         }
@@ -694,7 +738,7 @@
             const channelStatsData = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${key}`);
             
             if (!channelStatsData || channelStatsData === "QUOTA_EXHAUSTED" || !channelStatsData.items || channelStatsData.items.length === 0) {
-                logErrorToConsoleOnScreen(`[דילוג] ערוץ לא תקין או שנמחק מיוטיוב: ID ${channelId}`);
+                logErrorToConsoleOnScreen(`[דילוג] ערוץ שגוי או חסום: ${channelTitle} (${channelId})`);
                 updateProgress(100, 100, `מדלג על ערוץ שגוי...`); return;
             }
             
