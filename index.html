@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v7.9</title>
+    <title>YouTube NetFree Scan Control Hub v8.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -28,8 +28,8 @@
         <div class="flex items-center gap-3">
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.9</h1>
-                <p class="text-xs text-zinc-400">תיקון הפעלת סריקה המונית, תמיכה משולבת בסרטונים וערוצים ברשימה, וניהול תור מוגן</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 8.0</h1>
+                <p class="text-xs text-zinc-400">שחזור מלא לליבת 7.6, הזרקת תור מיידית, ורק אז חילוץ כמות סרטונים ודילוג כפילויות</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -73,7 +73,7 @@
         </div>
     </section>
 
-    <!-- שורת סיכום אנליטית מורחבת -->
+    <!-- שורת סיכום אנליטית -->
     <section class="max-w-[1600px] mx-auto mb-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow">
             <span class="text-[11px] text-zinc-500 block">ערוצים רשומים</span>
@@ -114,7 +114,7 @@
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-900 pb-3">
             <div class="flex items-center gap-3">
                 <span class="text-xs font-bold text-zinc-400">בקרת תור כללית:</span>
-                <span id="globalStatusBadge" class="text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-500">מערכת במנוחה</span>
+                <span id="globalStatusBadge" class="text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500">מערכת במנוחה</span>
             </div>
             <div class="flex flex-wrap gap-2">
                 <button onclick="pushAllBlockedToQueue()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-md">
@@ -395,7 +395,6 @@
             const matchChannel = input.match(/\/channel\/(UC[a-zA-Z0-9_-]{22})/);
             if (matchChannel) return { type: 'id', value: matchChannel[1] };
             
-            // זיהוי קישור סרטון בודד (Video ID) מתוך הרשימה ההמונית
             const matchVideo = input.match(/(?:v=|shorts\/|embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             if (matchVideo) return { type: 'video', value: matchVideo[1] };
             if (input.length === 11 && !input.startsWith('@')) return { type: 'video', value: input };
@@ -408,56 +407,119 @@
 
         function toggleBulkInputArea() { const area = document.getElementById('bulkInputArea'); area.classList.toggle('hidden'); }
 
-        // תיקון ליבה קשיח: הוספה המונית משולבת ערוצים וסרטונים + הפעלה מובטחת של המנוע
+        // שחזור הליבה היציבה של 7.6 + מנגנון הזרקה מיידי ורק אז חילוץ כמות סרטונים מדורג
         async function processBulkChannelsInsertion() {
             const text = document.getElementById('bulkChannelsTextArea').value.trim();
-            if (!text) return alert("הדבק קודם רשימה.");
+            if (!text) return alert("אנא הדבק רשימה תחילה.");
             const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             if(lines.length === 0) return;
             
             document.getElementById('bulkChannelsTextArea').value = '';
-            document.getElementById('bulkErrorLogConsole').value = ''; 
+            document.getElementById('bulkErrorLogConsole').value = '';
             
-            updateProgress(0, 100, `חילוץ ופענוח נתונים מוקדם עבור ${lines.length} שורות...`);
+            logErrorToConsoleOnScreen(`[הזרקה] מתחיל הזרקה מיידית של ${lines.length} שורות לתור...`);
             
+            // שלב 1: הזרקה מיידית של הכל לתור ודילוג על כפילויות קיימות ב-DB
             for (let item of lines) {
                 const parsed = extractChannelIdOrHandle(item);
                 
-                // טיפול ישיר בסרטון בודד שהוכנס ברשימה ההמונית (לבקשתך)
                 if (parsed.type === 'video') {
                     const vId = parsed.value;
                     if (db._standalone_videos.open.includes(vId) || db._standalone_videos.blocked.includes(vId)) {
                         logErrorToConsoleOnScreen(`[דילוג] סרטון בודד ${vId} כבר קיים במערכת.`);
                         continue;
                     }
-                    // הכנסה לתור כמשימה של סרטון בודד (מצב מיוחד)
                     pushToQueue(`VIDEO_${vId}`, `סרטון בודד (${vId})`, 'standalone_video', 1);
                     continue;
                 }
 
-                let resolved = null;
                 if (parsed.type === 'id') {
-                    if (db[parsed.value]) { logErrorToConsoleOnScreen(`[דילוג] הערוץ ${db[parsed.value].title || parsed.value} כבר קיים.`); continue; }
-                    resolved = { id: parsed.value, title: `ערוץ (${parsed.value})` };
+                    if (db[parsed.value]) { logErrorToConsoleOnScreen(`[דילוג] הערוץ ${db[parsed.value].title || parsed.value} כבר רשום במאגר.`); continue; }
+                    pushToQueue(parsed.value, `ערוץ (${parsed.value})`, 'full', 0);
                 } else if (parsed.type === 'handle') {
-                    resolved = await resolveYoutubeChannelIdFromHandle(parsed.value);
-                    if (resolved && db[resolved.id]) { logErrorToConsoleOnScreen(`[דילוג] הערוץ "${resolved.title}" כבר קיים.`); continue; }
+                    // הכנסה לתור עם מזהה זמני המבוסס על ה-Handle כדי שהפענוח יתבצע בהמשך בבטחה
+                    pushToQueue(`HANDLE_${parsed.value}`, `@${parsed.value}`, 'full_handle', 0);
                 } else {
-                    resolved = await resolveFirstChannelIdFromSearchText(parsed.value);
-                    if (resolved && db[resolved.id]) { logErrorToConsoleOnScreen(`[דילוג] תוצאת החיפוש "${resolved.title}" כבר קיימת.`); continue; }
-                }
-                
-                if (resolved) {
-                    let vCount = await fetchOfficialChannelVideoCount(resolved.id);
-                    pushToQueue(resolved.id, resolved.title, 'full', vCount);
-                } else {
-                    logErrorToConsoleOnScreen(`[שגיאה] לא ניתן לפענח או למצוא את הערוץ: ${item}`);
+                    pushToQueue(`SEARCH_${btoa(unescape(encodeURIComponent(parsed.value)))}`, `חיפוש: ${parsed.value}`, 'full_search', 0);
                 }
             }
+            
+            renderQueue();
             calculateGlobalStats();
             
-            // אכיפת הפעלה קשיחה של המנוע הראשי במידה והיה כבוי
+            // שלב 2: ריצה ברקע על התור הקיים לחילוץ ועדכון כמויות סרטונים ופענוח Handles
+            logErrorToConsoleOnScreen(`[רקע] מתחיל חילוץ כמויות סרטונים ופענוח מזהים עבור הפריטים שנוספו...`);
+            await asyncLazyResolveAndFetchQueueData();
+            
+            // הפעלה סופית של המנוע הראשי
             if (!isProcessing && queue.length > 0) processQueueNext();
+        }
+
+        // פונקציית רקע מדורגת לחילוץ נתוני סרטונים לאחר שהכל כבר הוזרק לתור לבקשתך
+        async function asyncLazyResolveAndFetchQueueData() {
+            for (let i = 0; i < queue.length; i++) {
+                let item = queue[i];
+                if (item.expectedVideos > 0) continue; // כבר חולץ או מעודכן
+                
+                if (item.id.startsWith('HANDLE_')) {
+                    let handleName = item.id.replace('HANDLE_', '');
+                    let resolved = await resolveYoutubeChannelIdFromHandle(handleName);
+                    if (resolved) {
+                        if (db[resolved.id]) {
+                            logErrorToConsoleOnScreen(`[סינון רקע] הערוץ המפוענח "${resolved.title}" נמצא כקיים במאגר. מסיר מהתור.`);
+                            queue.splice(i, 1); i--; continue;
+                        }
+                        item.id = resolved.id; item.title = resolved.title;
+                        item.expectedVideos = await fetchOfficialChannelVideoCount(resolved.id);
+                    } else {
+                        logErrorToConsoleOnScreen(`[שגיאת רקע] לא נמצא מזהה עבור @${handleName}. מסיר.`);
+                        queue.splice(i, 1); i--; continue;
+                    }
+                } else if (item.id.startsWith('SEARCH_')) {
+                    let searchTxt = decodeURIComponent(escape(atob(item.id.replace('SEARCH_', ''))));
+                    let resolved = await resolveFirstChannelIdFromSearchText(searchTxt);
+                    if (resolved) {
+                        if (db[resolved.id]) {
+                            logErrorToConsoleOnScreen(`[סינון רקע] תוצאת החיפוש "${resolved.title}" קיימת במאגר. מסיר מהתור.`);
+                            queue.splice(i, 1); i--; continue;
+                        }
+                        item.id = resolved.id; item.title = resolved.title;
+                        item.expectedVideos = await fetchOfficialChannelVideoCount(resolved.id);
+                    } else {
+                        logErrorToConsoleOnScreen(`[שגיאת רקע] חיפוש נכשל עבור "${searchTxt}". מסיר.`);
+                        queue.splice(i, 1); i--; continue;
+                    }
+                } else if (!item.id.startsWith('VIDEO_')) {
+                    // ערוץ רגיל עם ID - נחלץ רק את כמות הסרטונים שלו
+                    item.expectedVideos = await fetchOfficialChannelVideoCount(item.id);
+                }
+                
+                // רענון ויזואלי של התור והספרות מעל בכל שלב של חילוץ
+                localStorage.setItem('yt_active_queue_backup', JSON.stringify(queue));
+                renderQueue();
+                calculateGlobalStats();
+            }
+        }
+
+        async function fetchOfficialChannelVideoCount(channelId) {
+            const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${key}`);
+            if (data && data.items && data.items.length > 0) return parseInt(data.items[0].statistics.videoCount || 0, 10);
+            return 0;
+        }
+
+        async function resolveYoutubeChannelIdFromHandle(handleName) {
+            let data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=snippet&forHandle=${encodeURIComponent(handleName)}&key=${key}`);
+            if (data && data.items && data.items.length > 0) return { id: data.items[0].id, title: data.items[0].snippet.title };
+            
+            let backupData = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=3&q=${encodeURIComponent('@' + handleName)}&key=${key}`);
+            if (backupData && backupData.items && backupData.items.length > 0) return { id: backupData.items[0].channelId || backupData.items[0].id?.channelId, title: backupData.items[0].snippet.title };
+            return null;
+        }
+
+        async function resolveFirstChannelIdFromSearchText(searchText) {
+            const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=${encodeURIComponent(searchText)}&key=${key}`);
+            if (data && data.items && data.items.length > 0) return { id: data.items[0].id.channelId, title: data.items[0].snippet.title };
+            return null;
         }
 
         function appendLiveList(targetId, vId, color) {
@@ -554,24 +616,16 @@
         }
 
         function checkAndAddStandaloneVideoManual() {
-            const input = document.getElementById('standaloneVideoInput');
-            const vId = input.value.trim();
+            const input = document.getElementById('standaloneVideoInput'); const vId = input.value.trim();
             if(!vId || vId.length !== 11) return alert("אנא הזן Video ID תקין בן 11 תווים.");
-            input.value = '';
-            pushToQueue(`VIDEO_${vId}`, `סרטון בודד (${vId})`, 'standalone_video', 1);
+            input.value = ''; pushToQueue(`VIDEO_${vId}`, `סרטון בודד (${vId})`, 'standalone_video', 1);
         }
 
-        function refreshStandaloneVideos() {
-            const container = document.getElementById('standaloneVideosContainer');
-            if(!container) return;
-            const openTotal = db._standalone_videos?.open?.length || 0;
-            const blockedTotal = db._standalone_videos?.blocked?.length || 0;
+        function renderStandaloneVideos() {
+            const container = document.getElementById('standaloneVideosContainer'); if(!container) return;
+            const openTotal = db._standalone_videos?.open?.length || 0; const blockedTotal = db._standalone_videos?.blocked?.length || 0;
             document.getElementById('standaloneCountLabel').innerText = (openTotal + blockedTotal).toLocaleString('he-IL');
-            
-            if((openTotal + blockedTotal) === 0) {
-                container.innerHTML = '<p class="text-xs text-zinc-600 p-2 w-full text-center">אין סרטונים בודדים</p>';
-                return;
-            }
+            if((openTotal + blockedTotal) === 0) { container.innerHTML = '<p class="text-xs text-zinc-600 p-2 w-full text-center">אין סרטונים בודדים</p>'; return; }
             container.innerHTML = '';
             db._standalone_videos?.open?.forEach(id => container.appendChild(createStandaloneBadge(id, 'emerald')));
             db._standalone_videos?.blocked?.forEach(id => container.appendChild(createStandaloneBadge(id, 'rose')));
@@ -583,11 +637,18 @@
             return span;
         }
 
-        function deleteStandaloneVideo(id) {
-            db._standalone_videos.open = db._standalone_videos.open.filter(v => v !== id);
-            db._standalone_videos.blocked = db._standalone_videos.blocked.filter(v => v !== id);
-            localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db));
-            refreshStandaloneVideos(); calculateGlobalStats();
+        function deleteStandaloneVideo(id) { db._standalone_videos.open = db._standalone_videos.open.filter(v => v !== id); db._standalone_videos.blocked = db._standalone_videos.blocked.filter(v => v !== id); localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderStandaloneVideos(); calculateGlobalStats(); }
+
+        function pushFilteredBlockedToQueue() {
+            const maxScansLimit = parseInt(document.getElementById('filterScansCountSelect').value, 10); let totalAdded = 0;
+            Object.keys(db).forEach(cid => { if(cid !== "_standalone_videos" && !db[cid].isNetfreeWhitelisted) { let scansCount = db[cid].scanCount || 1; let blockedCount = db[cid].blockedVideos ? db[cid].blockedVideos.length : 0; if(scansCount < maxScansLimit && blockedCount > 0) { pushToQueue(cid, db[cid].title, 'blocked_only', blockedCount); totalAdded++; } } });
+            if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים.`); else alert("לא נמצאו ערוצים מתאימים.");
+        }
+
+        function pushFilteredDaysAgoChannelsToQueue() {
+            const daysLimit = parseInt(document.getElementById('filterDaysAgoSelect').value, 10); const timeLimitMs = Date.now() - (daysLimit * 86400000); let totalAdded = 0;
+            Object.keys(db).forEach(cid => { if(cid !== "_standalone_videos") { let updatedTime = db[cid].updatedTimestamp || 0; if(updatedTime >= timeLimitMs) { pushToQueue(cid, db[cid].title, 'full', db[cid].totalVideos || 0); totalAdded++; } } });
+            if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים.`); else alert("לא נמצאו ערוצים מתאימים.");
         }
 
         function pushToQueue(id, title, mode = 'full', expectedVideos = 0) {
@@ -595,7 +656,7 @@
             queue.push({ id: id, title: title, status: 'pending', mode: mode, expectedVideos: expectedVideos }); 
             localStorage.setItem('yt_active_queue_backup', JSON.stringify(queue));
             renderQueue(); calculateGlobalStats();
-            if (!isProcessing) processQueueNext();
+            if (!isProcessing && mode !== 'full_handle' && mode !== 'full_search') processQueueNext();
         }
 
         async function processQueueNext() {
@@ -610,50 +671,26 @@
             try { 
                 currentLiveChannelId = current.id;
                 if (current.mode === 'standalone_video') {
-                    // עיבוד ייעודי לסרטון בודד מתוך התור (לבקשתך)
                     await scanSingleVideoDirectFromQueue(current.id.replace('VIDEO_', ''), current.title);
                 } else if (current.mode === 'blocked_only') {
                     await scanChannelBlockedOnly(current.id, current.title);
                 } else {
                     await scanChannelVideosMssive(current.id, current.title); 
                 }
-            } catch (err) { console.error(err); logErrorToConsoleOnScreen(`שגיאת קריסה זמנית בערוץ: ${current.title}`); }
+            } catch (err) { console.error(err); logErrorToConsoleOnScreen(`שגיאת קריסה בערוץ: ${current.title}`); }
             
             if(queue.length > 0 && queue[0].id === current.id && queue[0].mode === current.mode) { queue.shift(); }
             processQueueNext();
         }
 
-        // לוגיקת סריקה של סרטון בודד שמגיע דרך רשימה המונית
         async function scanSingleVideoDirectFromQueue(vId, vTitle) {
-            document.getElementById('liveChannelName').innerText = vTitle;
-            document.getElementById('liveScanType').innerText = "סרטון בודד מהרשימה";
-            document.getElementById('liveOfficialCount').innerText = "1";
-            document.getElementById('liveTotalVideos').innerText = "1";
-            document.getElementById('liveOpenCount').innerText = "0";
-            document.getElementById('liveBlockedCount').innerText = "0";
-            
-            updateProgress(10, 100, `בודק סרטון ${vId}...`);
-            const status = await checkSingleVideoNetfree(vId, 0);
-            
-            if (status === 'unblocked') {
-                if(!db._standalone_videos.open.includes(vId)) db._standalone_videos.open.push(vId);
-                appendLiveList('liveOpenList', vId, 'emerald');
-                document.getElementById('liveOpenCount').innerText = "1";
-            } else {
-                if(!db._standalone_videos.blocked.includes(vId)) db._standalone_videos.blocked.push(vId);
-                document.getElementById('liveBlockedCount').innerText = "1";
-                appendLiveList('liveBlockedList', vId, 'rose');
-            }
-            
-            localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db));
-            renderStandaloneVideos();
-            updateProgress(100, 100, `הסתיים.`);
-        }
-
-        async function fetchOfficialChannelVideoCount(channelId) {
-            const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${key}`);
-            if (data && data.items && data.items.length > 0) return parseInt(data.items[0].statistics.videoCount || 0, 10);
-            return 0;
+            document.getElementById('liveChannelName').innerText = vTitle; document.getElementById('liveScanType').innerText = "סרטון בודד מהרשימה";
+            document.getElementById('liveOfficialCount').innerText = "1"; document.getElementById('liveTotalVideos').innerText = "1";
+            document.getElementById('liveOpenCount').innerText = "0"; document.getElementById('liveBlockedCount').innerText = "0";
+            updateProgress(10, 100, `בודק סרטון ${vId}...`); const status = await checkSingleVideoNetfree(vId, 0);
+            if (status === 'unblocked') { if(!db._standalone_videos.open.includes(vId)) db._standalone_videos.open.push(vId); appendLiveList('liveOpenList', vId, 'emerald'); document.getElementById('liveOpenCount').innerText = "1"; } 
+            else { if(!db._standalone_videos.blocked.includes(vId)) db._standalone_videos.blocked.push(vId); document.getElementById('liveBlockedCount').innerText = "1"; appendLiveList('liveBlockedList', vId, 'rose'); }
+            localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderStandaloneVideos(); updateProgress(100, 100, `הסתיים.`);
         }
 
         async function scanChannelVideosMssive(channelId, channelTitle) {
@@ -759,13 +796,9 @@
             });
         }
 
-        function renderStandaloneVideos() { const container = document.getElementById('standaloneVideosContainer'); if(!container) return; const total = db._standalone_videos.open.length + db._standalone_videos.blocked.length; document.getElementById('standaloneCountLabel').innerText = total.toLocaleString('he-IL'); if(total === 0) { container.innerHTML = '<p class="text-xs text-zinc-600 p-2 w-full text-center">אין סרטונים בודדים</p>'; return; } container.innerHTML = ''; db._standalone_videos.open.forEach(id => container.appendChild(createStandaloneBadge(id, 'emerald'))); db._standalone_videos.blocked.forEach(id => container.appendChild(createStandaloneBadge(id, 'rose'))); }
-        function createStandaloneBadge(id, color) { const span = document.createElement('div'); span.className = `bg-${color}-950/40 text-${color}-400 text-[11px] font-mono px-2 py-1 rounded-lg border border-${color}-900/50 flex items-center gap-1.5`; span.innerHTML = `<span>${id}</span><button onclick="playVideoInMainQa('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-play text-[8px]"></i></button><button onclick="deleteStandaloneVideo('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-times text-[9px]"></i></button>`; return span; }
-        function deleteStandaloneVideo(id) { db._standalone_videos.open = db._standalone_videos.open.filter(v => v !== id); db._standalone_videos.blocked = db._standalone_videos.blocked.filter(v => v !== id); localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderStandaloneVideos(); calculateGlobalStats(); }
-
         function openEditModal(channelId) { activeEditingChannelId = channelId; const data = db[channelId]; if(!data) return; document.getElementById('editModalTitle').innerText = `עריכת סרטונים: ${data.title}`; activeModalPlayingVideoId = null; renderModalVideoLists(); document.getElementById('editChannelModal').style.display = 'flex'; }
         function closeEditModal() { document.getElementById('editChannelModal').style.display = 'none'; if(modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); } catch(e){} } activeEditingChannelId = null; activeModalPlayingVideoId = null; }
-        function renderModalVideoLists() { const data = db[channelId = activeEditingChannelId]; if(!data) return; const openCont = document.getElementById('modalOpenList'); const blockCont = document.getElementById('modalBlockedList'); openCont.innerHTML = ''; blockCont.innerHTML = ''; document.getElementById('modalOpenCount').innerText = data.openVideos?.length || 0; document.getElementById('modalBlockedCount').innerText = data.blockedVideos?.length || 0; data.openVideos?.forEach(id => openCont.appendChild(createModalVideoRow(id, 'open'))); data.blockedVideos?.forEach(id => blockCont.appendChild(createModalVideoRow(id, 'blocked'))); }
+        function renderModalVideoLists() { const data = db[activeEditingChannelId]; if(!data) return; const openCont = document.getElementById('modalOpenList'); const blockCont = document.getElementById('modalBlockedList'); openCont.innerHTML = ''; blockCont.innerHTML = ''; document.getElementById('modalOpenCount').innerText = data.openVideos?.length || 0; document.getElementById('modalBlockedCount').innerText = data.blockedVideos?.length || 0; data.openVideos?.forEach(id => openCont.appendChild(createModalVideoRow(id, 'open'))); data.blockedVideos?.forEach(id => blockCont.appendChild(createModalVideoRow(id, 'blocked'))); }
         function createModalVideoRow(id, type) { const isPlayingNow = (activeModalPlayingVideoId === id); const div = document.createElement('div'); if(isPlayingNow) { div.className = "bg-blue-600/30 p-2 border-2 border-blue-500 rounded-lg flex justify-between items-center mb-1 text-blue-200 font-bold ring-1 ring-blue-400 animate-pulse"; } else { div.className = "bg-zinc-950 p-1.5 rounded border border-zinc-800 mb-1 hover:border-zinc-700 transition text-zinc-300"; } div.innerHTML = `<span class="truncate pl-2 max-w-[50%] flex items-center gap-1">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce"></i> ' : ''}<span>${id}</span></span><div class="flex gap-2"><button onclick="playVideoInModalQa('${id}')" class="text-blue-400 hover:underline text-[11px] font-bold">📺 נגן</button><button onclick="toggleVideoStatusManual('${id}', '${type}')" class="${type === 'open' ? 'text-amber-500' : 'text-emerald-500'} text-[11px] font-bold">${type === 'open' ? '🔄 חסום' : '🔄 פתח'}</button></div>`; return div; }
         function playVideoInModalQa(videoId) { activeModalPlayingVideoId = videoId; renderModalVideoLists(); if(modalQaPlayerInstance) { try{ modalQaPlayerInstance.destroy(); }catch(e){} } modalQaPlayerInstance = new YT.Player('modalQaPlayerFrame', { height: '100%', width: '100%', videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 1 }, events: { 'onReady': () => { const modalFrame = document.getElementById('modalQaPlayerFrame'); if(modalFrame) modalFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); } } }); }
 
@@ -783,7 +816,6 @@
             container.innerHTML = ''; 
             queue.forEach((item, index) => { 
                 const div = document.createElement('div'); div.className = "flex justify-between items-center bg-zinc-900 border border-zinc-800 p-2 rounded-xl text-[11px]"; 
-                // הצגת כמות סרטונים מובנית בתוך רשימת התור לבקשתך
                 div.innerHTML = `<div class="truncate max-w-[50%]" id="queue-item-title-${item.id}"><span class="font-bold text-zinc-300 block truncate text-xs">${item.title}</span><span class="text-[9px] text-zinc-500 font-normal">${item.mode === 'blocked_only' ? 'חסומים בלבד' : 'ערוץ מלא'} | ${item.expectedVideos ? item.expectedVideos.toLocaleString('he-IL') + ' סרטונים' : 'מחשב נתונים...'} | ${index === 0 ? 'סורק/מושהה' : 'ממתין'}</span></div><div class="flex gap-1"><button onclick="toggleChannelPause(${index})" class="bg-zinc-800 text-zinc-400 px-2 py-1 rounded text-[10px]">${item.status === 'paused' ? 'המשך' : 'השהה'}</button><button onclick="cancelChannelInQueue(${index})" class="bg-rose-950 text-rose-400 px-2 py-1 rounded text-[10px]">בטל</button></div>`; 
                 container.appendChild(div); 
             }); 
