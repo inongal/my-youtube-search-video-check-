@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v7.9.5</title>
+    <title>YouTube NetFree Scan Control Hub v7.9.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -28,8 +28,8 @@
         <div class="flex items-center gap-3">
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.9.5 טורבו</h1>
-                <p class="text-xs text-zinc-400">מערכת יישוב הבדלי סטטוס מובנית, סורק סרטונים חדשים גלובלי, ומנגנון ניקוי לוח אטומי</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.9.6 טורבו</h1>
+                <p class="text-xs text-zinc-400">מערכת יישוב הבדלי סטטוס מובנית, סורק סרטונים חדשים גלובלי, וחילוץ שמות ערוצים אוטומטי</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -257,7 +257,7 @@
                 <h2 class="text-xl font-bold flex items-center gap-2 text-amber-400"><i class="fas fa-code-compare"></i> מרכז יישוב הבדלי סטטוס ושינויים מנטפרי</h2>
                 <button onclick="closeReconciliationModal()" class="text-zinc-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
-            <p class="text-xs text-zinc-400 mb-4">הסרטונים הבאיםמצאו בסטטוס שונה מהרשום במערכת שלך בעקבות הסריקות החדשות. בחר את הסטטוס הנכון או אשר את כולם בבת אחת:</p>
+            <p class="text-xs text-zinc-400 mb-4">הסרטונים הבאים נמצאו בסטטוס שונה מהרשום במערכת שלך בעקבות הסריקות החדשות. בחר את הסטטוס הנכון או אשר את כולם בבת אחת:</p>
             <div class="flex-1 overflow-y-auto custom-scrollbar mb-4 space-y-2 bg-zinc-950 p-3 rounded-xl border border-zinc-800" id="reconciliationRowsContainer"></div>
             <div class="flex gap-3">
                 <button onclick="applyAllSuggestedConflicts()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-sm transition shadow-md">
@@ -405,6 +405,18 @@
             return { type: 'search', value: input }; 
         }
 
+        // 🌟 פונקציית חילוץ פרטים מלאה עבור מזהי ערוצים ישירים - UC
+        async function fetchChannelDetails(channelId) {
+            const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${key}`);
+            if (data && data.items && data.items.length > 0) {
+                return {
+                    title: data.items[0].snippet.title,
+                    videoCount: parseInt(data.items[0].statistics.videoCount || 0, 10)
+                };
+            }
+            return { title: `ערוץ (${channelId})`, videoCount: 0 };
+        }
+
         async function processBulkChannelsInsertion() {
             const text = document.getElementById('bulkChannelsTextArea').value.trim();
             if (!text) return alert("אנא הדבק רשימת קישורים בתיבה תחילה.");
@@ -418,8 +430,9 @@
             for (let item of lines) {
                 const parsed = extractChannelIdOrHandle(item);
                 if (parsed.type === 'id') {
-                    let count = await fetchChannelOfficialVideoCount(parsed.value);
-                    pushToQueue(parsed.value, `ערוץ (${parsed.value})`, 'full', count);
+                    // 🛠️ תיקון: במקום להזריק את ה-ID בתור השם, שולפים את השם הרשמי מיוטיוב
+                    let details = await fetchChannelDetails(parsed.value);
+                    pushToQueue(parsed.value, details.title, 'full', details.videoCount);
                 } else if (parsed.type === 'handle') {
                     let resolved = await resolveYoutubeChannelIdFromHandle(parsed.value);
                     if (resolved) {
@@ -727,7 +740,6 @@
                         const oldRow = document.getElementById(`live-item-${id}`);
                         if(oldRow) oldRow.remove();
 
-                        // 🌟 פתרון באג המונים המנפחים: ניקוי ה-ID מכל המערכים הזמניים לפני השמה חדשה
                         currentLiveOpenIds = currentLiveOpenIds.filter(x => x !== id);
                         currentLiveBlockedIds = currentLiveBlockedIds.filter(x => x !== id);
                         currentLiveUntestedIds = currentLiveUntestedIds.filter(x => x !== id);
@@ -744,7 +756,6 @@
                         }
                     });
 
-                    // עדכון מאובטח של מוני הממשק ללא כפילויות ספירה
                     document.getElementById('liveOpenCount').innerText = currentLiveOpenIds.length;
                     document.getElementById('liveBlockedCount').innerText = currentLiveBlockedIds.length;
                     document.getElementById('liveUntestedCount').innerText = currentLiveUntestedIds.length;
@@ -782,7 +793,6 @@
 
         function createLiveTestingRow(vId, elementId) { const list = document.getElementById('liveOpenList'); const div = document.createElement('div'); div.id = elementId; div.className = "flex justify-between items-center bg-blue-950/40 px-2 py-0.5 rounded border border-blue-800/60 mb-1 text-blue-400 font-bold animate-pulse"; div.innerHTML = `<span class="flex items-center gap-1"><span class="text-blue-500 text-sm leading-none">●</span><span>${vId}</span></span><span class="text-[8px] font-normal text-zinc-500">טורבו...</span>`; list.insertBefore(div, list.firstChild); }
         
-        // 📺 שדרוג נגן ה-QA הראשי
         function playVideoInMainQa(videoId) {
             const placeholder = document.getElementById('mainQaPlayerPlaceholder');
             if (placeholder) placeholder.style.display = 'none';
@@ -801,7 +811,6 @@
             });
         }
 
-        // 📺 שדרוג נגן ה-QA של חלון העריכה הידנית (פתרון חסימת הניגון)
         function playVideoInModalQa(videoId) {
             activeModalPlayingVideoId = videoId;
             renderModalVideoLists();
@@ -1136,127 +1145,13 @@
             } 
         }
 
-        function renderScannedDatabaseGrid() {
-            const grid = document.getElementById('scannedDatabaseGrid'); const searchFilter = document.getElementById('localDbSearchInput').value.trim().toLowerCase();
-            const sortMode = document.getElementById('localDbSortSelect').value;
-            let keys = Object.keys(db).filter(k => k !== "_standalone_videos"); if (searchFilter) keys = keys.filter(cid => db[cid].title && db[cid].title.toLowerCase().includes(searchFilter));
-            
-            if (sortMode === "timestamp") keys.sort((a, b) => (db[b].updatedTimestamp || 0) - (db[a].updatedTimestamp || 0));
-            else if (sortMode === "scans") keys.sort((a, b) => (db[a].scanCount || 1) - (db[b].scanCount || 1));
-            else if (sortMode === "alphabetical") keys.sort((a, b) => (db[a].title || "").localeCompare(db[b].title || ""));
-
-            if(keys.length === 0) { grid.innerHTML = '<div class="col-span-full text-center py-6 text-zinc-600 text-xs">אין תוצאות.</div>'; return; }
-            grid.innerHTML = '';
-            
-            keys.forEach(cid => {
-                const item = db[cid]; const div = document.createElement('div'); div.className = "bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex flex-col justify-between shadow-md hover:border-zinc-700 transition w-full";
-                let blockedCount = item.blockedVideos ? item.blockedVideos.length : 0; 
-                let untestedCount = item.untestedVideos ? item.untestedVideos.length : 0;
-                const isWhitelisted = item.isNetfreeWhitelisted || false;
-                let scansCount = item.scanCount || 1; let encodedTitle = btoa(unescape(encodeURIComponent(item.title)));
-                
-                div.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start gap-2 mb-1.5"><h4 class="font-bold text-sm text-white truncate max-w-[70%] flex items-center gap-1.5"><a href="https://www.youtube.com/channel/${cid}" target="_blank" class="text-zinc-500 hover:text-blue-400 transition"><i class="fas fa-link text-xs"></i></a><span class="truncate">${item.title}</span></h4><span class="text-[9px] bg-zinc-950 text-zinc-400 font-mono px-1.5 py-0.5 rounded border border-zinc-800">${item.scannedAt || 'לא ידוע'}</span></div>
-                        <div class="mt-1 mb-2"><span class="text-[10px] text-zinc-500 font-bold block"><i class="fas fa-rotate ml-1 text-zinc-600"></i>סך הכל סריקות: <span class="text-blue-400 font-mono font-bold">${scansCount.toLocaleString('he-IL')}</span></span></div>
-                        <div class="mt-1 mb-2.5"><button onclick="toggleNetfreeWhitelist('${cid}')" class="w-full text-right text-[10px] px-2.5 py-1.5 rounded-xl border flex items-center justify-between transition ${isWhitelisted ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800' : 'bg-zinc-950 text-zinc-500 border-zinc-800 hover:text-zinc-400'}"><span><i class="fas fa-shield-halved ml-1"></i> ערוץ מאושר גורף בנטפרי</span><span class="font-bold text-[9px] bg-zinc-900/50 px-2 py-0.5 rounded-md">${isWhitelisted ? 'פעיל' : 'כבוי'}</span></button></div>
-                        <div class="grid grid-cols-4 gap-1 text-center my-2 text-[10px] font-bold">
-                            <div class="bg-zinc-950 p-1 rounded-xl text-zinc-400 border border-zinc-800/40">${item.totalVideos.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">כללי</span></div>
-                            <div class="bg-emerald-950/20 p-1 rounded-xl text-emerald-400 border border-emerald-900/10">${item.openVideos ? item.openVideos.length.toLocaleString('he-IL') : 0} <span class="block text-[8px] font-normal text-zinc-500">פתוחים</span></div>
-                            <div class="bg-amber-950/20 p-1 rounded-xl text-amber-500 border border-amber-900/10">${untestedCount.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">לא נשלח</span></div>
-                            <div class="bg-rose-950/20 p-1 rounded-xl text-rose-400 border border-rose-900/10">${blockedCount.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">חסומים</span></div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-2 border-t border-zinc-800/60 pt-3 mt-3 text-[11px]">
-                        <div class="flex justify-between items-center w-full">
-                            <div class="flex gap-2"><button onclick="openEditModal('${cid}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1"><i class="fas fa-edit text-xs"></i> עריכה</button><button onclick="triggerQueueFromGrid('${cid}', '${encodedTitle}', 'full')" class="text-white hover:text-zinc-200 font-bold flex items-center gap-1"><i class="fas fa-sync text-xs"></i> סרוק מחדש</button></div>
-                            <button onclick="deleteChannel('${cid}')" class="text-rose-600 hover:text-rose-500"><i class="fas fa-trash"></i> הסר</button>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 mt-1">
-                            <button onclick="triggerQueueFromGrid('${cid}', '${encodedTitle}', 'untested_only')" class="bg-amber-600/10 hover:bg-amber-600/20 text-amber-500 text-[10px] font-bold py-1.5 border border-amber-900/40 rounded-xl transition" ${(untestedCount === 0 || isWhitelisted) ? 'disabled style="opacity:0.25; cursor:not-allowed;"' : ''}><i class="fas fa-question-circle ml-1"></i> סרוק לא נבדקו (${untestedCount})</button>
-                            <button onclick="triggerQueueFromGrid('${cid}', '${encodedTitle}', 'blocked_only')" class="bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 text-[10px] font-bold py-1.5 border border-rose-900/40 rounded-xl transition" ${(blockedCount === 0 || isWhitelisted) ? 'disabled style="opacity:0.25; cursor:not-allowed;"' : ''}><i class="fas fa-bolt ml-1"></i> סרוק חסומים (${blockedCount})</button>
-                        </div>
-                    </div>`;
-                grid.appendChild(div);
-            });
+        function toggleNetfreeWhitelist(channelId) {
+            if(!db[channelId]) return;
+            db[channelId].isNetfreeWhitelisted = !db[channelId].isNetfreeWhitelisted;
+            db[channelId].updatedTimestamp = Date.now();
+            saveDatabaseAndTriggerSync();
         }
 
-        function renderStandaloneVideos() { 
-            const container = document.getElementById('standaloneVideosContainer'); if(!container) return; 
-            const total = db._standalone_videos.open.length + db._standalone_videos.blocked.length + (db._standalone_videos.untested ? db._standalone_videos.untested.length : 0); 
-            document.getElementById('standaloneCountLabel').innerText = total.toLocaleString('he-IL'); 
-            if(total === 0) { container.innerHTML = '<p class="text-xs text-zinc-600 p-2 w-full text-center">אין סרטונים בודדים</p>'; return; } 
-            container.innerHTML = ''; 
-            db._standalone_videos.open.forEach(id => container.appendChild(createStandaloneBadge(id, 'emerald'))); 
-            if(db._standalone_videos.untested) db._standalone_videos.untested.forEach(id => container.appendChild(createStandaloneBadge(id, 'amber'))); 
-            db._standalone_videos.blocked.forEach(id => container.appendChild(createStandaloneBadge(id, 'rose'))); 
-        }
-        
-        function createStandaloneBadge(id, color) { const span = document.createElement('div'); span.className = `bg-${color}-950/40 text-${color}-400 text-[11px] font-mono px-2 py-1 rounded-lg border border-${color}-900/50 flex items-center gap-1.5`; span.innerHTML = `<span>${id}</span><button onclick="playVideoInMainQa('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-play text-[8px]"></i></button><button onclick="deleteStandaloneVideo('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-times text-[9px]"></i></button>`; return span; }
-        function deleteStandaloneVideo(id) { db._standalone_videos.open = db._standalone_videos.open.filter(v => v !== id); db._standalone_videos.blocked = db._standalone_videos.blocked.filter(v => v !== id); if(db._standalone_videos.untested) db._standalone_videos.untested = db._standalone_videos.untested.filter(v => v !== id); saveDatabaseAndTriggerSync(); renderStandaloneVideos(); }
-
-        function openEditModal(channelId) { activeEditingChannelId = channelId; const data = db[channelId]; if(!data) return; document.getElementById('editModalTitle').innerText = `עריכת סרטונים: ${data.title}`; activeModalPlayingVideoId = null; renderModalVideoLists(); document.getElementById('editChannelModal').style.display = 'flex'; }
-        function closeEditModal() { document.getElementById('editChannelModal').style.display = 'none'; if(modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); } catch(e){} } activeEditingChannelId = null; activeModalPlayingVideoId = null; }
-        
-        function renderModalVideoLists() { 
-            const data = db[activeEditingChannelId]; if(!data) return; 
-            const openCont = document.getElementById('modalOpenList'); 
-            const blockCont = document.getElementById('modalBlockedList');
-            const untestedCont = document.getElementById('modalUntestedList');
-
-            openCont.innerHTML = ''; blockCont.innerHTML = ''; untestedCont.innerHTML = ''; 
-            document.getElementById('modalOpenCount').innerText = data.openVideos?.length || 0; 
-            document.getElementById('modalBlockedCount').innerText = data.blockedVideos?.length || 0;
-            document.getElementById('modalUntestedCount').innerText = data.untestedVideos?.length || 0;
-
-            data.openVideos?.forEach(id => openCont.appendChild(createModalVideoRow(id, 'open'))); 
-            data.untestedVideos?.forEach(id => untestedCont.appendChild(createModalVideoRow(id, 'untested')));
-            data.blockedVideos?.forEach(id => blockCont.appendChild(createModalVideoRow(id, 'blocked'))); 
-        }
-        
-        function createModalVideoRow(id, type) { 
-            const isPlayingNow = (activeModalPlayingVideoId === id); const div = document.createElement('div'); 
-            if(isPlayingNow) { div.className = "bg-blue-600/30 p-2 border-2 border-blue-500 rounded-lg flex justify-between items-center mb-1 text-blue-200 font-bold ring-1 ring-blue-400 animate-pulse"; } 
-            else { div.className = "bg-zinc-950 p-1.5 rounded border border-zinc-800 mb-1 hover:border-zinc-700 transition text-zinc-300"; } 
-            div.innerHTML = `<span class="truncate pl-2 max-w-[50%] flex items-center gap-1">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce"></i> ' : ''}<span>${id}</span></span><div class="flex gap-2"><button onclick="playVideoInModalQa('${id}')" class="text-blue-400 hover:underline text-[11px] font-bold">📺 נגן</button><button onclick="toggleVideoStatusManual('${id}', '${type}')" class="text-amber-500 text-[11px] font-bold">🔄 שנה</button></div>`; return div; 
-        }
-        
-        function toggleVideoStatusManual(vId, currentType) {
-            const data = db[activeEditingChannelId]; if(!data) return;
-            if (currentType === 'open') data.openVideos = data.openVideos.filter(id => id !== vId);
-            else if (currentType === 'blocked') data.blockedVideos = data.blockedVideos.filter(id => id !== vId);
-            else data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
-
-            if (currentType === 'open') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
-            else if (currentType === 'untested') { if(!data.blockedVideos) data.blockedVideos = []; data.blockedVideos.push(vId); }
-            else { if(!data.openVideos) data.openVideos = []; data.openVideos.push(vId); }
-
-            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
-        }
-
-        function addVideoManually(targetType) {
-            const vId = document.getElementById('manualVideoIdInput').value.trim();
-            if(!vId || vId.length < 5) return alert("הזן מזהה וידאו תקין.");
-            const data = db[activeEditingChannelId]; if(!data) return;
-
-            document.getElementById('manualVideoIdInput').value = '';
-            data.openVideos = (data.openVideos || []).filter(id => id !== vId);
-            data.blockedVideos = (data.blockedVideos || []).filter(id => id !== vId);
-            data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
-
-            if(targetType === 'open') data.openVideos.push(vId);
-            else if(targetType === 'untested') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
-            else data.blockedVideos.push(vId);
-
-            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
-        }
-
-        function exportCleanJSON() { let cleanDb = {}; Object.keys(db).forEach(key => { if(key === "_standalone_videos") { cleanDb["_standalone_videos"] = db[key].open; } else { cleanDb[key] = { title: db[key].title, openVideos: db[key].openVideos }; } }); triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanDb, null, 2)), "netfree_approved_channels_clean.json"); }
-        function exportFullBackup() { triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)), "system_full_backup.json"); }
-        function triggerDownload(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
-        function toggleConfigModal() { const m = document.getElementById('configModal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; if(m.style.display === 'flex') document.getElementById('apiKeysTextArea').value = apiKeys.join('\n'); }
-        function saveApiKeys() { apiKeys = document.getElementById('apiKeysTextArea').value.split('\n').map(l => l.trim()).filter(l => l.length > 0); localStorage.setItem('yt_api_keys_v2', JSON.stringify(apiKeys)); currentKeyIndex = 0; document.getElementById('keyCountLabel').innerText = apiKeys.length; toggleConfigModal(); }
-        
         function updateGlobalStatus() { 
             const b = document.getElementById('globalStatusBadge'); 
             if (globalPause) { b.className = "text-xs font-bold px-2 py-1 bg-amber-950 border border-amber-800 text-amber-400 rounded-lg"; b.innerText = "השהיה כללית"; } 
