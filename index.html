@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v7.9.6</title>
+    <title>YouTube NetFree Scan Control Hub v7.9.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -28,8 +28,8 @@
         <div class="flex items-center gap-3">
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.9.6 טורבו</h1>
-                <p class="text-xs text-zinc-400">מערכת יישוב הבדלי סטטוס מובנית, סורק סרטונים חדשים גלובלי, וחילוץ שמות ערוצים אוטומטי</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.9.8 טורבו</h1>
+                <p class="text-xs text-zinc-400">מערכת יישוב הבדלי סטטוס מובנית, סורק סרטונים חדשים גלובלי, ומנגנון קידוד חסין קריסות</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -405,7 +405,6 @@
             return { type: 'search', value: input }; 
         }
 
-        // 🌟 פונקציית חילוץ פרטים מלאה עבור מזהי ערוצים ישירים - UC
         async function fetchChannelDetails(channelId) {
             const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${key}`);
             if (data && data.items && data.items.length > 0) {
@@ -430,7 +429,6 @@
             for (let item of lines) {
                 const parsed = extractChannelIdOrHandle(item);
                 if (parsed.type === 'id') {
-                    // 🛠️ תיקון: במקום להזריק את ה-ID בתור השם, שולפים את השם הרשמי מיוטיוב
                     let details = await fetchChannelDetails(parsed.value);
                     pushToQueue(parsed.value, details.title, 'full', details.videoCount);
                 } else if (parsed.type === 'handle') {
@@ -746,22 +744,20 @@
 
                         if (status === 'open') {
                             currentLiveOpenIds.push(id);
+                            document.getElementById('liveOpenCount').innerText = currentLiveOpenIds.length;
                             appendLiveList('liveOpenList', id, 'emerald');
                         } else if (status === 'untested') {
                             currentLiveUntestedIds.push(id);
+                            document.getElementById('liveUntestedCount').innerText = currentLiveUntestedIds.length;
                             appendLiveList('liveUntestedList', id, 'amber');
                         } else {
                             currentLiveBlockedIds.push(id);
+                            document.getElementById('liveBlockedCount').innerText = currentLiveBlockedIds.length;
                             appendLiveList('liveBlockedList', id, 'rose');
                         }
                     });
-
-                    document.getElementById('liveOpenCount').innerText = currentLiveOpenIds.length;
-                    document.getElementById('liveBlockedCount').innerText = currentLiveBlockedIds.length;
-                    document.getElementById('liveUntestedCount').innerText = currentLiveUntestedIds.length;
-
                 } catch (e) {
-                    console.error("שגיאת מענה של השרת המקומי:", e);
+                    console.error("שגיאת תקשורת מול השרת המקומי:", e);
                     currentBatch.forEach(id => {
                         scanMapping[id] = 'blocked';
                         const oldRow = document.getElementById(`live-item-${id}`);
@@ -1106,7 +1102,9 @@
             
             data.items.forEach(item => {
                 const snip = item.snippet; const cid = (parsed.type === 'id' || parsed.type === 'handle') ? item.id : (item.id?.channelId || item.snippet?.channelId); if(!cid) return;
-                const isAlreadyScanned = db[cid] ? true : false; let encodedTitle = btoa(unescape(encodeURIComponent(snip.title)));
+                const isAlreadyScanned = db[cid] ? true : false; 
+                // 🌟 שינוי: מעבר לקידוד URL חסין קריסות במקום btoa
+                let encodedTitle = encodeURIComponent(snip.title || '');
                 
                 const div = document.createElement('div'); div.className = "bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 shadow-md";
                 div.innerHTML = `
@@ -1120,15 +1118,17 @@
             });
         }
 
+        // 🌟 פענוח חסין ומהיר
         function triggerQueueFromSearch(cid, encodedTitle) {
-            let decodedTitle = decodeURIComponent(escape(atob(encodedTitle)));
+            let decodedTitle = decodeURIComponent(encodedTitle);
             fetchChannelOfficialVideoCount(cid).then(count => {
                 pushToQueue(cid, decodedTitle, 'full', count);
             });
         }
 
+        // 🌟 פענוח חסין ומהיר
         function triggerQueueFromGrid(cid, encodedTitle, mode) {
-            let decodedTitle = decodeURIComponent(escape(atob(encodedTitle)));
+            let decodedTitle = decodeURIComponent(encodedTitle);
             let existingItem = db[cid];
             let count = 0;
             if(existingItem) {
@@ -1145,6 +1145,215 @@
             } 
         }
 
+        // 🌟 ציור רשת הערוצים המלא עם הגנות מפני תווים מיוחדים ואימוג'ים בשמות ערוצים
+        function renderScannedDatabaseGrid() {
+            const grid = document.getElementById('scannedDatabaseGrid'); const searchFilter = document.getElementById('localDbSearchInput').value.trim().toLowerCase();
+            const sortMode = document.getElementById('localDbSortSelect').value;
+            let keys = Object.keys(db).filter(k => k !== "_standalone_videos"); if (searchFilter) keys = keys.filter(cid => db[cid].title && db[cid].title.toLowerCase().includes(searchFilter));
+            
+            if (sortMode === "timestamp") keys.sort((a, b) => (db[b].updatedTimestamp || 0) - (db[a].updatedTimestamp || 0));
+            else if (sortMode === "scans") keys.sort((a, b) => (db[a].scanCount || 1) - (db[b].scanCount || 1));
+            else if (sortMode === "alphabetical") keys.sort((a, b) => (db[a].title || "").localeCompare(db[b].title || ""));
+
+            if(keys.length === 0) { grid.innerHTML = '<div class="col-span-full text-center py-6 text-zinc-600 text-xs">אין תוצאות.</div>'; return; }
+            grid.innerHTML = '';
+            
+            keys.forEach(cid => {
+                const item = db[cid]; const div = document.createElement('div'); div.className = "bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex flex-col justify-between shadow-md hover:border-zinc-700 transition w-full";
+                let blockedCount = item.blockedVideos ? item.blockedVideos.length : 0; 
+                let untestedCount = item.untestedVideos ? item.untestedVideos.length : 0;
+                const isWhitelisted = item.isNetfreeWhitelisted || false;
+                let scansCount = item.scanCount || 1; 
+                
+                // 🛠️ מונע את קריסת ה-btoa: שימוש בקידוד URL חסין תקלות
+                let encodedTitle = encodeURIComponent(item.title || '');
+                
+                div.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-1.5"><h4 class="font-bold text-sm text-white truncate max-w-[70%] flex items-center gap-1.5"><a href="https://www.youtube.com/channel/${cid}" target="_blank" class="text-zinc-500 hover:text-blue-400 transition"><i class="fas fa-link text-xs"></i></a><span class="truncate">${item.title || 'ללא שם'}</span></h4><span class="text-[9px] bg-zinc-950 text-zinc-400 font-mono px-1.5 py-0.5 rounded border border-zinc-800">${item.scannedAt || 'לא ידוע'}</span></div>
+                        <div class="mt-1 mb-2"><span class="text-[10px] text-zinc-500 font-bold block"><i class="fas fa-rotate ml-1 text-zinc-600"></i>סך הכל סריקות: <span class="text-blue-400 font-mono font-bold">${scansCount.toLocaleString('he-IL')}</span></span></div>
+                        <div class="mt-1 mb-2.5"><button onclick="toggleNetfreeWhitelist('${cid}')" class="w-full text-right text-[10px] px-2.5 py-1.5 rounded-xl border flex items-center justify-between transition ${isWhitelisted ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800' : 'bg-zinc-950 text-zinc-500 border-zinc-800 hover:text-zinc-400'}"><span><i class="fas fa-shield-halved ml-1"></i> ערוץ מאושר גורף בנטפרי</span><span class="font-bold text-[9px] bg-zinc-900/50 px-2 py-0.5 rounded-md">${isWhitelisted ? 'פעיל' : 'כבוי'}</span></button></div>
+                        <div class="grid grid-cols-4 gap-1 text-center my-2 text-[10px] font-bold">
+                            <div class="bg-zinc-950 p-1 rounded-xl text-zinc-400 border border-zinc-800/40">${(item.totalVideos || 0).toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">כללי</span></div>
+                            <div class="bg-emerald-950/20 p-1 rounded-xl text-emerald-400 border border-emerald-900/10">${(item.openVideos ? item.openVideos.length : 0).toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">פתוחים</span></div>
+                            <div class="bg-amber-950/20 p-1 rounded-xl text-amber-500 border border-amber-900/10">${untestedCount.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">לא נשלח</span></div>
+                            <div class="bg-rose-950/20 p-1 rounded-xl text-rose-400 border border-rose-900/10">${blockedCount.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">חסומים</span></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 border-t border-zinc-800/60 pt-3 mt-3 text-[11px]">
+                        <div class="flex justify-between items-center w-full">
+                            <div class="flex gap-2"><button onclick="openEditModal('${cid}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1"><i class="fas fa-edit text-xs"></i> עריכה</button><button onclick="triggerQueueFromGrid('${cid}', '${encodedTitle}', 'full')" class="text-white hover:text-zinc-200 font-bold flex items-center gap-1"><i class="fas fa-sync text-xs"></i> סרוק מחדש</button></div>
+                            <button onclick="deleteChannel('${cid}')" class="text-rose-600 hover:text-rose-500"><i class="fas fa-trash"></i> הסר</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <button onclick="triggerQueueFromGrid('${cid}', '${encodedTitle}', 'untested_only')" class="bg-amber-600/10 hover:bg-amber-600/20 text-amber-500 text-[10px] font-bold py-1.5 border border-amber-900/40 rounded-xl transition" ${(untestedCount === 0 || isWhitelisted) ? 'disabled style="opacity:0.25; cursor:not-allowed;"' : ''}><i class="fas fa-question-circle ml-1"></i> סרוק לא נבדקו (${untestedCount})</button>
+                            <button onclick="triggerQueueFromGrid('${cid}', '${encodedTitle}', 'blocked_only')" class="bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 text-[10px] font-bold py-1.5 border border-rose-900/40 rounded-xl transition" ${(blockedCount === 0 || isWhitelisted) ? 'disabled style="opacity:0.25; cursor:not-allowed;"' : ''}><i class="fas fa-bolt ml-1"></i> סרוק חסומים (${blockedCount})</button>
+                        </div>
+                    </div>`;
+                grid.appendChild(div);
+            });
+        }
+
+        function renderStandaloneVideos() { 
+            const container = document.getElementById('standaloneVideosContainer'); if(!container) return; 
+            const total = db._standalone_videos.open.length + db._standalone_videos.blocked.length + (db._standalone_videos.untested ? db._standalone_videos.untested.length : 0); 
+            document.getElementById('standaloneCountLabel').innerText = total.toLocaleString('he-IL'); 
+            if(total === 0) { container.innerHTML = '<p class="text-xs text-zinc-600 p-2 w-full text-center">אין סרטונים בודדים</p>'; return; } 
+            container.innerHTML = ''; 
+            db._standalone_videos.open.forEach(id => container.appendChild(createStandaloneBadge(id, 'emerald'))); 
+            if(db._standalone_videos.untested) db._standalone_videos.untested.forEach(id => container.appendChild(createStandaloneBadge(id, 'amber'))); 
+            db._standalone_videos.blocked.forEach(id => container.appendChild(createStandaloneBadge(id, 'rose'))); 
+        }
+        
+        function createStandaloneBadge(id, color) { const span = document.createElement('div'); span.className = `bg-${color}-950/40 text-${color}-400 text-[11px] font-mono px-2 py-1 rounded-lg border border-${color}-900/50 flex items-center gap-1.5`; span.innerHTML = `<span>${id}</span><button onclick="playVideoInMainQa('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-play text-[8px]"></i></button><button onclick="deleteStandaloneVideo('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-times text-[9px]"></i></button>`; return span; }
+        function deleteStandaloneVideo(id) { db._standalone_videos.open = db._standalone_videos.open.filter(v => v !== id); db._standalone_videos.blocked = db._standalone_videos.blocked.filter(v => v !== id); if(db._standalone_videos.untested) db._standalone_videos.untested = db._standalone_videos.untested.filter(v => v !== id); saveDatabaseAndTriggerSync(); renderStandaloneVideos(); }
+
+        function openEditModal(channelId) { activeEditingChannelId = channelId; const data = db[channelId]; if(!data) return; document.getElementById('editModalTitle').innerText = `עריכת סרטונים: ${data.title}`; activeModalPlayingVideoId = null; renderModalVideoLists(); document.getElementById('editChannelModal').style.display = 'flex'; }
+        function closeEditModal() { document.getElementById('editChannelModal').style.display = 'none'; if(modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); } catch(e){} } activeEditingChannelId = null; activeModalPlayingVideoId = null; }
+        
+        function renderModalVideoLists() { 
+            const data = db[activeEditingChannelId]; if(!data) return; 
+            const openCont = document.getElementById('modalOpenList'); 
+            const blockCont = document.getElementById('modalBlockedList');
+            const untestedCont = document.getElementById('modalUntestedList');
+
+            openCont.innerHTML = ''; blockCont.innerHTML = ''; untestedCont.innerHTML = ''; 
+            document.getElementById('modalOpenCount').innerText = data.openVideos?.length || 0; 
+            document.getElementById('modalBlockedCount').innerText = data.blockedVideos?.length || 0;
+            document.getElementById('modalUntestedCount').innerText = data.untestedVideos?.length || 0;
+
+            data.openVideos?.forEach(id => openCont.appendChild(createModalVideoRow(id, 'open'))); 
+            data.untestedVideos?.forEach(id => untestedCont.appendChild(createModalVideoRow(id, 'untested')));
+            data.blockedVideos?.forEach(id => blockCont.appendChild(createModalVideoRow(id, 'blocked'))); 
+        }
+        
+        function createModalVideoRow(id, type) { 
+            const isPlayingNow = (activeModalPlayingVideoId === id); const div = document.createElement('div'); 
+            if(isPlayingNow) { div.className = "bg-blue-600/30 p-2 border-2 border-blue-500 rounded-lg flex justify-between items-center mb-1 text-blue-200 font-bold ring-1 ring-blue-400 animate-pulse"; } 
+            else { div.className = "bg-zinc-950 p-1.5 rounded border border-zinc-800 mb-1 hover:border-zinc-700 transition text-zinc-300"; } 
+            div.innerHTML = `<span class="truncate pl-2 max-w-[50%] flex items-center gap-1">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce"></i> ' : ''}<span>${id}</span></span><div class="flex gap-2"><button onclick="playVideoInModalQa('${id}')" class="text-blue-400 hover:underline text-[11px] font-bold">📺 נגן</button><button onclick="toggleVideoStatusManual('${id}', '${type}')" class="text-amber-500 text-[11px] font-bold">🔄 שנה</button></div>`; return div; 
+        }
+        
+        function toggleVideoStatusManual(vId, currentType) {
+            const data = db[activeEditingChannelId]; if(!data) return;
+            if (currentType === 'open') data.openVideos = data.openVideos.filter(id => id !== vId);
+            else if (currentType === 'blocked') data.blockedVideos = data.blockedVideos.filter(id => id !== vId);
+            else data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
+
+            if (currentType === 'open') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
+            else if (currentType === 'untested') { if(!data.blockedVideos) data.blockedVideos = []; data.blockedVideos.push(vId); }
+            else { if(!data.openVideos) data.openVideos = []; data.openVideos.push(vId); }
+
+            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
+        }
+
+        function addVideoManually(targetType) {
+            const vId = document.getElementById('manualVideoIdInput').value.trim();
+            if(!vId || vId.length < 5) return alert("הזן מזהה וידאו תקין.");
+            const data = db[activeEditingChannelId]; if(!data) return;
+
+            document.getElementById('manualVideoIdInput').value = '';
+            data.openVideos = (data.openVideos || []).filter(id => id !== vId);
+            data.blockedVideos = (data.blockedVideos || []).filter(id => id !== vId);
+            data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
+
+            if(targetType === 'open') data.openVideos.push(vId);
+            else if(targetType === 'untested') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
+            else data.blockedVideos.push(vId);
+
+            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
+        }
+
+        function exportCleanJSON() { let cleanDb = {}; Object.keys(db).forEach(key => { if(key === "_standalone_videos") { cleanDb["_standalone_videos"] = db[key].open; } else { cleanDb[key] = { title: db[key].title, openVideos: db[key].openVideos }; } }); triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanDb, null, 2)), "netfree_approved_channels_clean.json"); }
+        function exportFullBackup() { triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)), "system_full_backup.json"); }
+        function triggerDownload(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
+        function toggleConfigModal() { const m = document.getElementById('configModal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; if(m.style.display === 'flex') document.getElementById('apiKeysTextArea').value = apiKeys.join('\n'); }
+        function saveApiKeys() { apiKeys = document.getElementById('apiKeysTextArea').value.split('\n').map(l => l.trim()).filter(l => l.length > 0); localStorage.setItem('yt_api_keys_v2', JSON.stringify(apiKeys)); currentKeyIndex = 0; document.getElementById('keyCountLabel').innerText = apiKeys.length; toggleConfigModal(); }
+        
+        function openReconciliationModal() {
+            renderReconciliationRows();
+            document.getElementById('reconciliationModal').style.display = 'flex';
+        }
+        function closeReconciliationModal() { document.getElementById('reconciliationModal').style.display = 'none'; }
+
+        function renderReconciliationRows() {
+            const container = document.getElementById('reconciliationRowsContainer');
+            document.getElementById('globalConflictCountLabel').innerText = pendingConflicts.length;
+            
+            if(pendingConflicts.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-zinc-600 text-xs font-bold">אין הבדלי סטטוס ממתינים ליישוב. הכל מסונכרן!</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            pendingConflicts.forEach((conflict, index) => {
+                const row = document.createElement('div');
+                row.className = "flex flex-col sm:flex-row justify-between items-center bg-zinc-900 border border-zinc-800 p-3 rounded-xl gap-3 text-xs";
+                
+                let oldBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${conflict.oldStatus==='open'?'bg-emerald-950 text-emerald-400':conflict.oldStatus==='untested'?'bg-amber-950 text-amber-400':'bg-rose-950 text-rose-400'}">רשום: ${conflict.oldStatus}</span>`;
+                let newBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${conflict.newStatus==='open'?'bg-emerald-600 text-white':conflict.newStatus==='untested'?'bg-amber-500 text-black':'bg-rose-600 text-white'}">נטפרי: ${conflict.newStatus}</span>`;
+
+                row.innerHTML = `
+                    <div class="truncate flex-1 text-right">
+                        <span class="font-bold text-zinc-300 block truncate">${conflict.channelTitle}</span>
+                        <span class="font-mono text-zinc-500 block mt-0.5">${conflict.id}</span>
+                    </div>
+                    <div class="flex gap-2 flex-shrink-0 items-center">
+                        ${oldBadge} <i class="fas fa-arrow-left text-zinc-600 text-[10px]"></i> ${newBadge}
+                    </div>
+                    <div class="flex gap-1 flex-shrink-0">
+                        <button onclick="resolveSingleConflict(${index}, 'open')" class="bg-zinc-800 hover:bg-emerald-900 px-2 py-1 rounded font-bold text-[10px] text-emerald-400">פתוח</button>
+                        <button onclick="resolveSingleConflict(${index}, 'untested')" class="bg-zinc-800 hover:bg-amber-900 px-2 py-1 rounded font-bold text-[10px] text-amber-500">לא נשלח</button>
+                        <button onclick="resolveSingleConflict(${index}, 'blocked')" class="bg-zinc-800 hover:bg-rose-900 px-2 py-1 rounded font-bold text-[10px] text-rose-400">חסום</button>
+                    </div>`;
+                container.appendChild(row);
+            });
+        }
+
+        function resolveSingleConflict(index, chosenStatus) {
+            const conflict = pendingConflicts[index];
+            if(!conflict || !db[conflict.channelId]) return;
+
+            const channel = db[conflict.channelId];
+            channel.openVideos = (channel.openVideos || []).filter(id => id !== conflict.id);
+            channel.blockedVideos = (channel.blockedVideos || []).filter(id => id !== conflict.id);
+            channel.untestedVideos = (channel.untestedVideos || []).filter(id => id !== conflict.id);
+
+            if(chosenStatus === 'open') channel.openVideos.push(conflict.id);
+            else if(chosenStatus === 'untested') channel.untestedVideos.push(conflict.id);
+            else channel.blockedVideos.push(conflict.id);
+
+            channel.updatedTimestamp = Date.now();
+            pendingConflicts.splice(index, 1);
+            saveDatabaseAndTriggerSync();
+            renderReconciliationRows();
+        }
+
+        function applyAllSuggestedConflicts() {
+            if(pendingConflicts.length === 0) return;
+            if(!confirm(`האם להחיל אוטומטית את כל ${pendingConflicts.length} השינויים שהתגלו מנטפרי במאגר?`)) return;
+
+            pendingConflicts.forEach(conflict => {
+                const channel = db[conflict.channelId];
+                if(channel) {
+                    channel.openVideos = (channel.openVideos || []).filter(id => id !== conflict.id);
+                    channel.blockedVideos = (channel.blockedVideos || []).filter(id => id !== conflict.id);
+                    channel.untestedVideos = (channel.untestedVideos || []).filter(id => id !== conflict.id);
+
+                    if(conflict.newStatus === 'open') channel.openVideos.push(conflict.id);
+                    else if(conflict.newStatus === 'untested') channel.untestedVideos.push(conflict.id);
+                    else channel.blockedVideos.push(conflict.id);
+                    
+                    channel.updatedTimestamp = Date.now();
+                }
+            });
+
+            pendingConflicts = [];
+            saveDatabaseAndTriggerSync();
+            closeReconciliationModal();
+            alert("כל שינויי הסטטוס הוחלו בהצלחה במאגר הפרויקט!");
+        }
+
         function toggleNetfreeWhitelist(channelId) {
             if(!db[channelId]) return;
             db[channelId].isNetfreeWhitelisted = !db[channelId].isNetfreeWhitelisted;
@@ -1156,7 +1365,7 @@
             const b = document.getElementById('globalStatusBadge'); 
             if (globalPause) { b.className = "text-xs font-bold px-2 py-1 bg-amber-950 border border-amber-800 text-amber-400 rounded-lg"; b.innerText = "השהיה כללית"; } 
             else if (isProcessing) { b.className = "text-xs font-bold px-2 py-1 bg-blue-950 border border-blue-800 text-blue-400 rounded-lg animate-pulse"; b.innerText = "סורק טורבו פעיל ברשת"; } 
-            else { b.className = "text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-500 rounded-lg"; b.innerText = "מערכת במנוחה"; } 
+            else { b.className = "text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-500 rounded-lg"; b.innerText = "Meyareket BeMenocha"; } 
         }
         
         function renderQueue() { 
