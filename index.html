@@ -23,13 +23,12 @@
 </head>
 <body class="custom-scrollbar p-4 md:p-6 font-sans">
 
-    <!-- סרגל עליון -->
     <header class="max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-800">
         <div class="flex items-center gap-3">
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
                 <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 7.7</h1>
-                <p class="text-xs text-zinc-400">חילוץ כמות סרטונים מוקדמת בתור, מונה סרטונים ממתינים גלובלי, וגיבוי רציפות מלא</p>
+                <p class="text-xs text-zinc-400">חילוץ כמות סרטונים מוקדמת בתור, מונה סרטונים ממתינים גלובלי, וגיבוי מקומי בתיקיית הפרויקט</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -49,7 +48,6 @@
         </div>
     </header>
 
-    <!-- פנל שליטה גוגל דרייב -->
     <section class="max-w-[1600px] mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-md">
         <div class="flex items-center gap-3">
             <div class="p-2 bg-blue-600/10 text-blue-400 rounded-xl border border-blue-900/30">
@@ -73,7 +71,6 @@
         </div>
     </section>
 
-    <!-- שורת סיכום אנליטית מורחבת -->
     <section class="max-w-[1600px] mx-auto mb-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow">
             <span class="text-[11px] text-zinc-500 block">ערוצים רשומים</span>
@@ -91,9 +88,8 @@
             <span class="text-[11px] text-zinc-500 block">אחוז פתיחה כללי</span>
             <span id="globalOpenPercentage" class="text-xl font-bold font-mono text-purple-400">0%</span>
         </div>
-        <!-- שדרוג התיבה החמישית לבקשתך: מציג כעת סרטונים בתור במקום ערוצים -->
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow ring-1 ring-zinc-800">
-            <span class="text-[11px] text-amber-400 font-bold block"><i class="fas fa-video ml-1"></i>סרטונים בהמתנה לבדיקה</span>
+            <span class="text-[11px] text-amber-400 font-bold block"><i class="fas fa-video ml-1"></i>סרטונים בתור</span>
             <span id="statsQueueCount" class="text-xl font-bold font-mono text-amber-400">0</span>
         </div>
         <div onclick="toggleHourlyDailyStatsMode()" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow ring-1 ring-zinc-800 cursor-pointer hover:bg-zinc-900/50 transition select-none">
@@ -105,12 +101,11 @@
             <span id="statsWhitelistedChannelsCount" class="text-xl font-bold font-mono text-teal-400">0</span>
         </div>
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow ring-1 ring-zinc-800">
-            <span class="text-[11px] text-rose-400 font-bold block"><i class="fas fa-calculator ml-1"></i>ממוצע חסומים לערוץ</span>
-            <span id="statsAverageBlockedPerChannel" class="text-xl font-bold font-mono text-rose-400">0%</span>
+            <span class="text-[11px] text-rose-400 font-bold block"><i class="fas fa-calculator ml-1"></i>סרטונים שלא נשלחו</span>
+            <span id="globalTotalUntested" class="text-xl font-bold font-mono text-amber-500">0</span>
         </div>
     </section>
 
-    <!-- פקדים גלובליים -->
     <section class="max-w-[1600px] mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-4 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-900 pb-3">
             <div class="flex items-center gap-3">
@@ -156,7 +151,6 @@
     </section>
 
     <main class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- עמודה ימנית -->
         <div class="lg:col-span-4 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-md">
                 <div class="flex justify-between items-center mb-3">
@@ -195,13 +189,15 @@
                         </div>
                     </div>
 
-                    <div class="bg-zinc-900/40 p-2 rounded-xl border border-zinc-900 flex flex-col h-[180px]">
-                        <div class="flex justify-between text-[11px] font-bold mb-1">
+                    <div class="bg-zinc-900/40 p-2 rounded-xl border border-zinc-900 flex flex-col h-[220px]">
+                        <div class="flex justify-between text-[10px] font-bold mb-1">
                             <span class="text-emerald-400">פתוחים (<span id="liveOpenCount">0</span>)</span>
+                            <span class="text-amber-500">לא נשלחו (<span id="liveUntestedCount">0</span>)</span>
                             <span class="text-rose-400">חסומים (<span id="liveBlockedCount">0</span>)</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 h-full overflow-hidden">
+                        <div class="grid grid-cols-3 gap-1.5 h-full overflow-hidden">
                             <div id="liveOpenList" class="overflow-y-auto custom-scrollbar text-[9px] font-mono space-y-1 bg-zinc-950/40 p-1 rounded-md"></div>
+                            <div id="liveUntestedList" class="overflow-y-auto custom-scrollbar text-[9px] font-mono space-y-1 bg-zinc-950/40 p-1 rounded-md"></div>
                             <div id="liveBlockedList" class="overflow-y-auto custom-scrollbar text-[9px] font-mono space-y-1 bg-zinc-950/40 p-1 rounded-md"></div>
                         </div>
                     </div>
@@ -213,7 +209,6 @@
                 </div>
             </div>
 
-            <!-- פנל סרטונים בודדים -->
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-md">
                 <h2 class="text-base font-bold mb-1 flex items-center gap-2 text-indigo-400"><i class="fas fa-play-circle"></i> ניהול סרטונים בודדים (ללא ערוץ)</h2>
                 <div class="flex gap-2 mt-2">
@@ -225,7 +220,6 @@
             </div>
         </div>
 
-        <!-- עמודה שמאלית -->
         <div class="lg:col-span-8 space-y-6">
             <section class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-md flex flex-col h-full">
                 <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i class="fas fa-search text-blue-400"></i> הוספת ערוץ ישירה או חיפוש חופשי</h2>
@@ -234,7 +228,6 @@
                     <button onclick="searchChannels()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-sm transition whitespace-nowrap"><i class="fas fa-magic ml-1"></i> מעבד / חפש ערוץ</button>
                 </div>
                 
-                <!-- פנל הוספה המונית -->
                 <div class="border-t border-zinc-800/80 pt-4 mt-1">
                     <div class="text-xs font-bold text-zinc-300 flex items-center gap-1.5 mb-2">
                         <i class="fas fa-folder-plus text-amber-500"></i> הוספת רשימת ערוצים המונית (כל ערוץ בשורה)
@@ -245,7 +238,6 @@
                     </button>
                 </div>
 
-                <!-- תיבת פלט שגיאות ואי-הצלחות מובנית במסך -->
                 <div id="bulkErrorFeedbackWrapper" class="mt-4 border-t border-zinc-800/80 pt-4 flex-1 flex flex-col">
                     <div class="text-xs font-bold text-rose-400 flex items-center gap-1.5 mb-1.5">
                         <i class="fas fa-exclamation-triangle"></i> דוח שגיאות ודילוגים (ערוצים שלא נמצאו ביוטיוב)
@@ -258,7 +250,6 @@
         </div>
     </main>
 
-    <!-- אזור הערוצים המקומיים התחתון -->
     <section class="max-w-[1600px] mx-auto mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 pb-3 border-b border-zinc-900">
             <div class="flex items-center gap-4 flex-wrap">
@@ -285,7 +276,6 @@
         <div id="scannedDatabaseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[750px] overflow-y-auto pr-1 custom-scrollbar"></div>
     </section>
 
-    <!-- מודאל ידני ועריכה -->
     <div id="editChannelModal" class="fixed inset-0 z-[400] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-3xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
@@ -295,6 +285,7 @@
             <div class="flex gap-2 mb-4">
                 <input type="text" id="manualVideoIdInput" placeholder="הדבק Video ID" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-left font-mono outline-none focus:border-zinc-700">
                 <button onclick="addVideoManually('open')" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 whitespace-nowrap">הוסף כפתוח</button>
+                <button onclick="addVideoManually('untested')" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 whitespace-nowrap">הוסף כלא נשלח</button>
                 <button onclick="addVideoManually('blocked')" class="bg-rose-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-rose-700 whitespace-nowrap">הוסף כחסום</button>
             </div>
             <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-hidden mb-4">
@@ -302,6 +293,11 @@
                     <div>
                         <h4 class="text-xs font-bold text-emerald-400 mb-2">סרטונים פתוחים (<span id="modalOpenCount">0</span>)</h4>
                         <div id="modalOpenList" class="space-y-1 text-xs font-mono"></div>
+                    </div>
+                    <hr class="border-zinc-800">
+                    <div>
+                        <h4 class="text-xs font-bold text-amber-500 mb-2">סרטונים שלא נשלחו (<span id="modalUntestedCount">0</span>)</h4>
+                        <div id="modalUntestedList" class="space-y-1 text-xs font-mono"></div>
                     </div>
                     <hr class="border-zinc-800">
                     <div>
@@ -319,7 +315,6 @@
         </div>
     </div>
 
-    <!-- מודאל הגדרות גוגל דרייב API -->
     <div id="driveConfigModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-md bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-lg font-bold mb-2 flex items-center gap-2 text-blue-400"><i class="fab fa-google-drive"></i> הגדרות חיבור ל-Google Drive</h2>
@@ -340,7 +335,6 @@
         </div>
     </div>
 
-    <!-- מודאל מפתחות יוטיוב API -->
     <div id="configModal" class="fixed inset-0 z-[300] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-key text-blue-500"></i> ניהול מפתחות YouTube API</h2>
@@ -352,12 +346,8 @@
         </div>
     </div>
 
-    <div id="netfreeTesterContainer" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0;"></div>
-
     <script>
-        let db = JSON.parse(localStorage.getItem('yt_scanned_db_v4') || '{"_standalone_videos": {"open": [], "blocked": []}}');
-        if(!db._standalone_videos) db._standalone_videos = {"open": [], "blocked": []};
-        
+        let db = { _standalone_videos: { open: [], blocked: [], untested: [] } };
         let driveConfig = JSON.parse(localStorage.getItem('yt_drive_config') || '{"clientId":"","apiKey":""}');
         let apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
         let currentKeyIndex = 0;
@@ -382,6 +372,34 @@
         let currentLiveChannelId = null;
         let currentLiveOpenIds = [];
         let currentLiveBlockedIds = [];
+        let currentLiveUntestedIds = [];
+
+        async function syncWithLocalFolderAAA() {
+            try {
+                await fetch('http://localhost:3000/api/save-db', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(db)
+                });
+            } catch (e) {
+                console.error("שגיאה בגיבוי לפרויקט המקומי:", e);
+            }
+        }
+
+        async function loadDatabaseFromLocalFolderAAA() {
+            try {
+                const res = await fetch('http://localhost:3000/api/load-db');
+                db = await res.json();
+                if (!db._standalone_videos) db._standalone_videos = { open: [], blocked: [], untested: [] };
+                if (!db._standalone_videos.untested) db._standalone_videos.untested = [];
+                
+                renderScannedDatabaseGrid(); 
+                renderStandaloneVideos(); 
+                calculateGlobalStats();
+            } catch (e) {
+                console.error("לא ניתן להתחבר לסוכן המקומי. ודא ש-server.js רץ ב-CMD.", e);
+            }
+        }
 
         function extractChannelIdOrHandle(input) {
             input = input.trim();
@@ -394,9 +412,6 @@
             return { type: 'search', value: input }; 
         }
 
-        function toggleBulkInputArea() { const area = document.getElementById('bulkInputArea'); area.classList.toggle('hidden'); }
-
-        // חילוץ כמות סרטונים מוקדמת בכל הוספה המונית לתור
         async function processBulkChannelsInsertion() {
             const text = document.getElementById('bulkChannelsTextArea').value.trim();
             if (!text) return alert("אנא הדבק רשימת קישורים בתיבה תחילה.");
@@ -434,7 +449,6 @@
             calculateGlobalStats();
         }
 
-        // פונקציית עזר לחילוץ מוקדם של כמות הסרטונים בערוץ
         async function fetchChannelOfficialVideoCount(channelId) {
             const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${key}`);
             if (data && data.items && data.items.length > 0) {
@@ -501,27 +515,45 @@
 
         function appendLiveList(targetId, vId, color) {
             const list = document.getElementById(targetId); if(!list) return;
-            const type = (targetId === 'liveOpenList') ? 'open' : 'blocked';
+            let currentStatus = 'open';
+            if(targetId === 'liveBlockedList') currentStatus = 'blocked';
+            if(targetId === 'liveUntestedList') currentStatus = 'untested';
+
             const div = document.createElement('div'); div.id = `live-saved-row-${vId}`;
-            div.className = `flex justify-between items-center bg-${color}-950/20 px-2 py-1 rounded border border-${color}-900/30 mb-1 font-mono text-[10px] text-zinc-300`;
-            div.innerHTML = `<span>${vId}</span><div class="flex gap-1.5 flex-shrink-0"><button onclick="playVideoInMainQa('${vId}')" class="text-blue-400 font-bold hover:underline">📺 נגן</button><button onclick="toggleVideoStatusDirectFromLiveList('${vId}', '${type}')" class="text-amber-500 font-bold hover:underline">🔄 שנה</button></div>`;
+            div.className = `flex justify-between items-center bg-${color}-950/20 px-2 py-1 rounded border border-${color}-900/30 mb-1 font-mono text-[9px] text-zinc-300`;
+            div.innerHTML = `<span>${vId}</span><div class="flex gap-1 flex-shrink-0"><button onclick="playVideoInMainQa('${vId}')" class="text-blue-400 font-bold hover:underline">📺</button><button onclick="toggleVideoStatusDirectFromLiveList('${vId}', '${currentStatus}')" class="text-amber-500 font-bold hover:underline">🔄</button></div>`;
             list.insertBefore(div, list.firstChild);
         }
 
         function toggleVideoStatusDirectFromLiveList(vId, currentType) {
             if(!currentLiveChannelId || !db[currentLiveChannelId]) return;
-            if (currentType === 'open') {
-                currentLiveOpenIds = currentLiveOpenIds.filter(id => id !== vId); if(!currentLiveBlockedIds.includes(vId)) currentLiveBlockedIds.push(vId);
-                db[currentLiveChannelId].openVideos = db[currentLiveChannelId].openVideos.filter(id => id !== vId); if(!db[currentLiveChannelId].blockedVideos.includes(vId)) db[currentLiveChannelId].blockedVideos.push(vId);
-            } else {
-                currentLiveBlockedIds = currentLiveBlockedIds.filter(id => id !== vId); if(!currentLiveOpenIds.includes(vId)) currentLiveOpenIds.push(vId);
-                db[currentLiveChannelId].blockedVideos = db[currentLiveChannelId].blockedVideos.filter(id => id !== vId); if(!db[currentLiveChannelId].openVideos.includes(vId)) db[currentLiveChannelId].openVideos.push(vId);
-            }
-            db[currentLiveChannelId].updatedTimestamp = Date.now(); localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db));
-            document.getElementById('liveOpenList').innerHTML = ''; document.getElementById('liveBlockedList').innerHTML = '';
-            document.getElementById('liveOpenCount').innerText = currentLiveOpenIds.length; document.getElementById('liveBlockedCount').innerText = currentLiveBlockedIds.length;
-            currentLiveOpenIds.forEach(id => appendLiveList('liveOpenList', id, 'emerald')); currentLiveBlockedIds.forEach(id => appendLiveList('liveBlockedList', id, 'rose'));
-            calculateGlobalStats(); renderScannedDatabaseGrid(); if (googleAccessToken) syncWithGoogleDrive();
+            
+            if (currentType === 'open') currentLiveOpenIds = currentLiveOpenIds.filter(id => id !== vId);
+            else if (currentType === 'blocked') currentLiveBlockedIds = currentLiveBlockedIds.filter(id => id !== vId);
+            else currentLiveUntestedIds = currentLiveUntestedIds.filter(id => id !== vId);
+
+            if (currentType === 'open') { currentLiveUntestedIds.push(vId); }
+            else if (currentType === 'untested') { currentLiveBlockedIds.push(vId); }
+            else { currentLiveOpenIds.push(vId); }
+
+            db[currentLiveChannelId].openVideos = [...currentLiveOpenIds];
+            db[currentLiveChannelId].blockedVideos = [...currentLiveBlockedIds];
+            db[currentLiveChannelId].untestedVideos = [...currentLiveUntestedIds];
+            
+            db[currentLiveChannelId].updatedTimestamp = Date.now();
+            saveDatabaseAndTriggerSync();
+
+            document.getElementById('liveOpenList').innerHTML = ''; 
+            document.getElementById('liveBlockedList').innerHTML = '';
+            document.getElementById('liveUntestedList').innerHTML = '';
+
+            document.getElementById('liveOpenCount').innerText = currentLiveOpenIds.length; 
+            document.getElementById('liveBlockedCount').innerText = currentLiveBlockedIds.length;
+            document.getElementById('liveUntestedCount').innerText = currentLiveUntestedIds.length;
+
+            currentLiveOpenIds.forEach(id => appendLiveList('liveOpenList', id, 'emerald')); 
+            currentLiveBlockedIds.forEach(id => appendLiveList('liveBlockedList', id, 'rose'));
+            currentLiveUntestedIds.forEach(id => appendLiveList('liveUntestedList', id, 'amber'));
         }
 
         function toggleDriveConfigModal() {
@@ -541,7 +573,7 @@
 
         function initGoogleDriveLibraries() {
             if (!driveConfig.clientId || !driveConfig.apiKey) {
-                document.getElementById('driveStatusLabel').innerText = "הנתונים נשמרים מקומית בדפדפן (לא מחובר לענן)."; return;
+                document.getElementById('driveStatusLabel').innerText = "הסנכרון המקומי לתיקיית הפרויקט המקורית פעיל."; return;
             }
             try {
                 googleTokenClient = google.accounts.oauth2.initTokenClient({
@@ -556,7 +588,6 @@
                         document.getElementById('driveStatusLabel').innerText = "מחובר בהצלחה לענן!"; syncWithGoogleDrive();
                     },
                 });
-                document.getElementById('driveStatusLabel').innerText = "מפתחות הדרייב טעונים. מוכן לחיבור אימות.";
             } catch(e) { console.error(e); }
         }
 
@@ -583,6 +614,7 @@
                         if (key === "_standalone_videos") {
                             cloudData[key].open.forEach(v => { if(!db._standalone_videos.open.includes(v)) { db._standalone_videos.open.push(v); localUpdated = true; } });
                             cloudData[key].blocked.forEach(v => { if(!db._standalone_videos.blocked.includes(v)) { db._standalone_videos.blocked.push(v); localUpdated = true; } });
+                            if(cloudData[key].untested) cloudData[key].untested.forEach(v => { if(!db._standalone_videos.untested.includes(v)) { db._standalone_videos.untested.push(v); localUpdated = true; } });
                         } else {
                             if (!db[key]) { db[key] = cloudData[key]; localUpdated = true; } 
                             else {
@@ -591,7 +623,7 @@
                             }
                         }
                     });
-                    if (localUpdated) { localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderScannedDatabaseGrid(); renderStandaloneVideos(); }
+                    if (localUpdated) { await syncWithLocalFolderAAA(); renderScannedDatabaseGrid(); renderStandaloneVideos(); }
                 }
 
                 let metadata = { name: DRIVE_FILENAME, mimeType: 'application/json' }; let fileContent = JSON.stringify(db);
@@ -608,37 +640,37 @@
             } catch (err) { document.getElementById('driveStatusLabel').innerText = "⚠️ שגיאה בסנכרון ענן."; }
         }
 
-        function saveDatabaseAndTriggerSync(isDeletionSync = false) { localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); calculateGlobalStats(); renderScannedDatabaseGrid(); if (googleAccessToken) syncWithGoogleDrive(isDeletionSync); }
+        function saveDatabaseAndTriggerSync(isDeletionSync = false) { 
+            syncWithLocalFolderAAA().then(() => {
+                calculateGlobalStats(); 
+                renderScannedDatabaseGrid(); 
+                if (googleAccessToken) syncWithGoogleDrive(isDeletionSync);
+            });
+        }
 
-        // שדרוג חישוב קוביית הסטטיסטיקה לבקשתך: מראה סך סרטונים ממתינים בתוך התור
         function calculateGlobalStats() {
-            let totalChecked = 0; let totalOpen = 0; let totalBlocked = 0; let whitelistedCount = 0;
+            let totalChecked = 0; let totalOpen = 0; let totalBlocked = 0; let totalUntested = 0; let whitelistedCount = 0;
             let keys = Object.keys(db).filter(k => k !== "_standalone_videos");
             
             keys.forEach(key => {
-                totalChecked += parseInt(db[key].totalVideos || 0, 10); totalOpen += (db[key].openVideos ? db[key].openVideos.length : 0);
-                totalBlocked += (db[key].blockedVideos ? db[key].blockedVideos.length : 0); if (db[key].isNetfreeWhitelisted) whitelistedCount++;
+                totalChecked += parseInt(db[key].totalVideos || 0, 10); 
+                totalOpen += (db[key].openVideos ? db[key].openVideos.length : 0);
+                totalBlocked += (db[key].blockedVideos ? db[key].blockedVideos.length : 0); 
+                totalUntested += (db[key].untestedVideos ? db[key].untestedVideos.length : 0); 
+                if (db[key].isNetfreeWhitelisted) whitelistedCount++;
             });
             
             let percentage = totalChecked > 0 ? Math.round((totalOpen / totalChecked) * 100) : 0;
-            let percentBlocked = totalChecked > 0 ? ((totalBlocked / totalChecked) * 100).toFixed(1) : 0;
-            
-            // חישוב כמות סרטונים מצטברת שממתינה כרגע בכל התור
             let totalVideosInQueue = 0;
-            queue.forEach(item => {
-                totalVideosInQueue += (item.videoCount || 0);
-            });
+            queue.forEach(item => { totalVideosInQueue += (item.videoCount || 0); });
 
             document.getElementById('globalTotalChannels').innerText = keys.length.toLocaleString('he-IL');
             document.getElementById('globalTotalChecked').innerText = totalChecked.toLocaleString('he-IL');
             document.getElementById('globalTotalOpen').innerText = totalOpen.toLocaleString('he-IL');
             document.getElementById('globalOpenPercentage').innerText = `${percentage}%`;
-            
-            // הצגת מונה סרטונים בתור במקום ערוצים בתור
             document.getElementById('statsQueueCount').innerText = totalVideosInQueue.toLocaleString('he-IL');
-            
             document.getElementById('statsWhitelistedChannelsCount').innerText = whitelistedCount.toLocaleString('he-IL');
-            document.getElementById('statsAverageBlockedPerChannel').innerText = `${percentBlocked}%`;
+            document.getElementById('globalTotalUntested').innerText = totalUntested.toLocaleString('he-IL');
             refreshHourlyScanRate();
         }
 
@@ -655,51 +687,59 @@
             }
         }
 
-        function checkSingleVideoNetfree(videoId, slotIndex) {
-            return new Promise((resolve) => {
-                let resolved = false; const testerId = `tester-slot-${slotIndex}-${videoId}`;
-                const testerDiv = document.createElement('div'); testerDiv.id = testerId;
-                document.getElementById('netfreeTesterContainer').appendChild(testerDiv);
-                let tempPlayer; let timeout = setTimeout(() => { if (!resolved) { resolved = true; cleanup(); resolve('blocked'); } }, 7000);
-                function cleanup() { clearTimeout(timeout); if (tempPlayer && typeof tempPlayer.destroy === 'function') { try { tempPlayer.destroy(); } catch(e){} } if (testerDiv && testerDiv.parentNode) testerDiv.remove(); }
-                tempPlayer = new YT.Player(testerId, { height: '1', width: '1', videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'origin': window.location.origin },
-                    events: {
-                        'onReady': (event) => { const frame = document.getElementById(testerId); if(frame) frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); event.target.playVideo(); },
-                        'onError': () => { if (!resolved) { resolved = true; cleanup(); resolve('blocked'); } },
-                        'onStateChange': (event) => { if ((event.data === 1 || event.data === 3) && !resolved) { resolved = true; cleanup(); resolve('unblocked'); } }
-                    }
-                });
-            });
-        }
-
-        async function processBatchParallel(videoIds, progressCallback) {
-            let results = { open: [], blocked: [] }; let index = 0; const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-            document.getElementById('liveOpenList').innerHTML = ''; document.getElementById('liveBlockedList').innerHTML = '';
-            currentLiveOpenIds = []; currentLiveBlockedIds = []; scanStartTime = Date.now(); 
-
-            async function worker(workerId) {
-                while (index < videoIds.length) {
-                    if (globalPause || (queue[0] && queue[0].status === 'paused')) { await sleep(1000); continue; }
-                    if (!isProcessing || queue.length === 0 || queue[0].status === 'cancelled') {
-                        let remainingUnchecked = videoIds.slice(index);
-                        remainingUnchecked.forEach(vId => { if(!results.blocked.includes(vId)) results.blocked.push(vId); if(!currentLiveBlockedIds.includes(vId)) currentLiveBlockedIds.push(vId); });
-                        break;
-                    }
-                    const currentIdx = index++; const vId = videoIds[currentIdx]; if(!vId) continue;
-                    const tempElementId = `live-item-${vId}`; createLiveTestingRow(vId, tempElementId);
-                    await sleep(1000); const status = await checkSingleVideoNetfree(vId, workerId);
-                    const oldRow = document.getElementById(tempElementId); if(oldRow) oldRow.remove();
-                    if (status === 'unblocked') { 
-                        if(!results.open.includes(vId)) results.open.push(vId); if(!currentLiveOpenIds.includes(vId)) currentLiveOpenIds.push(vId);
-                        document.getElementById('liveOpenCount').innerText = currentLiveOpenIds.length; appendLiveList('liveOpenList', vId, 'emerald'); 
-                    } else { 
-                        if(!results.blocked.includes(vId)) results.blocked.push(vId); if(!currentLiveBlockedIds.includes(vId)) currentLiveBlockedIds.push(vId);
-                        document.getElementById('liveBlockedCount').innerText = currentLiveBlockedIds.length; appendLiveList('liveBlockedList', vId, 'rose'); 
-                    }
-                    hourlyScanLog.push(Date.now()); refreshHourlyScanRate(); progressCallback(results.open.length + results.blocked.length, videoIds.length);
+        async function runLocalPuppeteerScan(videoIds, progressCallback) {
+            let scanMapping = {};
+            const batchSize = 100;
+            
+            for (let i = 0; i < videoIds.length; i += batchSize) {
+                if (globalPause || (queue[0] && queue[0].status === 'paused')) { 
+                    i -= batchSize; 
+                    await new Promise(r => setTimeout(r, 1000)); 
+                    continue; 
                 }
+                if (!isProcessing || queue.length === 0 || queue[0].status === 'cancelled') break;
+
+                const currentBatch = videoIds.slice(i, i + batchSize);
+                currentBatch.forEach(id => createLiveTestingRow(id, `live-item-${id}`));
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/scan-batch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ videoIds: currentBatch })
+                    });
+                    const batchResult = await response.json();
+                    
+                    Object.keys(batchResult).forEach(id => {
+                        const status = batchResult[id];
+                        scanMapping[id] = status;
+                        
+                        const oldRow = document.getElementById(`live-item-${id}`);
+                        if(oldRow) oldRow.remove();
+
+                        if (status === 'open') {
+                            currentLiveOpenIds.push(id);
+                            document.getElementById('liveOpenCount').innerText = currentLiveOpenIds.length;
+                            appendLiveList('liveOpenList', id, 'emerald');
+                        } else if (status === 'untested') {
+                            currentLiveUntestedIds.push(id);
+                            document.getElementById('liveUntestedCount').innerText = currentLiveUntestedIds.length;
+                            appendLiveList('liveUntestedList', id, 'amber');
+                        } else {
+                            currentLiveBlockedIds.push(id);
+                            document.getElementById('liveBlockedCount').innerText = currentLiveBlockedIds.length;
+                            appendLiveList('liveBlockedList', id, 'rose');
+                        }
+                    });
+                } catch (e) {
+                    console.error("השרת המקומי מנותק. ודא שקובץ ה-BAT מופעל במחשב זה.", e);
+                }
+
+                hourlyScanLog.push(Date.now());
+                refreshHourlyScanRate();
+                progressCallback(Math.min(i + batchSize, videoIds.length), videoIds.length);
             }
-            const workers = Array(Math.min(3, videoIds.length)).fill(null).map((_, idx) => worker(idx)); await Promise.all(workers); return results;
+            return scanMapping;
         }
 
         function updateProgress(current, total, text) { 
@@ -717,13 +757,13 @@
             if (minutes > 0) timeLabel.innerText = `כ-${minutes} דק' ו-${seconds} שנ'`; else timeLabel.innerText = `כ-${seconds} שניות`;
         }
 
-        function createLiveTestingRow(vId, elementId) { const list = document.getElementById('liveOpenList'); const div = document.createElement('div'); div.id = elementId; div.className = "flex justify-between items-center bg-red-950/40 px-2 py-0.5 rounded border border-red-800/60 mb-1 text-red-400 font-bold animate-pulse"; div.innerHTML = `<span class="flex items-center gap-1"><span class="text-red-500 text-sm leading-none">●</span><span>${vId}</span></span><span class="text-[9px] font-normal text-zinc-500">בבדיקה...</span>`; list.insertBefore(div, list.firstChild); }
+        function createLiveTestingRow(vId, elementId) { const list = document.getElementById('liveOpenList'); const div = document.createElement('div'); div.id = elementId; div.className = "flex justify-between items-center bg-blue-950/40 px-2 py-0.5 rounded border border-blue-800/60 mb-1 text-blue-400 font-bold animate-pulse"; div.innerHTML = `<span class="flex items-center gap-1"><span class="text-blue-500 text-sm leading-none">●</span><span>${vId}</span></span><span class="text-[8px] font-normal text-zinc-500">בתור...</span>`; list.insertBefore(div, list.firstChild); }
         function playVideoInMainQa(videoId) { document.getElementById('mainQaPlayerPlaceholder').style.display = 'none'; if (mainQaPlayerInstance) { try { mainQaPlayerInstance.destroy(); } catch(e){} } mainQaPlayerInstance = new YT.Player('mainQaPlayerFrame', { height: '100%', width: '100%', videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 1 }, events: { 'onReady': () => { const mainFrame = document.getElementById('mainQaPlayerFrame'); if(mainFrame) mainFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); } } }); }
         function pauseGlobalScanner() { globalPause = true; updateGlobalStatus(); renderQueue(); }
         function resumeGlobalScanner() { globalPause = false; updateGlobalStatus(); renderQueue(); }
         
         function cancelGlobalScanner() { 
-            if(confirm("להסיר את כל המשימות ולרוקן את התור كעת?")) { 
+            if(confirm("להסיר את כל המשימות ולרוקן את התור כעת?")) { 
                 queue = []; isProcessing = false; globalPause = false; document.getElementById('spinnerIcon').classList.add('hidden'); 
                 updateProgress(0, 100, "הסריקה בבוטלה."); document.getElementById('liveChannelName').innerText = "-"; document.getElementById('liveScanType').innerText = "-"; document.getElementById('liveEstimatedTimeRemaining').innerText = "-";
                 currentLiveChannelId = null; updateGlobalStatus(); renderQueue(); calculateGlobalStats();
@@ -739,7 +779,6 @@
             if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים לסריקת חסומים.`); else alert("אין סרטונים חסומים במאגר.");
         }
 
-        // שימור וגיבוי מיידי של המשימות כולל ערוצים בהמתנה יחד עם כמות הסרטונים שלהם
         function pushToQueue(id, title, mode = 'full', videoCount = 0) {
             if (queue.some(q => q.id === id && q.mode === mode)) return;
             queue.push({ id: id, title: title, status: 'pending', mode: mode, videoCount: videoCount }); 
@@ -773,18 +812,29 @@
         async function scanChannelVideosMssive(channelId, channelTitle) {
             const isWhitelisted = db[channelId]?.isNetfreeWhitelisted || false;
             let currentScansCount = db[channelId]?.scanCount || 0;
-            let localOpenVideos = db[channelId]?.openVideos || []; let localBlockedVideos = db[channelId]?.blockedVideos || [];
+            
+            let localOpenVideos = db[channelId]?.openVideos || []; 
+            let localBlockedVideos = db[channelId]?.blockedVideos || [];
+            let localUntestedVideos = db[channelId]?.untestedVideos || [];
 
             document.getElementById('liveChannelName').innerText = channelTitle; document.getElementById('liveScanType').innerText = isWhitelisted ? "אישור מהיר" : "סריקה: ערוץ מלא";
             document.getElementById('liveOfficialCount').innerText = "..."; document.getElementById('liveTotalVideos').innerText = "...";
-            document.getElementById('liveOpenCount').innerText = "0"; document.getElementById('liveBlockedCount').innerText = "0";
+            
+            document.getElementById('liveOpenCount').innerText = "0"; 
+            document.getElementById('liveBlockedCount').innerText = "0";
+            document.getElementById('liveUntestedCount').innerText = "0";
 
-            if (isWhitelisted && db[channelId] && (db[channelId].openVideos || db[channelId].blockedVideos)) {
-                updateProgress(20, 100, `משחזר ומאשר רשימה...`); let localCombinedIds = [...localOpenVideos, ...localBlockedVideos];
-                document.getElementById('liveTotalVideos').innerText = localCombinedIds.length; document.getElementById('liveOfficialCount').innerText = localCombinedIds.length;
-                currentLiveOpenIds = [...localCombinedIds]; currentLiveBlockedIds = [];
-                localCombinedIds.forEach(vId => appendLiveList('liveOpenList', vId, 'emerald')); document.getElementById('liveOpenCount').innerText = localCombinedIds.length;
-                db[channelId] = { title: channelTitle, totalVideos: localCombinedIds.length, openVideos: localCombinedIds, blockedVideos: [], scannedAt: new Date().toLocaleDateString('he-IL'), updatedTimestamp: Date.now(), isNetfreeWhitelisted: true, scanCount: currentScansCount + 1 };
+            if (isWhitelisted && db[channelId]) {
+                updateProgress(20, 100, `משחזר ומאשר רשימה...`); 
+                let localCombinedIds = [...localOpenVideos, ...localBlockedVideos, ...localUntestedVideos];
+                document.getElementById('liveTotalVideos').innerText = localCombinedIds.length; 
+                document.getElementById('liveOfficialCount').innerText = localCombinedIds.length;
+                
+                currentLiveOpenIds = [...localCombinedIds]; currentLiveBlockedIds = []; currentLiveUntestedIds = [];
+                localCombinedIds.forEach(vId => appendLiveList('liveOpenList', vId, 'emerald')); 
+                document.getElementById('liveOpenCount').innerText = localCombinedIds.length;
+                
+                db[channelId] = { title: channelTitle, totalVideos: localCombinedIds.length, openVideos: localCombinedIds, blockedVideos: [], untestedVideos: [], scannedAt: new Date().toLocaleDateString('he-IL'), updatedTimestamp: Date.now(), isNetfreeWhitelisted: true, scanCount: currentScansCount + 1 };
                 saveDatabaseAndTriggerSync(); updateProgress(100, 100, `הסתיים בהצלחה.`); return;
             }
 
@@ -808,36 +858,88 @@
             } while (nextPageToken);
 
             document.getElementById('liveTotalVideos').innerText = allVideoIds.length;
-            if (allVideoIds.length === 0) { allVideoIds = [...localOpenVideos, ...localBlockedVideos]; if(allVideoIds.length === 0) return; }
+            if (allVideoIds.length === 0) { allVideoIds = [...localOpenVideos, ...localBlockedVideos, ...localUntestedVideos]; if(allVideoIds.length === 0) return; }
             
             hourlyScanLog.push(Date.now()); refreshHourlyScanRate();
-            let scanResults = { open: [...localOpenVideos], blocked: [] }; let targetVideosToScan = allVideoIds.filter(id => !localOpenVideos.includes(id));
+            scanStartTime = Date.now();
 
-            if (isWhitelisted) { 
-                scanResults.open = [...allVideoIds]; currentLiveOpenIds = [...allVideoIds];
-                allVideoIds.forEach(vId => appendLiveList('liveOpenList', vId, 'emerald')); document.getElementById('liveOpenCount').innerText = allVideoIds.length; 
-            } else {
-                localOpenVideos.forEach(vId => appendLiveList('liveOpenList', vId, 'emerald')); document.getElementById('liveOpenCount').innerText = localOpenVideos.length;
-                let freshScan = await processBatchParallel(targetVideosToScan, (processed, total) => { const pct = Math.round((processed / total) * 100); updateProgress(pct, 100, `סריקה: ${processed}/${total}`); });
-                freshScan.open.forEach(id => { if(!scanResults.open.includes(id)) scanResults.open.push(id); }); scanResults.blocked = freshScan.blocked;
-                currentLiveOpenIds = [...scanResults.open]; currentLiveBlockedIds = [...scanResults.blocked];
-            }
-            db[channelId] = { title: channelTitle, totalVideos: allVideoIds.length, openVideos: scanResults.open, blockedVideos: scanResults.blocked, scannedAt: new Date().toLocaleDateString('he-IL'), updatedTimestamp: Date.now(), isNetfreeWhitelisted: isWhitelisted, scanCount: currentScansCount + 1 };
+            let finalOpen = [...localOpenVideos]; 
+            let finalBlocked = []; 
+            let finalUntested = [];
+
+            let targetVideosToScan = allVideoIds.filter(id => !localOpenVideos.includes(id));
+
+            localOpenVideos.forEach(vId => appendLiveList('liveOpenList', vId, 'emerald')); 
+            document.getElementById('liveOpenCount').innerText = localOpenVideos.length;
+
+            let scanMap = await runLocalPuppeteerScan(targetVideosToScan, (processed, total) => {
+                updateProgress(processed, total, `סריקת רשת מהירה: ${processed}/${total}`);
+            });
+
+            Object.keys(scanMap).forEach(id => {
+                const resStatus = scanMap[id];
+                if (resStatus === 'open') finalOpen.push(id);
+                else if (resStatus === 'untested') finalUntested.push(id);
+                else finalBlocked.push(id);
+            });
+
+            currentLiveOpenIds = [...finalOpen]; 
+            currentLiveBlockedIds = [...finalBlocked];
+            currentLiveUntestedIds = [...finalUntested];
+
+            db[channelId] = { 
+                title: channelTitle, 
+                totalVideos: allVideoIds.length, 
+                openVideos: finalOpen, 
+                blockedVideos: finalBlocked, 
+                untestedVideos: finalUntested,
+                scannedAt: new Date().toLocaleDateString('he-IL'), 
+                updatedTimestamp: Date.now(), 
+                isNetfreeWhitelisted: false, 
+                scanCount: currentScansCount + 1 
+            };
             saveDatabaseAndTriggerSync();
         }
 
         async function scanChannelBlockedOnly(channelId, channelTitle) {
-            const existingData = db[channelId]; if (!existingData || !existingData.blockedVideos || existingData.blockedVideos.length === 0) return;
-            let currentScansCount = existingData.scanCount || 1; const targetVideoIds = [...existingData.blockedVideos]; 
+            const existingData = db[channelId]; 
+            if (!existingData || !existingData.blockedVideos || existingData.blockedVideos.length === 0) return;
+            
+            let currentScansCount = existingData.scanCount || 1; 
+            const targetVideoIds = [...existingData.blockedVideos]; 
+            
             document.getElementById('liveChannelName').innerText = channelTitle; document.getElementById('liveScanType').innerText = "עדכון חסומים (מעבר יחיד)";
             document.getElementById('liveOfficialCount').innerText = existingData.totalVideos; document.getElementById('liveTotalVideos').innerText = targetVideoIds.length;
             
             hourlyScanLog.push(Date.now()); refreshHourlyScanRate();
-            let scanResults = await processBatchParallel(targetVideoIds, (processed, total) => { const pct = Math.round((processed / total) * 100); updateProgress(pct, 100, `סריקה מהירה: ${processed}/${total}`); });
-            scanResults.open.forEach(vId => { if (!existingData.openVideos.includes(vId)) existingData.openVideos.push(vId); });
+            scanStartTime = Date.now();
+
+            let scanMap = await runLocalPuppeteerScan(targetVideoIds, (processed, total) => {
+                updateProgress(processed, total, `סריקה מהירה: ${processed}/${total}`);
+            });
+
+            let newBlocked = [];
+            let newUntested = existingData.untestedVideos || [];
+
+            Object.keys(scanMap).forEach(id => {
+                const resStatus = scanMap[id];
+                if (resStatus === 'open') {
+                    if (!existingData.openVideos.includes(id)) existingData.openVideos.push(id);
+                } else if (resStatus === 'untested') {
+                    if (!newUntested.includes(id)) newUntested.push(id);
+                } else {
+                    newBlocked.push(id);
+                }
+            });
             
-            existingData.blockedVideos = scanResults.blocked; existingData.scannedAt = new Date().toLocaleDateString('he-IL'); existingData.updatedTimestamp = Date.now(); 
-            existingData.scanCount = currentScansCount + 1; db[channelId] = existingData; saveDatabaseAndTriggerSync();
+            existingData.blockedVideos = newBlocked; 
+            existingData.untestedVideos = newUntested;
+            existingData.scannedAt = new Date().toLocaleDateString('he-IL'); 
+            existingData.updatedTimestamp = Date.now(); 
+            existingData.scanCount = currentScansCount + 1; 
+            
+            db[channelId] = existingData; 
+            saveDatabaseAndTriggerSync();
         }
 
         async function searchChannels() {
@@ -872,7 +974,6 @@
 
         function triggerQueueFromSearch(cid, encodedTitle) {
             let decodedTitle = decodeURIComponent(escape(atob(encodedTitle)));
-            // הבאת נתוני כמות מוקדמים גם בלחיצה בודדת מחיפוש
             fetchChannelOfficialVideoCount(cid).then(count => {
                 pushToQueue(cid, decodedTitle, 'full', count);
             });
@@ -886,7 +987,7 @@
         }
 
         function deleteChannel(id) { 
-            if(confirm("להסיר ערוץ זה מהדפדפן ומההיסטוריה ב-Google Drive לצמיתות?")) { 
+            if(confirm("להסיר ערוץ זה מהמחשב ומההיסטוריה לצמיתות?")) { 
                 delete db[id]; saveDatabaseAndTriggerSync(true); 
             } 
         }
@@ -905,18 +1006,21 @@
             
             keys.forEach(cid => {
                 const item = db[cid]; const div = document.createElement('div'); div.className = "bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex flex-col justify-between shadow-md hover:border-zinc-700 transition w-full";
-                let blockedCount = item.blockedVideos ? item.blockedVideos.length : 0; const isWhitelisted = item.isNetfreeWhitelisted || false;
+                let blockedCount = item.blockedVideos ? item.blockedVideos.length : 0; 
+                let untestedCount = item.untestedVideos ? item.untestedVideos.length : 0;
+                const isWhitelisted = item.isNetfreeWhitelisted || false;
                 let scansCount = item.scanCount || 1; let encodedTitle = btoa(unescape(encodeURIComponent(item.title)));
                 
                 div.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start gap-2 mb-1.5"><h4 class="font-bold text-sm text-white truncate max-w-[70%] flex items-center gap-1.5"><a href="https://www.youtube.com/channel/${cid}" target="_blank" class="text-zinc-500 hover:text-blue-400 transition"><i class="fas fa-link text-xs"></i></a><span class="truncate">${item.title}</span></h4><span class="text-[9px] bg-zinc-950 text-zinc-400 font-mono px-1.5 py-0.5 rounded border border-zinc-800">${item.scannedAt || 'לא ידוע'}</span></div>
                         <div class="mt-1 mb-2"><span class="text-[10px] text-zinc-500 font-bold block"><i class="fas fa-rotate ml-1 text-zinc-600"></i>סך הכל סריקות: <span class="text-blue-400 font-mono font-bold">${scansCount.toLocaleString('he-IL')}</span></span></div>
-                        <div class="mt-1 mb-2.5"><button onclick="toggleNetfreeWhitelist('${cid}', true)" class="w-full text-right text-[10px] px-2.5 py-1.5 rounded-xl border flex items-center justify-between transition ${isWhitelisted ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800' : 'bg-zinc-950 text-zinc-500 border-zinc-800 hover:text-zinc-400'}"><span><i class="fas fa-shield-halved ml-1"></i> ערוץ מאושר גורף בנטפרי</span><span class="font-bold text-[9px] bg-zinc-900/50 px-2 py-0.5 rounded-md">${isWhitelisted ? 'פעיל' : 'כבוי'}</span></button></div>
-                        <div class="grid grid-cols-3 gap-2 text-center my-2 text-[11px] font-bold">
-                            <div class="bg-zinc-950 p-1.5 rounded-xl text-zinc-400 border border-zinc-800/40">${item.totalVideos.toLocaleString('he-IL')} <span class="block text-[9px] font-normal text-zinc-500">סרטונים</span></div>
-                            <div class="bg-emerald-950/20 p-1.5 rounded-xl text-emerald-400 border border-emerald-900/10">${item.openVideos.length.toLocaleString('he-IL')} <span class="block text-[9px] font-normal text-zinc-500">פתוחים</span></div>
-                            <div class="bg-rose-950/20 p-1.5 rounded-xl text-rose-400 border border-rose-900/10">${blockedCount.toLocaleString('he-IL')} <span class="block text-[9px] font-normal text-zinc-500">חסומים</span></div>
+                        <div class="mt-1 mb-2.5"><button onclick="toggleNetfreeWhitelist('${cid}')" class="w-full text-right text-[10px] px-2.5 py-1.5 rounded-xl border flex items-center justify-between transition ${isWhitelisted ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800' : 'bg-zinc-950 text-zinc-500 border-zinc-800 hover:text-zinc-400'}"><span><i class="fas fa-shield-halved ml-1"></i> ערוץ מאושר גורף בנטפרי</span><span class="font-bold text-[9px] bg-zinc-900/50 px-2 py-0.5 rounded-md">${isWhitelisted ? 'פעיל' : 'כבוי'}</span></button></div>
+                        <div class="grid grid-cols-4 gap-1 text-center my-2 text-[10px] font-bold">
+                            <div class="bg-zinc-950 p-1 rounded-xl text-zinc-400 border border-zinc-800/40">${item.totalVideos.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">כללי</span></div>
+                            <div class="bg-emerald-950/20 p-1 rounded-xl text-emerald-400 border border-emerald-900/10">${item.openVideos ? item.openVideos.length.toLocaleString('he-IL') : 0} <span class="block text-[8px] font-normal text-zinc-500">פתוחים</span></div>
+                            <div class="bg-amber-950/20 p-1 rounded-xl text-amber-500 border border-amber-900/10">${untestedCount.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">לא נשלח</span></div>
+                            <div class="bg-rose-950/20 p-1 rounded-xl text-rose-400 border border-rose-900/10">${blockedCount.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">חסומים</span></div>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2 border-t border-zinc-800/60 pt-3 mt-3 text-[11px]">
@@ -930,25 +1034,133 @@
             });
         }
 
-        function checkAndAddStandaloneVideo() {}
-        function renderStandaloneVideos() { const container = document.getElementById('standaloneVideosContainer'); if(!container) return; const total = db._standalone_videos.open.length + db._standalone_videos.blocked.length; document.getElementById('standaloneCountLabel').innerText = total.toLocaleString('he-IL'); if(total === 0) { container.innerHTML = '<p class="text-xs text-zinc-600 p-2 w-full text-center">אין סרטונים בודדים</p>'; return; } container.innerHTML = ''; db._standalone_videos.open.forEach(id => container.appendChild(createStandaloneBadge(id, 'emerald'))); db._standalone_videos.blocked.forEach(id => container.appendChild(createStandaloneBadge(id, 'rose'))); }
+        function toggleNetfreeWhitelist(channelId) {
+            if(!db[channelId]) return;
+            db[channelId].isNetfreeWhitelisted = !db[channelId].isNetfreeWhitelisted;
+            db[channelId].updatedTimestamp = Date.now();
+            saveDatabaseAndTriggerSync();
+        }
+
+        function checkAndAddStandaloneVideo() {
+            const vId = document.getElementById('standaloneVideoInput').value.trim();
+            if(!vId || vId.length < 5) return alert("הזן מזהה סרטון תקין.");
+            
+            document.getElementById('standaloneVideoInput').value = '';
+            
+            fetch('http://localhost:3000/api/scan-batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ videoIds: [vId] })
+            }).then(res => res.json()).then(result => {
+                const status = result[vId] || 'blocked';
+                
+                db._standalone_videos.open = db._standalone_videos.open.filter(id => id !== vId);
+                db._standalone_videos.blocked = db._standalone_videos.blocked.filter(id => id !== vId);
+                if(!db._standalone_videos.untested) db._standalone_videos.untested = [];
+                db._standalone_videos.untested = db._standalone_videos.untested.filter(id => id !== vId);
+
+                if(status === 'open') db._standalone_videos.open.push(vId);
+                else if(status === 'untested') db._standalone_videos.untested.push(vId);
+                else db._standalone_videos.blocked.push(vId);
+
+                saveDatabaseAndTriggerSync();
+                renderStandaloneVideos();
+            });
+        }
+
+        function renderStandaloneVideos() { 
+            const container = document.getElementById('standaloneVideosContainer'); if(!container) return; 
+            const total = db._standalone_videos.open.length + db._standalone_videos.blocked.length + (db._standalone_videos.untested ? db._standalone_videos.untested.length : 0); 
+            document.getElementById('standaloneCountLabel').innerText = total.toLocaleString('he-IL'); 
+            if(total === 0) { container.innerHTML = '<p class="text-xs text-zinc-600 p-2 w-full text-center">אין סרטונים בודדים</p>'; return; } 
+            container.innerHTML = ''; 
+            db._standalone_videos.open.forEach(id => container.appendChild(createStandaloneBadge(id, 'emerald'))); 
+            if(db._standalone_videos.untested) db._standalone_videos.untested.forEach(id => container.appendChild(createStandaloneBadge(id, 'amber'))); 
+            db._standalone_videos.blocked.forEach(id => container.appendChild(createStandaloneBadge(id, 'rose'))); 
+        }
+        
         function createStandaloneBadge(id, color) { const span = document.createElement('div'); span.className = `bg-${color}-950/40 text-${color}-400 text-[11px] font-mono px-2 py-1 rounded-lg border border-${color}-900/50 flex items-center gap-1.5`; span.innerHTML = `<span>${id}</span><button onclick="playVideoInMainQa('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-play text-[8px]"></i></button><button onclick="deleteStandaloneVideo('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-times text-[9px]"></i></button>`; return span; }
-        function deleteStandaloneVideo(id) { db._standalone_videos.open = db._standalone_videos.open.filter(v => v !== id); db._standalone_videos.blocked = db._standalone_videos.blocked.filter(v => v !== id); localStorage.setItem('yt_scanned_db_v4', JSON.stringify(db)); renderStandaloneVideos(); calculateGlobalStats(); }
+        function deleteStandaloneVideo(id) { db._standalone_videos.open = db._standalone_videos.open.filter(v => v !== id); db._standalone_videos.blocked = db._standalone_videos.blocked.filter(v => v !== id); if(db._standalone_videos.untested) db._standalone_videos.untested = db._standalone_videos.untested.filter(v => v !== id); saveDatabaseAndTriggerSync(); renderStandaloneVideos(); }
 
         function openEditModal(channelId) { activeEditingChannelId = channelId; const data = db[channelId]; if(!data) return; document.getElementById('editModalTitle').innerText = `עריכת סרטונים: ${data.title}`; activeModalPlayingVideoId = null; renderModalVideoLists(); document.getElementById('editChannelModal').style.display = 'flex'; }
         function closeEditModal() { document.getElementById('editChannelModal').style.display = 'none'; if(modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); } catch(e){} } activeEditingChannelId = null; activeModalPlayingVideoId = null; }
-        function renderModalVideoLists() { const data = db[activeEditingChannelId]; if(!data) return; const openCont = document.getElementById('modalOpenList'); const blockCont = document.getElementById('modalBlockedList'); openCont.innerHTML = ''; blockCont.innerHTML = ''; document.getElementById('modalOpenCount').innerText = data.openVideos?.length || 0; document.getElementById('modalBlockedCount').innerText = data.blockedVideos?.length || 0; data.openVideos?.forEach(id => openCont.appendChild(createModalVideoRow(id, 'open'))); data.blockedVideos?.forEach(id => blockCont.appendChild(createModalVideoRow(id, 'blocked'))); }
-        function createModalVideoRow(id, type) { const isPlayingNow = (activeModalPlayingVideoId === id); const div = document.createElement('div'); if(isPlayingNow) { div.className = "bg-blue-600/30 p-2 border-2 border-blue-500 rounded-lg flex justify-between items-center mb-1 text-blue-200 font-bold ring-1 ring-blue-400 animate-pulse"; } else { div.className = "bg-zinc-950 p-1.5 rounded border border-zinc-800 mb-1 hover:border-zinc-700 transition text-zinc-300"; } div.innerHTML = `<span class="truncate pl-2 max-w-[50%] flex items-center gap-1">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce"></i> ' : ''}<span>${id}</span></span><div class="flex gap-2"><button onclick="playVideoInModalQa('${id}')" class="text-blue-400 hover:underline text-[11px] font-bold">📺 נגן</button><button onclick="toggleVideoStatusManual('${id}', '${type}')" class="${type === 'open' ? 'text-amber-500' : 'text-emerald-500'} text-[11px] font-bold">${type === 'open' ? '🔄 חסום' : '🔄 פתח'}</button></div>`; return div; }
-        function playVideoInModalQa(videoId) { activeModalPlayingVideoId = videoId; renderModalVideoLists(); if(modalQaPlayerInstance) { try{ modalQaPlayerInstance.destroy(); }catch(e){} } modalQaPlayerInstance = new YT.Player('modalQaPlayerFrame', { height: '100%', width: '100%', videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 1 }, events: { 'onReady': () => { const modalFrame = document.getElementById('modalQaPlayerFrame'); if(modalFrame) modalFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); } } }); }
+        
+        function renderModalVideoLists() { 
+            const data = db[activeEditingChannelId]; if(!data) return; 
+            const openCont = document.getElementById('modalOpenList'); 
+            const blockCont = document.getElementById('modalBlockedList');
+            const untestedCont = document.getElementById('modalUntestedList');
+
+            openCont.innerHTML = ''; blockCont.innerHTML = ''; untestedCont.innerHTML = ''; 
+            document.getElementById('modalOpenCount').innerText = data.openVideos?.length || 0; 
+            document.getElementById('modalBlockedCount').innerText = data.blockedVideos?.length || 0;
+            document.getElementById('modalUntestedCount').innerText = data.untestedVideos?.length || 0;
+
+            data.openVideos?.forEach(id => openCont.appendChild(createModalVideoRow(id, 'open'))); 
+            data.untestedVideos?.forEach(id => untestedCont.appendChild(createModalVideoRow(id, 'untested')));
+            data.blockedVideos?.forEach(id => blockCont.appendChild(createModalVideoRow(id, 'blocked'))); 
+        }
+        
+        function createModalVideoRow(id, type) { 
+            const isPlayingNow = (activeModalPlayingVideoId === id); const div = document.createElement('div'); 
+            if(isPlayingNow) { div.className = "bg-blue-600/30 p-2 border-2 border-blue-500 rounded-lg flex justify-between items-center mb-1 text-blue-200 font-bold ring-1 ring-blue-400 animate-pulse"; } 
+            else { div.className = "bg-zinc-950 p-1.5 rounded border border-zinc-800 mb-1 hover:border-zinc-700 transition text-zinc-300"; } 
+            div.innerHTML = `<span class="truncate pl-2 max-w-[50%] flex items-center gap-1">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce"></i> ' : ''}<span>${id}</span></span><div class="flex gap-2"><button onclick="playVideoInModalQa('${id}')" class="text-blue-400 hover:underline text-[11px] font-bold">📺 נגן</button><button onclick="toggleVideoStatusManual('${id}', '${type}')" class="text-amber-500 text-[11px] font-bold">🔄 שנה</button></div>`; return div; 
+        }
+        
+        function toggleVideoStatusManual(vId, currentType) {
+            const data = db[activeEditingChannelId];
+            if(!data) return;
+
+            if (currentType === 'open') data.openVideos = data.openVideos.filter(id => id !== vId);
+            else if (currentType === 'blocked') data.blockedVideos = data.blockedVideos.filter(id => id !== vId);
+            else data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
+
+            if (currentType === 'open') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
+            else if (currentType === 'untested') { if(!data.blockedVideos) data.blockedVideos = []; data.blockedVideos.push(vId); }
+            else { if(!data.openVideos) data.openVideos = []; data.openVideos.push(vId); }
+
+            data.updatedTimestamp = Date.now();
+            saveDatabaseAndTriggerSync();
+            renderModalVideoLists();
+        }
+
+        function addVideoManually(targetType) {
+            const vId = document.getElementById('manualVideoIdInput').value.trim();
+            if(!vId || vId.length < 5) return alert("הזן מזהה וידאו תקין.");
+            const data = db[activeEditingChannelId];
+            if(!data) return;
+
+            document.getElementById('manualVideoIdInput').value = '';
+
+            data.openVideos = (data.openVideos || []).filter(id => id !== vId);
+            data.blockedVideos = (data.blockedVideos || []).filter(id => id !== vId);
+            data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
+
+            if(targetType === 'open') data.openVideos.push(vId);
+            else if(targetType === 'untested') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
+            else data.blockedVideos.push(vId);
+
+            data.updatedTimestamp = Date.now();
+            saveDatabaseAndTriggerSync();
+            renderModalVideoLists();
+        }
+
+        function playVideoInModalQa(videoId) { activeModalPlayingVideoId = videoId; renderModalVideoLists(); if(modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); } catch(e){} } modalQaPlayerInstance = new YT.Player('modalQaPlayerFrame', { height: '100%', width: '100%', videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 1 }, events: { 'onReady': () => { const modalFrame = document.getElementById('modalQaPlayerFrame'); if(modalFrame) modalFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); } } }); }
 
         function exportCleanJSON() { let cleanDb = {}; Object.keys(db).forEach(key => { if(key === "_standalone_videos") { cleanDb["_standalone_videos"] = db[key].open; } else { cleanDb[key] = { title: db[key].title, openVideos: db[key].openVideos }; } }); triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanDb, null, 2)), "netfree_approved_channels_clean.json"); }
         function exportFullBackup() { triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)), "system_full_backup.json"); }
         function triggerDownload(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
         function toggleConfigModal() { const m = document.getElementById('configModal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; if(m.style.display === 'flex') document.getElementById('apiKeysTextArea').value = apiKeys.join('\n'); }
         function saveApiKeys() { apiKeys = document.getElementById('apiKeysTextArea').value.split('\n').map(l => l.trim()).filter(l => l.length > 0); localStorage.setItem('yt_api_keys_v2', JSON.stringify(apiKeys)); currentKeyIndex = 0; document.getElementById('keyCountLabel').innerText = apiKeys.length; toggleConfigModal(); }
-        function updateGlobalStatus() { const b = document.getElementById('globalStatusBadge'); if (globalPause) { b.className = "text-xs font-bold px-2 py-1 bg-amber-950 border border-amber-800 text-amber-400 rounded-lg"; b.innerText = "השהיה כללית"; } else if (isProcessing) { b.className = "text-xs font-bold px-2 py-1 bg-indigo-950 border border-indigo-800 text-indigo-400 rounded-lg animate-pulse"; b.innerText = "סורק באופן פעיל"; } else { b.className = "text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-500 rounded-lg"; b.innerText = "מערכת במנוחה"; } }
         
-        // רינדור התור בתוספת כמות הסרטונים המוקדמת שנלמדה
+        function updateGlobalStatus() { 
+            const b = document.getElementById('globalStatusBadge'); 
+            if (globalPause) { b.className = "text-xs font-bold px-2 py-1 bg-amber-950 border border-amber-800 text-amber-400 rounded-lg"; b.innerText = "השהיה כללית"; } 
+            else if (isProcessing) { b.className = "text-xs font-bold px-2 py-1 bg-blue-950 border border-blue-800 text-blue-400 rounded-lg animate-pulse"; b.innerText = "סורק טורבו פעיל ברשת"; } 
+            else { b.className = "text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-500 rounded-lg"; b.innerText = "מערכת במנוחה"; } 
+        }
+        
         function renderQueue() { 
             const queueLabel = document.getElementById('queueProgressLabel'); if(queueLabel) queueLabel.innerText = `${queue.length.toLocaleString('he-IL')} משימות בתור`; 
             const container = document.getElementById('queueItemsList'); if(!container) return; 
@@ -977,18 +1189,23 @@
             }
             return "QUOTA_EXHAUSTED";
         }
+        
         function handleQuotaExhaustionStop() { queue = []; isProcessing = false; globalPause = false; document.getElementById('spinnerIcon').classList.add('hidden'); updateProgress(0, 100, "הסריקה נבלמה."); updateGlobalStatus(); renderQueue(); }
+        function importFullBackup(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { db = JSON.parse(e.target.result); saveDatabaseAndTriggerSync(); } catch(err) { alert("קובץ גיבוי לא תקין"); } }; reader.readAsText(file); }
 
         setInterval(refreshHourlyScanRate, 30000);
+        
         window.onload = () => { 
             apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
             document.getElementById('keyCountLabel').innerText = apiKeys.length; 
-            renderScannedDatabaseGrid(); renderStandaloneVideos(); calculateGlobalStats(); 
-            initGoogleDriveLibraries(); 
-            if (queue.length > 0) {
-                renderQueue();
-                logErrorToConsoleOnScreen(`[תור שוחזר] נמצאו ${queue.length} משימות ממתינות בזיכרון, לחץ על 'חדש הכל' להמשך.`);
-            }
+            
+            loadDatabaseFromLocalFolderAAA().then(() => {
+                initGoogleDriveLibraries(); 
+                if (queue.length > 0) {
+                    renderQueue();
+                    logErrorToConsoleOnScreen(`[תור שוחזר] נמצאו ${queue.length} משימות ממתינות בזיכרון.`);
+                }
+            });
         };
     </script>
 </body>
