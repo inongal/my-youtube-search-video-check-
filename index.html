@@ -23,12 +23,13 @@
 </head>
 <body class="custom-scrollbar p-4 md:p-6 font-sans">
 
+    <!-- סרגל עליון -->
     <header class="max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-800">
         <div class="flex items-center gap-3">
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
                 <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 8.3 טורבו</h1>
-                <p class="text-xs text-zinc-400">זיכרון חיבור אוטומטי לענן, איתור חוסרים היסטוריים, ותיקון אנומליות מבוסס סריקה מחודשת</p>
+                <p class="text-xs text-zinc-400">איזון סטטיסטי אטומי, איתור חוסרים היסטוריים (חדשים וישנים), וזיכרון חיבור אוטומטי לענן</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -47,6 +48,7 @@
         </div>
     </header>
 
+    <!-- פנל שליטה גוגל דרייב -->
     <section class="max-w-[1600px] mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-md">
         <div class="flex items-center gap-3">
             <div class="p-2 bg-blue-600/10 text-blue-400 rounded-xl border border-blue-900/30">
@@ -70,6 +72,7 @@
         </div>
     </section>
 
+    <!-- שורת סיכום אנליטית מורחבת -->
     <section class="max-w-[1600px] mx-auto mb-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow">
             <span class="text-[11px] text-zinc-500 block">ערוצים רשומים</span>
@@ -105,6 +108,7 @@
         </div>
     </section>
 
+    <!-- פקדים גлובליים -->
     <section class="max-w-[1600px] mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-4 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-900 pb-3">
             <div class="flex items-center gap-3">
@@ -113,7 +117,7 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <button onclick="checkGlobalNewVideos()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-md font-sans">
-                    <i class="fas fa-search-plus"></i> 🔍 בדוק סרטונים חדשים וישנים חסרים בכל הערוצים
+                    <i class="fas fa-search-plus"></i> 🔍 בדוק סרטונים חדשים וישנים חסרים בכל הערוצים כעת
                 </button>
                 <button onclick="pushAllUntestedToQueue()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-md">
                     <i class="fas fa-question-circle"></i> 🟡 סרוק את כל הלא-נבדקים במערכת
@@ -129,6 +133,7 @@
     </section>
 
     <main class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- עמודה ימנית -->
         <div class="lg:col-span-4 space-y-6">
             <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-md">
                 <div class="flex justify-between items-center mb-3">
@@ -187,27 +192,30 @@
             </div>
         </div>
 
+        <!-- עמודה שמאלית -->
         <div class="lg:col-span-8 space-y-6">
             <section class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-md flex flex-col h-full">
-                <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i class="fas fa-search text-blue-400"></i> הוספת ערוץ ישירה או חיפוש חופשי</h2>
+                <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i class="fas fa-search text-blue-400"></i> הוספת ערוץ ישירה или חיפוש חופשי</h2>
                 <div class="flex flex-col sm:flex-row gap-2 max-w-2xl mb-3">
                     <input type="text" id="channelSearchInput" placeholder="הדבק כתובת ערוץ, מזהה ערוץ, ידית (@) או שם לחיפוש..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm outline-none focus:border-zinc-700 font-mono">
                     <button onclick="searchChannels()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-sm transition whitespace-nowrap"><i class="fas fa-magic ml-1"></i> מעבד / חפש ערוץ</button>
                 </div>
                 
+                <!-- פנל הוספה המונית -->
                 <div class="border-t border-zinc-800/80 pt-4 mt-1">
                     <div class="text-xs font-bold text-zinc-300 flex items-center gap-1.5 mb-2">
                         <i class="fas fa-folder-plus text-amber-500"></i> הוספת רשימת ערוצים המונית (כל ערוץ בשורה)
                     </div>
                     <textarea id="bulkChannelsTextArea" rows="5" placeholder="הדבק רשימת ערוצים, קישורים, או ידיות @howridiculous - אחד בכל שורה..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 outline-none text-left font-mono text-xs focus:border-zinc-700 custom-scrollbar mb-2" dir="ltr"></textarea>
                     <button onclick="processBulkChannelsInsertion()" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
-                        <i class="fas fa-play-circle"></i> פתח, פענח והכנס את כל הרשימה לתור לסריקה
+                        <i class="fas fa-play-circle"></i> פתח, פענח והכנס את כל הרשימה לתור לסриקה
                     </button>
                 </div>
 
+                <!-- תיבת פלט שגיאות ואי-הצלחות מובנית במסך -->
                 <div id="bulkErrorFeedbackWrapper" class="mt-4 border-t border-zinc-800/80 pt-4 flex-1 flex flex-col">
                     <div class="text-xs font-bold text-rose-400 flex items-center gap-1.5 mb-1.5">
-                        <i class="fas fa-exclamation-triangle"></i> דוח שגיאות ודילוגים (ערוצים שלא נמצאו ביוטיוב)
+                        <i class="fas fa-exclamation-triangle"></i> דוח שגיאות ודיлוגים (ערוצים שלא נמצאו ביוטיוב)
                     </div>
                     <textarea id="bulkErrorLogConsole" rows="4" readonly placeholder="כאן יופיעו ערוצים שגויים או כאלו שדולגו אוטומטית במהלך העבודה..." class="w-full bg-zinc-950 border border-zinc-900 text-rose-300/80 p-3 rounded-xl font-mono text-[11px] outline-none resize-none custom-scrollbar flex-1"></textarea>
                 </div>
@@ -217,12 +225,22 @@
         </div>
     </main>
 
+    <!-- אזור סרטונים בודדים -->
+    <section class="max-w-[1600px] mx-auto mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-lg">
+        <div class="flex items-center gap-2 mb-3">
+            <i class="fas fa-video text-zinc-400 text-sm"></i>
+            <h3 class="text-xs font-bold text-zinc-300">סרטונים בודדים במערכת (<span id="standaloneCountLabel">0</span>)</h3>
+        </div>
+        <div id="standaloneVideosContainer" class="flex flex-wrap gap-2 text-xs"></div>
+    </section>
+
+    <!-- אזור הערוצים המקומיים התחתון -->
     <section class="max-w-[1600px] mx-auto mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 pb-3 border-b border-zinc-900">
             <div class="flex items-center gap-4 flex-wrap">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-server text-zinc-400 text-xl"></i>
-                    <h2 class="text-lg font-bold">הערוצים הרשומים במערכת</h2>
+                    <h2 class="text-lg font-bold">הערוצים הרшומים במערכת</h2>
                 </div>
                 <div class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl text-xs">
                     <span class="text-zinc-500 font-bold"><i class="fas fa-sort-amount-down ml-1"></i>מיין לפי:</span>
@@ -248,6 +266,7 @@
         <div id="scannedDatabaseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[750px] overflow-y-auto pr-1 custom-scrollbar"></div>
     </section>
 
+    <!-- מודאל הגדרות ענן (Google Drive) -->
     <div id="driveConfigModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2 text-blue-400"><i class="fab fa-google-drive"></i> הגדרות סנכרון ענן Google Drive</h2>
@@ -263,31 +282,33 @@
                 </div>
             </div>
             <div class="flex gap-3">
-                <button onclick="saveDriveConfig()" class="flex-1 bg-white text-black py-2.5 rounded-xl font-bold text-sm">שמור הגדרות ענן</button>
-                <button onclick="toggleDriveConfigModal()" class="px-5 bg-zinc-800 text-white py-2.5 rounded-xl text-sm">ביטול</button>
+                <button onclick="saveDriveConfig()" class="flex-1 bg-white text-black py-2.5 rounded-xl font-bold text-sm hover:bg-zinc-200 transition">שמור הגדרות ענן</button>
+                <button onclick="toggleDriveConfigModal()" class="px-5 bg-zinc-800 text-white py-2.5 rounded-xl text-sm hover:bg-zinc-700 transition">ביטול</button>
             </div>
         </div>
     </div>
 
+    <!-- מודאל מפתחות יוטיוב API -->
     <div id="configModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2 text-blue-500"><i class="fas fa-key"></i> ניהול מפתחות YouTube API</h2>
             <p class="text-xs text-zinc-400 mb-3">הדבק מפתח אחד בכל שורה. המערכת תבצע רוטציה אוטומטית במקרה של ניצול מכסה:</p>
             <textarea id="apiKeysTextArea" rows="6" placeholder="הדבק מפתח אחד בכל שורה..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 outline-none text-left font-mono text-xs focus:border-zinc-700 mb-4 custom-scrollbar" dir="ltr"></textarea>
             <div class="flex gap-3">
-                <button onclick="saveApiKeys()" class="flex-1 bg-white text-black py-2.5 rounded-xl font-bold text-sm">שמור מפתחות</button>
-                <button onclick="toggleConfigModal()" class="px-5 bg-zinc-800 text-white py-2.5 rounded-xl text-sm">סגור</button>
+                <button onclick="saveApiKeys()" class="flex-1 bg-white text-black py-2.5 rounded-xl font-bold text-sm hover:bg-zinc-200 transition">שמור מפתחות</button>
+                <button onclick="toggleConfigModal()" class="px-5 bg-zinc-800 text-white py-2.5 rounded-xl text-sm hover:bg-zinc-700 transition">סגור</button>
             </div>
         </div>
     </div>
 
+    <!-- מודאל מעקב שינויי סטטוס (דו"ח סתירות) משודרג עם נגן מובנה -->
     <div id="reconciliationModal" class="fixed inset-0 z-[600] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-5xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
                 <h2 class="text-xl font-bold flex items-center gap-2 text-amber-400"><i class="fas fa-code-compare"></i> דו"ח שינויי סטטוס אחרונים מנטפרי</h2>
                 <button onclick="closeReconciliationModal()" class="text-zinc-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
-            <p class="text-xs text-zinc-400 mb-4">הסרטונים הבאים עודכנו אוטומטית לסטטוס החדש מהסריקה האחרונה. באפשרותך לצפות בהם ולבצע שינוי ידני הפוך במידת הצורך:</p>
+            <p class="text-xs text-zinc-400 mb-4">הסרטונים הבאים עודכנו אוטומטית לסטטוס החדש מהסриקה האחרונה. באפשרותך לצפות בהם ולבצע שינוי ידני הפוך במידת הצורך:</p>
             <div class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4 overflow-hidden mb-4">
                 <div class="md:col-span-7 overflow-y-auto custom-scrollbar space-y-2 bg-zinc-950 p-3 rounded-xl border border-zinc-800" id="reconciliationRowsContainer"></div>
                 <div class="md:col-span-5 flex flex-col bg-zinc-950 rounded-xl p-3 border border-zinc-800 items-center justify-center">
@@ -299,13 +320,14 @@
             </div>
             <div class="flex gap-3">
                 <button onclick="clearAllConflictLogs()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-sm transition shadow-md">
-                    <i class="fas fa-check-double ml-1"></i> נקה את רשימת הדיווחים (הכל מעודכן ומאושר)
+                    <i class="fas fa-check-double ml-1"></i> נקה את רשימת הדיווחים (הכל מעودכן ומאושר)
                 </button>
                 <button onclick="closeReconciliationModal()" class="px-6 bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-xl text-sm font-bold">סגור חלון</button>
             </div>
         </div>
     </div>
 
+    <!-- מודאל עריכה רгיל -->
     <div id="editChannelModal" class="fixed inset-0 z-[400] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-3xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
@@ -442,7 +464,7 @@
         function extractChannelIdOrHandle(input) {
             input = input.trim();
             if (input.startsWith('UC') && input.length >= 24) return { type: 'id', value: input }; 
-            const matchChannel = input.match(/\/\channel\/(UC[a-zA-Z0-9_-]{22})/);
+            const matchChannel = input.match(/\/channel\/(UC[a-zA-Z0-9_-]{22})/);
             if (matchChannel) return { type: 'id', value: matchChannel[1] };
             const matchHandle = input.match(/(?:youtube\.com\/)?@([a-zA-Z0-9_.-]+)/);
             if (matchHandle) return { type: 'handle', value: matchHandle[1] };
@@ -482,7 +504,7 @@
                         let count = await fetchChannelOfficialVideoCount(resolved.id);
                         pushToQueue(resolved.id, resolved.title, 'full', count);
                     } else {
-                        logErrorToConsoleOnScreen(`[דילוג] לא נמצא מזהה עבור הידית: @${parsed.value}`);
+                        logErrorToConsoleOnScreen(`[דיлוג] לא נמצא מזהה עבור הידית: @${parsed.value}`);
                     }
                 } else {
                     let resolved = await resolveFirstChannelIdFromSearchText(parsed.value);
@@ -490,7 +512,7 @@
                         let count = await fetchChannelOfficialVideoCount(resolved.id);
                         pushToQueue(resolved.id, resolved.title, 'full', count);
                     } else {
-                        logErrorToConsoleOnScreen(`[דילוג] החיפוש נכשל עבור: "${parsed.value}"`);
+                        logErrorToConsoleOnScreen(`[דיлוג] החיפוש נכשל עבור: "${parsed.value}"`);
                     }
                 }
             }
@@ -534,7 +556,7 @@
             const keys = Object.keys(db).filter(k => k !== "_standalone_videos");
             if(keys.length === 0) return alert("אין ערוצים רשומים במאגר לבדיקה.");
             
-            updateProgress(0, keys.length, "מאתר סרטונים חסרים (חדשים וישנים) מול שרתי יוטיוב...");
+            updateProgress(0, keys.length, "מאתר סרטונים חסרים (חדשים וישנים) מול שрתי יוטיוב...");
             let totalNewFound = 0;
             let channelsWithNew = 0;
 
@@ -544,7 +566,7 @@
                 if (!channelData) continue;
                 const uploadsPlaylistId = cid.replace(/^UC/, 'UU');
                 
-                updateProgress(i, keys.length, `בודק חוסרי מידע עבור הערוץ: ${channelData.title}`);
+                updateProgress(i, keys.length, `בודק חוסри מידע עבור הערוץ: ${channelData.title}`);
 
                 try {
                     const liveCount = await fetchChannelOfficialVideoCount(cid);
@@ -599,14 +621,14 @@
                     }
 
                 } catch (err) {
-                    console.error("שגיאה בסריקה גלובלית: " + cid, err);
+                    console.error("שגיאה בסриקה גלובלית: " + cid, err);
                 }
             }
             
             updateProgress(keys.length, keys.length, "בדיקת סרטונים חסרים הסתיימה.");
             if (totalNewFound > 0) {
                 saveDatabaseAndTriggerSync();
-                alert(`הסריקה הסתיימה!\nנמצאו ${totalNewFound} סרטונים חסרים (חדשים וישנים) ב-${channelsWithNew} ערוצים שונים.\nהם הוכנסו בצורה ממוקדת לתור לבדיקה ברשת.`);
+                alert(`הסриקה הסתיימה!\nנמצאו ${totalNewFound} סרטונים חסרים (חדשים וישנים) ב-${channelsWithNew} ערוצים שונים.\nהם הוכנסו בצורה ממוקדת לתור לבדיקה ברשת.`);
             } else {
                 alert("הסריקה הסתיימה! המאגר שלך מעודכן ב-100% ולא נמצאו שום סרטונים חסרים ביוטיוב.");
             }
@@ -620,7 +642,7 @@
                     totalAdded++;
                 }
             });
-            if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים לסריקת סרטונים שלא נבדקו.`); 
+            if(totalAdded > 0) alert(`הוכנסו לתור ${totalAdded} ערוצים לסриקת סרטונים שלא נבדקו.`); 
             else alert("אין סרטונים במצב 'לא נשלח' במאגר כרגע.");
         }
 
@@ -712,7 +734,6 @@
                         if (tokenResponse.error !== undefined) { throw (tokenResponse); }
                         googleAccessToken = tokenResponse.access_token;
                         
-                        // 🌟 שדרוג: שמירת ה-Access Token בזיכרון קבוע לחיבור אוטומטי
                         localStorage.setItem('yt_google_access_token', googleAccessToken);
                         
                         document.getElementById('btnDriveAuth').innerText = "✓ מחובר לגוגל";
@@ -725,7 +746,7 @@
             } catch(e) { console.error(e); }
         } 
 
-        function handleAuthClick() { if (googleTokenClient === null) return alert("הזן קודם מפתחות בהגדרות ענן."); googleTokenClient.requestAccessToken({prompt: 'consent'}); }
+        function handleAuthClick() { if (googleTokenClient === null) return alert("הזן קודם מפתחות בהгדרות ענן."); googleTokenClient.requestAccessToken({prompt: 'consent'}); }
 
         async function syncWithGoogleDrive(isDeletionSync = false) { 
             if (!googleAccessToken) return;
@@ -874,7 +895,7 @@
                         }
                     });
                 } catch (e) {
-                    console.error("שגיאת תקשורת מול השרת המקומי:", e);
+                    console.error("שגיאת מענה מהשרת המקומי:", e);
                     currentBatch.forEach(id => {
                         scanMapping[id] = 'blocked';
                         const oldRow = document.getElementById(`live-item-${id}`);
@@ -904,7 +925,7 @@
             if (minutes > 0) timeLabel.innerText = `כ-${minutes} דק' ו-${seconds} שנ'`; else timeLabel.innerText = `כ-${seconds} שניות`;
         }
 
-        function createLiveTestingRow(vId, elementId) { const list = document.getElementById('liveOpenList'); const div = document.createElement('div'); div.id = elementId; div.className = "flex justify-between items-center bg-blue-950/40 px-2 py-0.5 rounded border border-blue-800/60 mb-1 text-blue-400 font-bold animate-pulse"; div.innerHTML = `<span class=\"flex items-center gap-1\"><span class=\"text-blue-500 text-sm leading-none\">●</span><span>\·${vId}</span></span><span class=\"text-[8px] font-normal text-zinc-500\">טורבו...</span>`; list.insertBefore(div, list.firstChild); }
+        function createLiveTestingRow(vId, elementId) { const list = document.getElementById('liveOpenList'); const div = document.createElement('div'); div.id = elementId; div.className = "flex justify-between items-center bg-blue-950/40 px-2 py-0.5 rounded border border-blue-800/60 mb-1 text-blue-400 font-bold animate-pulse"; div.innerHTML = `<span class="flex items-center gap-1"><span class="text-blue-500 text-sm leading-none">●</span><span>${vId}</span></span><span class="text-[8px] font-normal text-zinc-500">טורבו...</span>`; list.insertBefore(div, list.firstChild); }
         
         function playVideoInMainQa(videoId) {
             const placeholder = document.getElementById('mainQaPlayerPlaceholder');
@@ -913,7 +934,10 @@
             if (frameElement) {
                 const wrapper = frameElement.parentElement;
                 wrapper.innerHTML = `
-                    <div id=\"mainQaPlayerFrame\" class=\"w-full h-full\"></div>\n                    <div id=\"mainQaPlayerPlaceholder\" class=\"absolute inset-0 flex items-center justify-center text-zinc-600 text-[10px] bg-zinc-950 p-4 text-center\" style=\"display:none;\">\n                        לחץ על כפתור נגן ברשימות כדי לבדוק\n                    </div>`;
+                    <div id="mainQaPlayerFrame" class="w-full h-full"></div>
+                    <div id="mainQaPlayerPlaceholder" class="absolute inset-0 flex items-center justify-center text-zinc-600 text-[10px] bg-zinc-950 p-4 text-center" style="display:none;">
+                        לחץ על כפתור נגן ברשימות כדי לבדוק
+                    </div>`;
             }
             mainQaPlayerInstance = new YT.Player('mainQaPlayerFrame', {
                 height: '100%', width: '100%', videoId: videoId,
@@ -927,7 +951,7 @@
             const frameElement = document.getElementById('modalQaPlayerFrame');
             if (frameElement) {
                 const wrapper = frameElement.parentElement;
-                wrapper.innerHTML = '<div id=\"modalQaPlayerFrame\" class=\"w-full h-full\"></div>';
+                wrapper.innerHTML = '<div id="modalQaPlayerFrame" class="w-full h-full"></div>';
             }
             modalQaPlayerInstance = new YT.Player('modalQaPlayerFrame', {
                 height: '100%', width: '100%', videoId: videoId,
@@ -941,7 +965,7 @@
             const frameElement = document.getElementById('reconciliationQaPlayerFrame');
             if (frameElement) {
                 const wrapper = frameElement.parentElement;
-                wrapper.innerHTML = '<div id=\"reconciliationQaPlayerFrame\" class=\"w-full h-full\"></div>';
+                wrapper.innerHTML = '<div id="reconciliationQaPlayerFrame" class="w-full h-full"></div>';
             }
             reconQaPlayerInstance = new YT.Player('reconciliationQaPlayerFrame', {
                 height: '100%', width: '100%', videoId: videoId,
@@ -1407,134 +1431,12 @@
             }
         }
 
-        function openEditModal(channelId) { activeEditingChannelId = channelId; const data = db[channelId]; if(!data) return; document.getElementById('editModalTitle').innerText = `עריכת סרטונים: ${data.title}`; activeModalPlayingVideoId = null; renderModalVideoLists(); document.getElementById('editChannelModal').style.display = 'flex'; }
-        function closeEditModal() { document.getElementById('editChannelModal').style.display = 'none'; if(modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); } catch(e){} } activeEditingChannelId = null; activeModalPlayingVideoId = null; }
-        
-        function renderModalVideoLists() { 
-            const data = db[activeEditingChannelId]; if(!data) return; 
-            const openCont = document.getElementById('modalOpenList'); 
-            const blockCont = document.getElementById('modalBlockedList');
-            const untestedCont = document.getElementById('modalUntestedList');
-
-            openCont.innerHTML = ''; blockCont.innerHTML = ''; untestedCont.innerHTML = ''; 
-            document.getElementById('modalOpenCount').innerText = data.openVideos?.length || 0; 
-            document.getElementById('modalBlockedCount').innerText = data.blockedVideos?.length || 0;
-            document.getElementById('modalUntestedCount').innerText = data.untestedVideos?.length || 0;
-
-            data.openVideos?.forEach(id => openCont.appendChild(createModalVideoRow(id, 'open'))); 
-            data.untestedVideos?.forEach(id => untestedCont.appendChild(createModalVideoRow(id, 'untested')));
-            data.blockedVideos?.forEach(id => blockCont.appendChild(createModalVideoRow(id, 'blocked'))); 
-        }
-        
-        function createModalVideoRow(id, type) { 
-            const isPlayingNow = (activeModalPlayingVideoId === id); const div = document.createElement('div'); 
-            if(isPlayingNow) { div.className = "bg-blue-600/30 p-2 border-2 border-blue-500 rounded-lg flex justify-between items-center mb-1 text-blue-200 font-bold ring-1 ring-blue-400 animate-pulse"; } 
-            else { div.className = "bg-zinc-950 p-1.5 rounded border border-zinc-800 mb-1 hover:border-zinc-700 transition text-zinc-300"; } 
-            div.innerHTML = `<span class="truncate pl-2 max-w-[50%] flex items-center gap-1">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce"></i> ' : ''}<span>${id}</span></span><div class="flex gap-2"><button onclick="playVideoInModalQa('${id}')" class="text-blue-400 hover:underline text-[11px] font-bold">📺 נגן</button><button onclick="toggleVideoStatusManual('${id}', '${type}')" class="text-amber-500 text-[11px] font-bold">🔄 שנה</button></div>`; return div; 
-        }
-        
-        function toggleVideoStatusManual(vId, currentType) {
-            const data = db[activeEditingChannelId]; if(!data) return;
-            if (currentType === 'open') data.openVideos = data.openVideos.filter(id => id !== vId);
-            else if (currentType === 'blocked') data.blockedVideos = data.blockedVideos.filter(id => id !== vId);
-            else data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
-
-            if (currentType === 'open') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
-            else if (currentType === 'untested') { if(!data.blockedVideos) data.blockedVideos = []; data.blockedVideos.push(vId); }
-            else { if(!data.openVideos) data.openVideos = []; data.openVideos.push(vId); }
-
-            data.totalVideos = (data.openVideos?.length || 0) + (data.blockedVideos?.length || 0) + (data.untestedVideos?.length || 0);
-            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
-        }
-
-        function addVideoManually(targetType) {
-            const vId = document.getElementById('manualVideoIdInput').value.trim();
-            if(!vId || vId.length < 5) return alert("הזן מזהה וידאו תקין.");
-            const data = db[activeEditingChannelId]; if(!data) return;
-
-            document.getElementById('manualVideoIdInput').value = '';
-            data.openVideos = (data.openVideos || []).filter(id => id !== vId);
-            data.blockedVideos = (data.blockedVideos || []).filter(id => id !== vId);
-            data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
-
-            if(targetType === 'open') data.openVideos.push(vId);
-            else if(targetType === 'untested') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
-            else data.blockedVideos.push(vId);
-
-            data.totalVideos = (data.openVideos?.length || 0) + (data.blockedVideos?.length || 0) + (data.untestedVideos?.length || 0);
-            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
-        }
-
-        function exportCleanJSON() { let cleanDb = {}; Object.keys(db).forEach(key => { if(key === "_standalone_videos") { cleanDb["_standalone_videos"] = db[key].open; } else { cleanDb[key] = { title: db[key].title, openVideos: db[key].openVideos }; } }); triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanDb, null, 2)), "netfree_approved_channels_clean.json"); }
-        function exportFullBackup() { triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)), "system_full_backup.json"); }
-        function triggerDownload(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
-        
-        function openReconciliationModal() {
-            renderReconciliationRows();
-            document.getElementById('reconciliationModal').style.display = 'flex';
-        }
-        function closeReconciliationModal() { 
-            document.getElementById('reconciliationModal').style.display = 'none'; 
-            if(reconQaPlayerInstance) { try { reconQaPlayerInstance.destroy(); } catch(e){} }
-            activeReconciliationPlayingVideoId = null;
-        }
-
-        function renderReconciliationRows() {
-            const container = document.getElementById('reconciliationRowsContainer');
-            document.getElementById('globalConflictCountLabel').innerText = pendingConflicts.length;
-            
-            if(pendingConflicts.length === 0) {
-                container.innerHTML = '<div class="text-center py-12 text-zinc-600 text-xs font-bold">אין שינויים אחרונים במאגר. הכל מעודכן ומסונכרן!</div>';
-                return;
-            }
-
-            container.innerHTML = '';
-            pendingConflicts.forEach((conflict, index) => {
-                const isPlayingNow = (activeReconciliationPlayingVideoId === conflict.id);
-                const row = document.createElement('div');
-                
-                if(isPlayingNow) {
-                    row.className = "flex flex-col sm:flex-row justify-between items-center bg-blue-600/20 border-2 border-blue-500 p-3 rounded-xl gap-3 text-xs ring-1 ring-blue-400 animate-pulse";
-                } else {
-                    row.className = "flex flex-col sm:flex-row justify-between items-center bg-zinc-900 border border-zinc-800 p-3 rounded-xl gap-3 text-xs";
-                }
-                
-                let oldBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${conflict.oldStatus==='open'?'bg-emerald-950 text-emerald-400':conflict.oldStatus==='untested'?'bg-amber-950 text-amber-400':'bg-rose-950 text-rose-400'}">לשעבר: ${conflict.oldStatus}</span>`;
-                let newBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${conflict.newStatus==='open'?'bg-emerald-600 text-white':conflict.newStatus==='untested'?'bg-amber-500 text-black':'bg-rose-600 text-white'}">השתנה ל: ${conflict.newStatus}</span>`;
-
-                row.innerHTML = `
-                    <div class="truncate flex-1 text-right">
-                        <span class="font-bold text-zinc-300 block truncate text-xs">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce ml-1"></i> ' : ''}${conflict.channelTitle}</span>
-                        <span class="font-mono text-zinc-500 block mt-0.5 text-[10px]">${conflict.id}</span>
-                    </div>
-                    <div class="flex gap-1.5 flex-shrink-0 items-center">
-                        ${oldBadge} <i class="fas fa-arrow-left text-zinc-600 text-[9px]"></i> ${newBadge}
-                    </div>
-                    <div class="flex gap-1 flex-shrink-0 items-center">
-                        <button onclick="playVideoInReconciliationQa('${conflict.id}')" class="bg-zinc-800 hover:bg-blue-900 text-blue-400 px-2 py-1 rounded font-bold text-[10px]">📺 נגן</button>
-                        <span class="text-zinc-600 px-0.5">|</span>
-                        <button onclick="resolveSingleConflict(${index}, 'open')" class="bg-zinc-800 hover:bg-emerald-950 px-1.5 py-1 rounded text-emerald-400 text-[9px]">כפה פתוח</button>
-                        <button onclick="resolveSingleConflict(${index}, 'untested')" class="bg-zinc-800 hover:bg-amber-950 px-1.5 py-1 rounded text-amber-500 text-[9px]">כפה צהוב</button>
-                        <button onclick="resolveSingleConflict(${index}, 'blocked')" class="bg-zinc-800 hover:bg-rose-950 px-1.5 py-1 rounded text-rose-400 text-[9px]">כפה חסום</button>
-                    </div>`;
-                container.appendChild(row);
-            });
-        }
-
-        function clearAllConflictLogs() {
-            pendingConflicts = [];
-            calculateGlobalStats();
-            closeReconciliationModal();
-            alert("רשימת הדוחות נוקתה בהצלחה. כל העדכונים כבר שמורים בפרויקט!");
-        }
-
         importFullBackup = function(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { db = JSON.parse(e.target.result); saveDatabaseAndTriggerSync(); } catch(err) { alert("קובץ גיבוי לא תקין"); } }; reader.readAsText(file); }
 
         window.onload = () => { 
             apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
             document.getElementById('keyCountLabel').innerText = apiKeys.length; 
 
-            // 🔄 שחזור חיבור אוטומטי לגוגל דרייב אם קיים אסימון שמור בדפדפן
             const savedToken = localStorage.getItem('yt_google_access_token');
             if (savedToken && driveConfig.clientId && driveConfig.apiKey) {
                 googleAccessToken = savedToken;
@@ -1547,7 +1449,7 @@
             loadDatabaseFromLocalFolderAAA().then(() => {
                 initGoogleDriveLibraries(); 
                 if (googleAccessToken) {
-                    syncWithGoogleDrive(); // מיזוג וסנכרון ראשוני מיידי
+                    syncWithGoogleDrive();
                 }
                 if (queue.length > 0) {
                     renderQueue();
