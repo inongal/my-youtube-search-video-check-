@@ -151,7 +151,7 @@
                     <div id="progressBarFill" class="bg-gradient-to-l from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-200" style="width: 0%"></div>
                 </div>
                 <div class="flex justify-between text-[10px] text-zinc-400 mb-3 px-1">
-                    <span id="progressText">מערכת מוכנה.</span>
+                    <span id="progressText">Mערכת במנוחה.</span>
                     <span id="progressPercentage">0%</span>
                 </div>
 
@@ -253,6 +253,15 @@
                 <button id="btnFixAllAnomalies" onclick="fixAllDatabaseAnomalies()" class="bg-zinc-950 hover:bg-zinc-900 text-blue-400 border border-blue-900/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md hidden animate-pulse">
                     <i class="fas fa-wand-magic-sparkles"></i> 🪄 הפעל בדיקת עומק והכנס לא תואמים לסריקה מלאה מחדש
                 </button>
+
+                <!-- בקרת פעולות המוניות החדשה -->
+                <div id="bulkActionsControlContainer" class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs">
+                    <button onclick="toggleSelectAllChannels()" class="text-zinc-400 hover:text-zinc-300 font-bold ml-1 flex items-center gap-1"><i class="fas fa-check-square text-blue-400"></i> בחר / נקה הכל</button>
+                    <span class="text-zinc-600 font-bold">|</span>
+                    <span class="text-zinc-400 font-bold">הפעל המוני:</span>
+                    <button onclick="runBulkOperation('blocked_only')" class="bg-rose-600/90 hover:bg-rose-700 text-white text-[11px] px-2 py-0.5 rounded-md font-bold transition"><i class="fas fa-scissors ml-0.5"></i> סרוק רק חסומים</button>
+                    <button onclick="runBulkOperation('untested_only')" class="bg-amber-600/90 hover:bg-amber-700 text-white text-[11px] px-2 py-0.5 rounded-md font-bold transition"><i class="fas fa-question ml-0.5"></i> סרוק רק לא נבדקו</button>
+                </div>
             </div>
             <div class="relative w-full sm:max-w-xs">
                 <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-zinc-500 text-xs"><i class="fas fa-filter"></i></span>
@@ -262,6 +271,7 @@
         <div id="scannedDatabaseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[750px] overflow-y-auto pr-1 custom-scrollbar"></div>
     </section>
 
+    <!-- מודאל הגדרות ענן -->
     <div id="driveConfigModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2 text-blue-400"><i class="fab fa-google-drive"></i> הגדרות סנכרון ענן Google Drive</h2>
@@ -283,6 +293,7 @@
         </div>
     </div>
 
+    <!-- מודאל מפתחות API -->
     <div id="configModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2 text-blue-505"><i class="fas fa-key"></i> ניהול מפתחות YouTube API</h2>
@@ -295,6 +306,7 @@
         </div>
     </div>
 
+    <!-- מודאל דוח שינויים מנטפרי -->
     <div id="reconciliationModal" class="fixed inset-0 z-[600] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-5xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
@@ -320,6 +332,7 @@
         </div>
     </div>
 
+    <!-- מודאל עריכת סרטונים בערוץ -->
     <div id="editChannelModal" class="fixed inset-0 z-[400] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-3xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-zinc-800">
@@ -1517,8 +1530,6 @@
         function triggerDownload(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
         importFullBackup = function(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { db = JSON.parse(e.target.result); saveDatabaseAndTriggerSync(); } catch(err) { alert("קובץ גיבוי לא תקין"); } }; reader.readAsText(file); }
 
-        // --- שילוב פונקציות הרינדור והרוטציה לתיקון הבאגים ---
-
         async function fetchWithRotation(urlBuilderFunc) {
             if (!apiKeys || apiKeys.length === 0) {
                 console.error("לא הוגדרו מפתחות API ברוטציה.");
@@ -1548,6 +1559,7 @@
             return "QUOTA_EXHAUSTED";
         }
 
+        // רינדור רשת הערוצים המשופרת (כולל תיבות סימון לבחירה המונית וכפתורי סריקה סלקטיביים)
         function renderScannedDatabaseGrid() {
             const grid = document.getElementById('scannedDatabaseGrid');
             if (!grid) return;
@@ -1587,7 +1599,10 @@
                 div.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start gap-2 mb-1">
-                            <h3 class="font-bold text-sm text-white truncate flex-1">${item.title}</h3>
+                            <div class="flex items-center gap-2 truncate flex-1">
+                                <input type="checkbox" data-channel-id="${k}" class="channel-bulk-checkbox w-4 h-4 bg-zinc-950 border-zinc-800 rounded text-blue-600 focus:ring-0 focus:ring-offset-0 cursor-pointer">
+                                <h3 class="font-bold text-sm text-white truncate">${item.title}</h3>
+                            </div>
                             <button onclick="deleteChannel('${k}')" class="text-rose-500 hover:text-rose-400 text-xs"><i class="fas fa-trash"></i></button>
                         </div>
                         <span class="text-[10px] font-mono text-zinc-500 block truncate">${k}</span>
@@ -1599,14 +1614,53 @@
                         </div>
                         <span class="text-[10px] text-zinc-400 block">עדכון: ${item.scannedAt || '-'} (ריצות: ${item.scanCount || 0})</span>
                     </div>
-                    <div class="flex flex-wrap gap-1 pt-2 border-t border-zinc-800/60">
-                        <button onclick="openEditModal('${k}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] py-1 rounded-lg font-bold transition"><i class="fas fa-edit ml-1"></i>עריכה</button>
-                        <button onclick="triggerQueueFromGrid('${k}', '${encodeURIComponent(item.title)}', 'full')" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-2 py-1 rounded-lg font-bold transition"><i class="fas fa-sync"></i></button>
-                        <button onclick="toggleNetfreeWhitelist('${k}')" class="${item.isNetfreeWhitelisted ? 'bg-teal-600 text-white' : 'bg-zinc-800 text-zinc-400'} text-[11px] px-2 py-1 rounded-lg font-bold transition"><i class="fas fa-shield-halved"></i></button>
+                    <div class="flex flex-col gap-1.5 pt-2 border-t border-zinc-800/60">
+                        <div class="flex gap-1 w-full">
+                            <button onclick="openEditModal('${k}')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] py-1 rounded-lg font-bold transition"><i class="fas fa-edit ml-1"></i>עריכה</button>
+                            <button onclick="triggerQueueFromGrid('${k}', '${encodeURIComponent(item.title)}', 'full')" title="סריקה מלאה מחדש" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-3 py-1 rounded-lg font-bold transition"><i class="fas fa-sync"></i></button>
+                            <button onclick="toggleNetfreeWhitelist('${k}')" class="${item.isNetfreeWhitelisted ? 'bg-teal-600 text-white' : 'bg-zinc-800 text-zinc-400'} text-[11px] px-2.5 py-1 rounded-lg font-bold transition"><i class="fas fa-shield-halved"></i></button>
+                        </div>
+                        <div class="flex gap-1 w-full">
+                            <button onclick="triggerQueueFromGrid('${k}', '${encodeURIComponent(item.title)}', 'blocked_only')" class="flex-1 bg-rose-950/40 hover:bg-rose-900/40 text-rose-400 border border-rose-900/30 text-[10px] py-1 rounded-lg font-bold transition"><i class="fas fa-scissors ml-1"></i>רק חסומים</button>
+                            <button onclick="triggerQueueFromGrid('${k}', '${encodeURIComponent(item.title)}', 'untested_only')" class="flex-1 bg-amber-950/40 hover:bg-amber-900/40 text-amber-400 border border-amber-900/30 text-[10px] py-1 rounded-lg font-bold transition"><i class="fas fa-question ml-1"></i>רק לא נבדקו</button>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(div);
             });
+        }
+
+        // מנגנון סימון גלובלי (בחר / נקה הכל)
+        function toggleSelectAllChannels() {
+            const checkboxes = document.querySelectorAll('.channel-bulk-checkbox');
+            const anyUnchecked = Array.from(checkboxes).some(cb => !cb.checked);
+            checkboxes.forEach(cb => cb.checked = anyUnchecked);
+        }
+
+        // מנגנון הרצה המונית מבוסס מקבץ תיבות סימון
+        function runBulkOperation(mode) {
+            const checkedBoxes = document.querySelectorAll('.channel-bulk-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                return alert("אנא סמן לפחות ערוץ אחד (באמצעות תיבות הסימון בכרטיסיות) כדי לבצע הפעלה המונית.");
+            }
+            
+            let pushedCount = 0;
+            checkedBoxes.forEach(cb => {
+                const cid = cb.getAttribute('data-channel-id');
+                const item = db[cid];
+                if (item) {
+                    let count = 0;
+                    if (mode === 'blocked_only') count = item.blockedVideos?.length || 0;
+                    else if (mode === 'untested_only') count = item.untestedVideos?.length || 0;
+                    else count = item.totalVideos || 0;
+
+                    pushToQueue(cid, item.title, mode, count);
+                    pushedCount++;
+                    cb.checked = false; // איפוס תיבת הסימון לאחר ההוספה לתור
+                }
+            });
+            
+            alert(`הפעולה ההמונית הצליחה! ${pushedCount} ערוצים הוכנסו בצורה ממוקדת לתור הראשי.`);
         }
 
         function renderReconciliationRows() {
@@ -1722,7 +1776,7 @@
             if (!badge) return;
             
             if (queue.length === 0) {
-                badge.innerText = "Mערכת במנוחה";
+                badge.innerText = "מערכת במנוחה";
                 badge.className = "text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-500 rounded-xl";
             } else if (globalPause) {
                 badge.innerText = "מערכת מושהית";
