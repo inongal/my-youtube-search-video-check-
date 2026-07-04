@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v8.2</title>
+    <title>YouTube NetFree Scan Control Hub v8.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -27,8 +27,8 @@
         <div class="flex items-center gap-3">
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 8.2 טורבו</h1>
-                <p class="text-xs text-zinc-400">איזון סטטיסטי אטומי, איתור חוסרים היסטוריים (חדשים וישנים), ותיקון אנומליות מבוסס סריקה מחודשת</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 8.4 טורבו</h1>
+                <p class="text-xs text-zinc-400">איזון סטטיסטי אטומי, איתור חוסרים היסטוריים (חדשים וישנים), וחיבור אוטומטי רציף לענן</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -247,6 +247,27 @@
         </div>
         <div id="scannedDatabaseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[750px] overflow-y-auto pr-1 custom-scrollbar"></div>
     </section>
+
+    <div id="driveConfigModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
+            <h2 class="text-xl font-bold mb-2 flex items-center gap-2 text-blue-400"><i class="fab fa-google-drive"></i> הגדרות סנכרון ענן Google Drive</h2>
+            <p class="text-xs text-zinc-400 mb-4">הזן את מפתחות הגישה שלך לחשבון גוגל כדי לאפשר מיזוג וסנכרון אוטומטי:</p>
+            <div class="space-y-3 mb-4">
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">Google Client ID:</label>
+                    <input type="text" id="driveClientIdInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-left font-mono outline-none focus:border-zinc-700">
+                </div>
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">Google API Key:</label>
+                    <input type="text" id="driveApiKeyInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-left font-mono outline-none focus:border-zinc-700">
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="saveDriveConfig()" class="flex-1 bg-white text-black py-2.5 rounded-xl font-bold text-sm hover:bg-zinc-200 transition">שמור הגדרות ענן</button>
+                <button onclick="toggleDriveConfigModal()" class="px-5 bg-zinc-800 text-white py-2.5 rounded-xl text-sm hover:bg-zinc-700 transition">ביטול</button>
+            </div>
+        </div>
+    </div>
 
     <div id="reconciliationModal" class="fixed inset-0 z-[600] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-5xl bg-zinc-900 border border-zinc-800 text-right flex flex-col max-h-[90vh]">
@@ -508,7 +529,6 @@
             return null;
         }
 
-        // 🌟 שדרוג: סריקה לאיתור חדשים וישנים חסרים - סורק פלייליסט מלא ומאתר חורים במערך
         async function checkGlobalNewVideos() {
             const keys = Object.keys(db).filter(k => k !== "_standalone_videos");
             if(keys.length === 0) return alert("אין ערוצים רשומים במאגר לבדיקה.");
@@ -536,7 +556,6 @@
                     
                     let allPlaylistVideoIds = [];
                     
-                    // אם חסרים סרטונים במאגר המקומי (בין אם הם ישנים או חדשים), נסרוק את כל הפלייליסט של הערוץ ביוטיוב
                     if (actualSum < liveCount) {
                         let nextPageToken = "";
                         let safetyCounter = 0;
@@ -546,17 +565,16 @@
                             if(data === "QUOTA_EXHAUSTED" || data === null) break; 
                             if (data && data.items && data.items.length > 0) { 
                                 data.items.forEach(item => { 
-                                    const vId = item.snippet?.resourceId?.videoId; 
-                                    if (vId && !allPlaylistVideoIds.includes(vId)) allPlaylistVideoIds.push(vId); 
+                                    const vId = item.snippet?.resourceId?.videoId;
+                                    if (vId && !allPlaylistVideoIds.includes(vId)) allPlaylistVideoIds.push(vId);
                                 }); 
-                                nextPageToken = data.nextPageToken || ""; 
-                            } else { 
-                                nextPageToken = ""; 
+                                nextPageToken = data.nextPageToken || "";
+                            } else {
+                                nextPageToken = "";
                             }
                             safetyCounter++; if(safetyCounter > 200) break; 
                         } while (nextPageToken);
                     } else {
-                        // אם המונים שווים, נעשה רק בדיקה מהירה של ה-50 האחרונים למקרה שעלה משהו בדקות האחרונות
                         const data = await fetchWithRotation((key) => `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=50&key=${key}`);
                         if (data && data.items && data.items.length > 0) {
                             data.items.forEach(item => {
@@ -566,13 +584,11 @@
                         }
                     }
 
-                    // סינון ומציאת כל המזהים שלא קיימים אצלנו במאגר בכלל (חדשים או ישנים שפוספסו בעבר)
                     let missingIds = allPlaylistVideoIds.filter(vId => !knownIds.includes(vId));
 
                     if (missingIds.length > 0) {
                         totalNewFound += missingIds.length;
                         channelsWithNew++;
-                        // דוחף לתור משימה ממוקדת שתסרוק אך ורק את ה-IDs החסרים הללו
                         pushToQueue(cid, channelData.title, 'new_only', missingIds.length, missingIds);
                     }
                     
@@ -650,8 +666,15 @@
             currentLiveUntestedIds.forEach(id => appendLiveList('liveUntestedList', id, 'amber'));
         }
 
+        // 🛠️ פונקציית הפתיחה ששואבת מעודכן ומאכלסת את השדות כראוי
         function toggleDriveConfigModal() {
-            const m = document.getElementById('driveConfigModal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            const m = document.getElementById('driveConfigModal');
+            if(!m) return;
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            if (m.style.display === 'flex') {
+                document.getElementById('driveClientIdInput').value = driveConfig.clientId || '';
+                document.getElementById('driveApiKeyInput').value = driveConfig.apiKey || '';
+            }
         }
 
         function saveDriveConfig() {
@@ -671,6 +694,10 @@
                     callback: (tokenResponse) => {
                         if (tokenResponse.error !== undefined) { throw (tokenResponse); }
                         googleAccessToken = tokenResponse.access_token;
+                        
+                        // שמירת אסימון הגישה לקובץ המטמון הקבוע בדפדפן
+                        localStorage.setItem('yt_google_access_token', googleAccessToken);
+                        
                         document.getElementById('btnDriveAuth').innerText = "✓ מחובר לגוגל";
                         document.getElementById('btnDriveAuth').className = "bg-emerald-600/20 text-emerald-400 border border-emerald-800 px-4 py-1.5 rounded-xl text-xs font-bold cursor-default";
                         document.getElementById('btnDriveSync').disabled = false;
@@ -1036,7 +1063,7 @@
                 
                 if (newStatus === 'open') finalOpen.push(id);
                 else if (newStatus === 'untested') finalUntested.push(id);
-                else finalBlocked.push(id);
+                else finalBlocked.push(id); 
             });
 
             db[channelId] = { 
@@ -1081,8 +1108,7 @@
                 if (resStatus === 'open') {
                     if (!existingData.openVideos.includes(id)) existingData.openVideos.push(id);
                 } else if (resStatus === 'blocked') {
-                    if (!existingData.blockedVideos.includes(id)) existingData.blockedVideos.push(id);
-                } else {
+                    if (!existingData.blockedVideos.includes(id)) existingData.blockedVideos.push(id);                } else {
                     newUntested.push(id);
                 }
             });
@@ -1231,88 +1257,52 @@
             } 
         }
 
-        function renderScannedDatabaseGrid() {
-            const grid = document.getElementById('scannedDatabaseGrid'); const searchFilter = document.getElementById('localDbSearchInput').value.trim().toLowerCase();
-            const sortMode = document.getElementById('localDbSortSelect').value;
-            let keys = Object.keys(db).filter(k => k !== "_standalone_videos"); 
-            
-            if (searchFilter) keys = keys.filter(cid => db[cid].title && db[cid].title.toLowerCase().includes(searchFilter));
-            
-            if (filterAnomaliesOnly) {
-                keys = keys.filter(cid => {
-                    const item = db[cid];
-                    const actualSum = (item.openVideos?.length || 0) + (item.blockedVideos?.length || 0) + (item.untestedVideos?.length || 0);
-                    return actualSum !== (item.totalVideos || 0);
-                });
-            }
-
-            if (sortMode === "timestamp") keys.sort((a, b) => (db[b].updatedTimestamp || 0) - (db[a].updatedTimestamp || 0));
-            else if (sortMode === "scans") keys.sort((a, b) => (db[a].scanCount || 1) - (db[b].scanCount || 1));
-            else if (sortMode === "alphabetical") keys.sort((a, b) => (db[a].title || "").localeCompare(db[b].title || ""));
-
-            if(keys.length === 0) { grid.innerHTML = '<div class="col-span-full text-center py-6 text-zinc-600 text-xs">אין תוצאות לערוצים הרשומים.</div>'; return; }
-            grid.innerHTML = '';
-            
-            keys.forEach(cid => {
-                const item = db[cid]; const div = document.createElement('div'); div.className = "bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex flex-col justify-between shadow-md hover:border-zinc-700 transition w-full";
-                let blockedCount = item.blockedVideos ? item.blockedVideos.length : 0; 
-                let untestedCount = item.untestedVideos ? item.untestedVideos.length : 0;
-                let openCount = item.openVideos ? item.openVideos.length : 0;
-                const isWhitelisted = item.isNetfreeWhitelisted || false;
-                let scansCount = item.scanCount || 1; 
-                let encodedTitle = encodeURIComponent(item.title || '');
-                
-                const actualSum = openCount + blockedCount + untestedCount;
-                const isAnomalous = (actualSum !== (item.totalVideos || 0));
-
-                div.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start gap-2 mb-1.5">
-                            <h4 class="font-bold text-sm text-white truncate max-w-[70%] flex items-center gap-1.5">
-                                <a href="https://www.youtube.com/channel/${cid}" target="_blank" class="text-zinc-500 hover:text-blue-400 transition"><i class="fas fa-link text-xs"></i></a>
-                                <span class="truncate">${item.title || 'ללא שם'}</span>
-                            </h4>
-                            <span class="text-[9px] bg-zinc-950 text-zinc-400 font-mono px-1.5 py-0.5 rounded border border-zinc-800">${item.scannedAt || 'לא ידוע'}</span>
-                        </div>
-                        <div class="mt-1 mb-2 flex justify-between items-center">
-                            <span class="text-[10px] text-zinc-500 font-bold block"><i class="fas fa-rotate ml-1 text-zinc-600"></i>סך הכל סריקות: <span class="text-blue-400 font-mono font-bold">${scansCount.toLocaleString('he-IL')}</span></span>
-                            ${isAnomalous ? `<span class="text-[9px] bg-amber-950/60 text-amber-400 font-bold px-2 py-0.5 rounded border border-amber-800 animate-pulse"><i class="fas fa-triangle-exclamation ml-1"></i>שגיאת מונים</span>` : ''}
-                        </div>
-                        <div class="mt-1 mb-2.5"><button onclick="toggleNetfreeWhitelist('${cid}')" class="w-full text-right text-[10px] px-2.5 py-1.5 rounded-xl border flex items-center justify-between transition ${isWhitelisted ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800' : 'bg-zinc-950 text-zinc-500 border-zinc-800 hover:text-zinc-400'}"><span><i class="fas fa-shield-halved ml-1"></i> ערוץ מאושר גורף בנטפרי</span><span class="font-bold text-[9px] bg-zinc-900/50 px-2 py-0.5 rounded-md">${isWhitelisted ? 'פעיל' : 'כבוי'}</span></button></div>
-                        <div class="grid grid-cols-4 gap-1 text-center my-2 text-[10px] font-bold">
-                            <div class="bg-zinc-950 p-1 rounded-xl text-zinc-400 border border-zinc-800/40 font-mono ${isAnomalous ? 'text-amber-400 ring-1 ring-amber-800' : ''}" title="מאגר מדווח: ${item.totalVideos || 0} | בפועל שמור: ${actualSum}">${item.totalVideos || 0} <span class="block text-[8px] font-normal text-zinc-500">כללי</span></div>
-                            <div class="bg-emerald-950/20 p-1 rounded-xl text-emerald-400 border border-emerald-900/10">${openCount.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">פתוחים</span></div>
-                            <div class="bg-amber-950/20 p-1 rounded-xl text-amber-500 border border-amber-900/10">${untestedCount.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">לא נשלח</span></div>
-                            <div class="bg-rose-950/20 p-1 rounded-xl text-rose-400 border border-rose-900/10">${blockedCount.toLocaleString('he-IL')} <span class="block text-[8px] font-normal text-zinc-500">חסומים</span></div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-2 border-t border-zinc-800/60 pt-3 mt-3 text-[11px]">
-                        <div class="flex justify-between items-center w-full">
-                            <div class="flex gap-2"><button onclick="openEditModal('${cid}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1"><i class="fas fa-edit text-xs"></i> עריכה</button><button onclick="triggerQueueFromGrid('${cid}', '${encodedTitle}', 'full')" class="text-white hover:text-zinc-200 font-bold flex items-center gap-1"><i class="fas fa-sync text-xs"></i> סרוק מחדש</button></div>
-                            <button onclick="deleteChannel('${cid}')" class="text-rose-600 hover:text-rose-500"><i class="fas fa-trash"></i> הסר</button>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 mt-1">
-                            <button onclick="triggerQueueFromGrid('${cid}', '${encodedTitle}', 'untested_only')" class="bg-amber-600/10 hover:bg-amber-600/20 text-amber-500 text-[10px] font-bold py-1.5 border border-amber-900/40 rounded-xl transition" ${(untestedCount === 0 || isWhitelisted) ? 'disabled style="opacity:0.25; cursor:not-allowed;"' : ''}><i class="fas fa-question-circle ml-1"></i> סרוק לא נבדקו (${untestedCount})</button>
-                            <button onclick="triggerQueueFromGrid('${cid}', '${encodedTitle}', 'blocked_only')" class="bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 text-[10px] font-bold py-1.5 border border-rose-900/40 rounded-xl transition" ${(blockedCount === 0 || isWhitelisted) ? 'disabled style="opacity:0.25; cursor:not-allowed;"' : ''}><i class="fas fa-bolt ml-1"></i> סרוק חסומים (${blockedCount})</button>
-                        </div>
-                    </div>`;
-                grid.appendChild(div);
-            });
+        function toggleNetfreeWhitelist(channelId) {
+            if(!db[channelId]) return;
+            db[channelId].isNetfreeWhitelisted = !db[channelId].isNetfreeWhitelisted;
+            db[channelId].updatedTimestamp = Date.now();
+            saveDatabaseAndTriggerSync();
         }
 
-        function renderStandaloneVideos() { 
-            const container = document.getElementById('standaloneVideosContainer'); if(!container) return; 
-            const total = db._standalone_videos.open.length + db._standalone_videos.blocked.length + (db._standalone_videos.untested ? db._standalone_videos.untested.length : 0); 
-            document.getElementById('standaloneCountLabel').innerText = total.toLocaleString('he-IL'); 
-            if(total === 0) { container.innerHTML = '<p class="text-xs text-zinc-600 p-2 w-full text-center">אין סרטונים בודדים</p>'; return; } 
-            container.innerHTML = ''; 
-            db._standalone_videos.open.forEach(id => container.appendChild(createStandaloneBadge(id, 'emerald'))); 
-            if(db._standalone_videos.untested) db._standalone_videos.untested.forEach(id => container.appendChild(createStandaloneBadge(id, 'amber'))); 
-            db._standalone_videos.blocked.forEach(id => container.appendChild(createStandaloneBadge(id, 'rose'))); 
+        function updateGlobalStatus() { 
+            const b = document.getElementById('globalStatusBadge'); 
+            if (globalPause) { b.className = "text-xs font-bold px-2 py-1 bg-amber-950 border border-amber-800 text-amber-400 rounded-lg"; b.innerText = "השהיה כללית"; } 
+            else if (isProcessing) { b.className = "text-xs font-bold px-2 py-1 bg-blue-950 border border-blue-800 text-blue-400 rounded-lg animate-pulse"; b.innerText = "סורק טורבו פעיל ברשת"; } 
+            else { b.className = "text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-500 rounded-lg"; b.innerText = "מערכת במנוחה"; } 
         }
         
-        function createStandaloneBadge(id, color) { const span = document.createElement('div'); span.className = `bg-${color}-950/40 text-${color}-400 text-[11px] font-mono px-2 py-1 rounded-lg border border-${color}-900/50 flex items-center gap-1.5`; span.innerHTML = `<span>${id}</span><button onclick="playVideoInMainQa('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-play text-[8px]"></i></button><button onclick="deleteStandaloneVideo('${id}')" class="text-zinc-500 hover:text-white"><i class="fas fa-times text-[9px]"></i></button>`; return span; }
-        function deleteStandaloneVideo(id) { db._standalone_videos.open = db._standalone_videos.open.filter(v => v !== id); db._standalone_videos.blocked = db._standalone_videos.blocked.filter(v => v !== id); if(db._standalone_videos.untested) db._standalone_videos.untested = db._standalone_videos.untested.filter(v => v !== id); saveDatabaseAndTriggerSync(); renderStandaloneVideos(); }
+        function renderQueue() { 
+            const queueLabel = document.getElementById('queueProgressLabel'); if(queueLabel) queueLabel.innerText = `${queue.length.toLocaleString('he-IL')} משימות בתור`; 
+            const container = document.getElementById('queueItemsList'); if(!container) return; 
+            if(queue.length === 0) { container.innerHTML = '<div class="text-center py-2 text-zinc-600 text-xs">אין ערוצים בתור</div>'; return; } 
+            container.innerHTML = ''; 
+            queue.forEach((item, index) => { 
+                const div = document.createElement('div'); div.className = "flex justify-between items-center bg-zinc-900 border border-zinc-800 p-2 rounded-xl text-[11px]"; 
+                let modeTxt = item.mode === 'blocked_only' ? 'חסומים בלבד' : item.mode === 'untested_only' ? 'צהובים בלבד' : item.mode === 'new_only' ? 'חדשים בלבד' : 'ערוץ מלא';
+                let vCountText = item.videoCount ? ` | ${item.videoCount.toLocaleString('he-IL')} סרטונים` : '';
+                div.innerHTML = `<div class="truncate max-w-[50%]" id="queue-item-title-${item.id}"><span class="font-bold text-zinc-300 block truncate text-xs">${item.title}</span><span class="text-[9px] text-zinc-500 font-normal">${modeTxt}${vCountText}</span></div><div class="flex gap-1"><button onclick="toggleChannelPause(${index})" class="bg-zinc-800 text-zinc-400 px-2 py-1 rounded text-[10px]">${item.status === 'paused' ? 'המשך' : 'השהה'}</button><button onclick="cancelChannelInQueue(${index})" class="bg-rose-950 text-rose-400 px-2 py-1 rounded text-[10px]">בטל</button></div>`; 
+                container.appendChild(div); 
+            }); 
+        }
+
+        async function fetchWithRotation(urlBuilder) {
+            if(apiKeys.length === 0) { alert("⚠️ לא נמצאו מפתחות API תקינים במערכת!"); handleQuotaExhaustionStop(); return "QUOTA_EXHAUSTED"; }
+            let attempts = 0; while (attempts < apiKeys.length) {
+                try {
+                    const url = urlBuilder(apiKeys[currentKeyIndex]); const res = await fetch(url);
+                    if (!res.ok) {
+                        const errJson = await res.json().catch(() => null); const googleErrorReason = errJson?.error?.errors?.[0]?.reason || "לא צוין";
+                        if (res.status === 403 && googleErrorReason === 'quotaExceeded') { currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length; attempts++; continue; }
+                        return null;
+                    }
+                    return await res.json();
+                } catch (e) { return null; }
+            }
+            return "QUOTA_EXHAUSTED";
+        }
+        
+        function handleQuotaExhaustionStop() { queue = []; isProcessing = false; globalPause = false; document.getElementById('spinnerIcon').classList.add('hidden'); updateProgress(0, 100, "הסריקה נבלמה."); updateGlobalStatus(); renderQueue(); }
+        function importFullBackup(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { db = JSON.parse(e.target.result); saveDatabaseAndTriggerSync(); } catch(err) { alert("קובץ גיבוי לא תקין"); } }; reader.readAsText(file); }
 
         function toggleAnomaliesFilter() {
             filterAnomaliesOnly = !filterAnomaliesOnly;
@@ -1329,12 +1319,11 @@
             renderScannedDatabaseGrid();
         }
 
-        // 🌟 שדרוג: מריץ בדיקת עומק חיה מול יוטיוב לכל הערוצים, ומכניס ערוץ פגום לסריקה מלאה מחדש
         async function fixAllDatabaseAnomalies() {
             let keys = Object.keys(db).filter(k => k !== "_standalone_videos");
             if (keys.length === 0) return alert("אין ערוצים במאגר.");
             
-            if (!confirm(`המערכת תפנה כעת ל-YouTube API עבור כל ${keys.length} הערוצים ברקע, תבדוק את כמות הסרטונים האמיתית ביוטיוב, ואם תמצא ערוץ משובש (לדוגמה ערוץ שרשום בו 50 במקום 5000) - היא תעדכן את המונה ותכניס אותו אוטומטית לתור לסריקה מלאה מחדש. להמשיך?`)) return;
+            if (!confirm(`המערכת תפנה כעת ל-YouTube API עבור כל ${keys.length} הערוצים ברקע, תבדוק את כמות הסרטונים האמיתית ביוטיוב, ואם תמצא ערוץ משובש - היא תעדכן את המונה ותכניס אותו אוטומטית לתור לסריקה מלאה מחדש. להמשיך?`)) return;
             
             let fixedCount = 0;
             updateProgress(0, keys.length, "מריץ בדיקת אמת והשוואת נתונים מול שרתי יוטיוב...");
@@ -1350,12 +1339,10 @@
                     const liveCount = await fetchChannelOfficialVideoCount(cid);
                     const actualSum = (item.openVideos?.length || 0) + (item.blockedVideos?.length || 0) + (item.untestedVideos?.length || 0);
                     
-                    // זיהוי שורש הבעיה: אם כמות הסרטונים האמיתית ביוטיוב שונה מסכום המערכים השמורים אצלנו במחשב
                     if (liveCount !== actualSum || item.totalVideos !== liveCount) {
                         item.totalVideos = liveCount;
                         item.updatedTimestamp = Date.now();
                         
-                        // פקודה אטומית: זורק את הערוץ המשובש לסריקה מלאה מחדש כדי למשוך את כל אלפי הסרטונים החסרים
                         pushToQueue(cid, item.title, 'full', liveCount);
                         fixedCount++;
                     }
@@ -1375,148 +1362,33 @@
             }
         }
 
-        function openEditModal(channelId) { activeEditingChannelId = channelId; const data = db[channelId]; if(!data) return; document.getElementById('editModalTitle').innerText = `עריכת סרטונים: ${data.title}`; activeModalPlayingVideoId = null; renderModalVideoLists(); document.getElementById('editChannelModal').style.display = 'flex'; }
-        function closeEditModal() { document.getElementById('editChannelModal').style.display = 'none'; if(modalQaPlayerInstance) { try { modalQaPlayerInstance.destroy(); } catch(e){} } activeEditingChannelId = null; activeModalPlayingVideoId = null; }
+        setInterval(refreshHourlyScanRate, 30000);
         
-        function renderModalVideoLists() { 
-            const data = db[activeEditingChannelId]; if(!data) return; 
-            const openCont = document.getElementById('modalOpenList'); 
-            const blockCont = document.getElementById('modalBlockedList');
-            const untestedCont = document.getElementById('modalUntestedList');
+        window.onload = () => { 
+            apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
+            document.getElementById('keyCountLabel').innerText = apiKeys.length; 
 
-            openCont.innerHTML = ''; blockCont.innerHTML = ''; untestedCont.innerHTML = ''; 
-            document.getElementById('modalOpenCount').innerText = data.openVideos?.length || 0; 
-            document.getElementById('modalBlockedCount').innerText = data.blockedVideos?.length || 0;
-            document.getElementById('modalUntestedCount').innerText = data.untestedVideos?.length || 0;
-
-            data.openVideos?.forEach(id => openCont.appendChild(createModalVideoRow(id, 'open'))); 
-            data.untestedVideos?.forEach(id => untestedCont.appendChild(createModalVideoRow(id, 'untested')));
-            data.blockedVideos?.forEach(id => blockCont.appendChild(createModalVideoRow(id, 'blocked'))); 
-        }
-        
-        function createModalVideoRow(id, type) { 
-            const isPlayingNow = (activeModalPlayingVideoId === id); const div = document.createElement('div'); 
-            if(isPlayingNow) { div.className = "bg-blue-600/30 p-2 border-2 border-blue-500 rounded-lg flex justify-between items-center mb-1 text-blue-200 font-bold ring-1 ring-blue-400 animate-pulse"; } 
-            else { div.className = "bg-zinc-950 p-1.5 rounded border border-zinc-800 mb-1 hover:border-zinc-700 transition text-zinc-300"; } 
-            div.innerHTML = `<span class="truncate pl-2 max-w-[50%] flex items-center gap-1">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce"></i> ' : ''}<span>${id}</span></span><div class="flex gap-2"><button onclick="playVideoInModalQa('${id}')" class="text-blue-400 hover:underline text-[11px] font-bold">📺 נגן</button><button onclick="toggleVideoStatusManual('${id}', '${type}')" class="text-amber-500 text-[11px] font-bold">🔄 שנה</button></div>`; return div; 
-        }
-        
-        function toggleVideoStatusManual(vId, currentType) {
-            const data = db[activeEditingChannelId]; if(!data) return;
-            if (currentType === 'open') data.openVideos = data.openVideos.filter(id => id !== vId);
-            else if (currentType === 'blocked') data.blockedVideos = data.blockedVideos.filter(id => id !== vId);
-            else data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
-
-            if (currentType === 'open') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
-            else if (currentType === 'untested') { if(!data.blockedVideos) data.blockedVideos = []; data.blockedVideos.push(vId); }
-            else { if(!data.openVideos) data.openVideos = []; data.openVideos.push(vId); }
-
-            data.totalVideos = (data.openVideos?.length || 0) + (data.blockedVideos?.length || 0) + (data.untestedVideos?.length || 0);
-            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
-        }
-
-        function addVideoManually(targetType) {
-            const vId = document.getElementById('manualVideoIdInput').value.trim();
-            if(!vId || vId.length < 5) return alert("הזן מזהה וידאו תקין.");
-            const data = db[activeEditingChannelId]; if(!data) return;
-
-            document.getElementById('manualVideoIdInput').value = '';
-            data.openVideos = (data.openVideos || []).filter(id => id !== vId);
-            data.blockedVideos = (data.blockedVideos || []).filter(id => id !== vId);
-            data.untestedVideos = (data.untestedVideos || []).filter(id => id !== vId);
-
-            if(targetType === 'open') data.openVideos.push(vId);
-            else if(targetType === 'untested') { if(!data.untestedVideos) data.untestedVideos = []; data.untestedVideos.push(vId); }
-            else data.blockedVideos.push(vId);
-
-            data.totalVideos = (data.openVideos?.length || 0) + (data.blockedVideos?.length || 0) + (data.untestedVideos?.length || 0);
-            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
-        }
-
-        function exportCleanJSON() { let cleanDb = {}; Object.keys(db).forEach(key => { if(key === "_standalone_videos") { cleanDb["_standalone_videos"] = db[key].open; } else { cleanDb[key] = { title: db[key].title, openVideos: db[key].openVideos }; } }); triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanDb, null, 2)), "netfree_approved_channels_clean.json"); }
-        function exportFullBackup() { triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)), "system_full_backup.json"); }
-        function triggerDownload(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
-        function toggleConfigModal() { const m = document.getElementById('configModal'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; if(m.style.display === 'flex') document.getElementById('apiKeysTextArea').value = apiKeys.join('\n'); }
-        function saveApiKeys() { apiKeys = document.getElementById('apiKeysTextArea').value.split('\n').map(l => l.trim()).filter(l => l.length > 0); localStorage.setItem('yt_api_keys_v2', JSON.stringify(apiKeys)); currentKeyIndex = 0; document.getElementById('keyCountLabel').innerText = apiKeys.length; toggleConfigModal(); }
-        
-        function openReconciliationModal() {
-            renderReconciliationRows();
-            document.getElementById('reconciliationModal').style.display = 'flex';
-        }
-        function closeReconciliationModal() { 
-            document.getElementById('reconciliationModal').style.display = 'none'; 
-            if(reconQaPlayerInstance) { try { reconQaPlayerInstance.destroy(); } catch(e){} }
-            activeReconciliationPlayingVideoId = null;
-        }
-
-        function renderReconciliationRows() {
-            const container = document.getElementById('reconciliationRowsContainer');
-            document.getElementById('globalConflictCountLabel').innerText = pendingConflicts.length;
-            
-            if(pendingConflicts.length === 0) {
-                container.innerHTML = '<div class="text-center py-12 text-zinc-600 text-xs font-bold">אין שינויים אחרונים במאגר. הכל מעודכן ומסונכרן!</div>';
-                return;
+            // 🔄 שחזור וחיבור אוטומטי מלא לדרייב ללא צורך בלחיצות ידניות בכל הפעלה
+            const savedToken = localStorage.getItem('yt_google_access_token');
+            if (savedToken && driveConfig.clientId && driveConfig.apiKey) {
+                googleAccessToken = savedToken;
+                document.getElementById('btnDriveAuth').innerText = "✓ מחובר אוטומטית";
+                document.getElementById('btnDriveAuth').className = "bg-emerald-600/20 text-emerald-400 border border-emerald-800 px-4 py-1.5 rounded-xl text-xs font-bold cursor-default";
+                document.getElementById('btnDriveSync').disabled = false;
+                document.getElementById('btnDriveSync').className = "bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md";
             }
 
-            container.innerHTML = '';
-            pendingConflicts.forEach((conflict, index) => {
-                const isPlayingNow = (activeReconciliationPlayingVideoId === conflict.id);
-                const row = document.createElement('div');
-                
-                if(isPlayingNow) {
-                    row.className = "flex flex-col sm:flex-row justify-between items-center bg-blue-600/20 border-2 border-blue-500 p-3 rounded-xl gap-3 text-xs ring-1 ring-blue-400 animate-pulse";
-                } else {
-                    row.className = "flex flex-col sm:flex-row justify-between items-center bg-zinc-900 border border-zinc-800 p-3 rounded-xl gap-3 text-xs";
+            loadDatabaseFromLocalFolderAAA().then(() => {
+                initGoogleDriveLibraries(); 
+                if (googleAccessToken) {
+                    syncWithGoogleDrive();
                 }
-                
-                let oldBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${conflict.oldStatus==='open'?'bg-emerald-950 text-emerald-400':conflict.oldStatus==='untested'?'bg-amber-950 text-amber-400':'bg-rose-950 text-rose-400'}">לשעבר: ${conflict.oldStatus}</span>`;
-                let newBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${conflict.newStatus==='open'?'bg-emerald-600 text-white':conflict.newStatus==='untested'?'bg-amber-500 text-black':'bg-rose-600 text-white'}">השתנה ל: ${conflict.newStatus}</span>`;
-
-                row.innerHTML = `
-                    <div class="truncate flex-1 text-right">
-                        <span class="font-bold text-zinc-300 block truncate text-xs">${isPlayingNow ? '<i class="fas fa-volume-high text-blue-400 animate-bounce ml-1"></i> ' : ''}${conflict.channelTitle}</span>
-                        <span class="font-mono text-zinc-500 block mt-0.5 text-[10px]">${conflict.id}</span>
-                    </div>
-                    <div class="flex gap-1.5 flex-shrink-0 items-center">
-                        ${oldBadge} <i class="fas fa-arrow-left text-zinc-600 text-[9px]"></i> ${newBadge}
-                    </div>
-                    <div class="flex gap-1 flex-shrink-0 items-center">
-                        <button onclick="playVideoInReconciliationQa('${conflict.id}')" class="bg-zinc-800 hover:bg-blue-900 text-blue-400 px-2 py-1 rounded font-bold text-[10px]">📺 נגן</button>
-                        <span class="text-zinc-600 px-0.5">|</span>
-                        <button onclick="resolveSingleConflict(${index}, 'open')" class="bg-zinc-800 hover:bg-emerald-950 px-1.5 py-1 rounded text-emerald-400 text-[9px]">כפה פתוח</button>
-                        <button onclick="resolveSingleConflict(${index}, 'untested')" class="bg-zinc-800 hover:bg-amber-950 px-1.5 py-1 rounded text-amber-500 text-[9px]">כפה צהוב</button>
-                        <button onclick="resolveSingleConflict(${index}, 'blocked')" class="bg-zinc-800 hover:bg-rose-950 px-1.5 py-1 rounded text-rose-400 text-[9px]">כפה חסום</button>
-                    </div>`;
-                container.appendChild(row);
+                if (queue.length > 0) {
+                    renderQueue();
+                    logErrorToConsoleOnScreen(`[תור שוחזר] נמצאו ${queue.length} משימות ממתינות בזיכרון.`);
+                }
             });
-        }
-
-        function resolveSingleConflict(index, chosenStatus) {
-            const conflict = pendingConflicts[index];
-            if(!conflict || !db[conflict.channelId]) return;
-
-            const channel = db[conflict.channelId];
-            channel.openVideos = (channel.openVideos || []).filter(id => id !== conflict.id);
-            channel.blockedVideos = (channel.blockedVideos || []).filter(id => id !== conflict.id);
-            channel.untestedVideos = (channel.untestedVideos || []).filter(id => id !== conflict.id);
-
-            if(chosenStatus === 'open') channel.openVideos.push(conflict.id);
-            else if(chosenStatus === 'untested') channel.untestedVideos.push(conflict.id);
-            else channel.blockedVideos.push(conflict.id);
-
-            channel.totalVideos = (channel.openVideos?.length || 0) + (channel.blockedVideos?.length || 0) + (channel.untestedVideos?.length || 0);
-            channel.updatedTimestamp = Date.now();
-            pendingConflicts.splice(index, 1);
-            saveDatabaseAndTriggerSync();
-            renderReconciliationRows();
-        }
-
-        function clearAllConflictLogs() {
-            pendingConflicts = [];
-            calculateGlobalStats();
-            closeReconciliationModal();
-            alert("רשימת הדוחות נוקתה בהצלחה. כל העדכונים כבר שמורים בפרויקט!");
-        }
+        };
     </script>
 </body>
 </html>
