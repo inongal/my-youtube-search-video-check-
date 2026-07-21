@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v8.54</title>
+    <title>YouTube NetFree Scan Control Hub v8.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -151,7 +151,7 @@
                     <div id="progressBarFill" class="bg-gradient-to-l from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-200" style="width: 0%"></div>
                 </div>
                 <div class="flex justify-between text-[10px] text-zinc-400 mb-3 px-1">
-                    <span id="progressText">Mערכת במנוחה.</span>
+                    <span id="progressText">מערכת במנוחה.</span>
                     <span id="progressPercentage">0%</span>
                 </div>
 
@@ -197,19 +197,19 @@
                 
                 <div class="border-t border-zinc-800/80 pt-4 mt-1">
                     <div class="text-xs font-bold text-zinc-300 flex items-center gap-1.5 mb-2">
-                        <i class="fas fa-folder-plus text-amber-500"></i> הוספת רשימת ערוצים המונית (כל ערוץ בשורה)
+                        <i class="fas fa-folder-plus text-amber-500"></i> הוספת רשימת ערוצים המונית (סריקת ערוצים חדשים בלבד)
                     </div>
                     <textarea id="bulkChannelsTextArea" rows="5" placeholder="הדבק רשימת ערוצים, קישורים, או ידיות @howridiculous - אחד בכל שורה..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 outline-none text-left font-mono text-xs focus:border-zinc-700 custom-scrollbar mb-2" dir="ltr"></textarea>
                     <button onclick="processBulkChannelsInsertion()" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
-                        <i class="fas fa-play-circle"></i> פתח, פענח והכנס את כל הרשימה לתור לסריקה
+                        <i class="fas fa-play-circle"></i> פתח, פענח והכנס ערוצים חדשים שלא נבדקו מעולם לתור
                     </button>
                 </div>
 
                 <div id="bulkErrorFeedbackWrapper" class="mt-4 border-t border-zinc-800/80 pt-4 flex-1 flex flex-col">
                     <div class="text-xs font-bold text-rose-400 flex items-center gap-1.5 mb-1.5">
-                        <i class="fas fa-exclamation-triangle"></i> דוח שגיאות ודילוגים (ערוצים שלא נמצאו ביוטיוב)
+                        <i class="fas fa-exclamation-triangle"></i> דוח שגיאות, דילוגים וסינונים (ערוצים קיימים או שגויים)
                     </div>
-                    <textarea id="bulkErrorLogConsole" rows="4" readonly placeholder="כאן יופיעו ערוצים שגויים או כאלו שדולגו אוטומטית במהלך העבודה..." class="w-full bg-zinc-950 border border-zinc-900 text-rose-300/80 p-3 rounded-xl font-mono text-[11px] outline-none resize-none custom-scrollbar flex-1"></textarea>
+                    <textarea id="bulkErrorLogConsole" rows="4" readonly placeholder="כאן יופיעו ערוצים שדולגו אוטומטית כי הם כבר קיימים במאגר שלך..." class="w-full bg-zinc-950 border border-zinc-900 text-rose-300/80 p-3 rounded-xl font-mono text-[11px] outline-none resize-none custom-scrollbar flex-1"></textarea>
                 </div>
 
                 <div id="channelSearchResults" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1 hidden mt-4"></div>
@@ -254,7 +254,6 @@
                     <i class="fas fa-wand-magic-sparkles"></i> 🪄 הפעל בדיקת עומק והכנס לא תואמים לסריקה מלאה מחדש
                 </button>
 
-                <!-- בקרת פעולות המוניות החדשה -->
                 <div id="bulkActionsControlContainer" class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs">
                     <button onclick="toggleSelectAllChannels()" class="text-zinc-400 hover:text-zinc-300 font-bold ml-1 flex items-center gap-1"><i class="fas fa-check-square text-blue-400"></i> בחר / נקה הכל</button>
                     <span class="text-zinc-600 font-bold">|</span>
@@ -488,6 +487,7 @@
             return { title: `ערוץ (${channelId})`, videoCount: 0 };
         }
 
+        // 🛡️ עדכון גרסה 8.5: פונקציית הכנסה המונית מבוססת סינון מוקדם מול המאגר המקומי
         async function processBulkChannelsInsertion() {
             const text = document.getElementById('bulkChannelsTextArea').value.trim();
             if (!text) return alert("אנא הדבק רשימת קישורים בתיבה תחילה.");
@@ -495,32 +495,71 @@
             if(lines.length === 0) return;
             
             document.getElementById('bulkErrorLogConsole').value = ''; 
-            updateProgress(0, 100, `מחלץ נתוני סרטונים עבור ${lines.length} ערוצים לתור...`);
+            updateProgress(0, lines.length, `מפענח ומסנן ערוצים קיימים...`);
             
-            for (let item of lines) {
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                const item = lines[i];
+                updateProgress(i, lines.length, `מעבד (${i + 1}/${lines.length}): ${item}`);
+                
                 const parsed = extractChannelIdOrHandle(item);
+                let channelId = null;
+                let channelTitle = "";
+                let videoCount = 0;
+
                 if (parsed.type === 'id') {
-                    let details = await fetchChannelDetails(parsed.value);
-                    pushToQueue(parsed.value, details.title, 'full', details.videoCount);
+                    channelId = parsed.value;
+                    if (db[channelId]) {
+                        skippedCount++;
+                        logErrorToConsoleOnScreen(`[סינון] הערוץ ${channelId} כבר קיים במאגר. דולג אוטומטית.`);
+                        continue;
+                    }
+                    let details = await fetchChannelDetails(channelId);
+                    channelTitle = details.title;
+                    videoCount = details.videoCount;
                 } else if (parsed.type === 'handle') {
                     let resolved = await resolveYoutubeChannelIdFromHandle(parsed.value);
                     if (resolved) {
-                        let count = await fetchChannelOfficialVideoCount(resolved.id);
-                        pushToQueue(resolved.id, resolved.title, 'full', count);
+                        channelId = resolved.id;
+                        channelTitle = resolved.title;
+                        if (db[channelId]) {
+                            skippedCount++;
+                            logErrorToConsoleOnScreen(`[סינון] הערוץ @${parsed.value} (${channelId}) כבר קיים במאגר. דולג אוטומטית.`);
+                            continue;
+                        }
+                        videoCount = await fetchChannelOfficialVideoCount(channelId);
                     } else {
-                        logErrorToConsoleOnScreen(`[דילוג] לא נמצא מזהה עבור הידית: @${parsed.value}`);
+                        logErrorToConsoleOnScreen(`[שגיאה] לא נמצא מזהה עבור הידית: @${parsed.value}`);
+                        continue;
                     }
                 } else {
                     let resolved = await resolveFirstChannelIdFromSearchText(parsed.value);
                     if (resolved) {
-                        let count = await fetchChannelOfficialVideoCount(resolved.id);
-                        pushToQueue(resolved.id, resolved.title, 'full', count);
+                        channelId = resolved.id;
+                        channelTitle = resolved.title;
+                        if (db[channelId]) {
+                            skippedCount++;
+                            logErrorToConsoleOnScreen(`[סינון] תוצאת החיפוש "${parsed.value}" (${channelId}) כבר קיימת במאגר. דולג אוטומטית.`);
+                            continue;
+                        }
+                        videoCount = await fetchChannelOfficialVideoCount(channelId);
                     } else {
-                        logErrorToConsoleOnScreen(`[דילוג] החיפוש נכשל עבור: "${parsed.value}"`);
+                        logErrorToConsoleOnScreen(`[שגיאה] החיפוש נכשל עבור: "${parsed.value}"`);
+                        continue;
                     }
                 }
+
+                if (channelId) {
+                    pushToQueue(channelId, channelTitle, 'full', videoCount);
+                    addedCount++;
+                }
             }
+            
+            updateProgress(lines.length, lines.length, `הסתיים! התווספו ${addedCount}, דולגו ${skippedCount}`);
             calculateGlobalStats();
+            alert(`הוספת רשימה המונית הסתיימה!\nהוכנסו לתור: ${addedCount} ערוצים חדשים.\nדולגו וסוננו (כי הם כבר קיימים במאגר שלך): ${skippedCount} ערוצים.`);
         }
 
         async function fetchChannelOfficialVideoCount(channelId) {
@@ -1545,7 +1584,7 @@
                     const data = await response.json();
                     
                     if (data.error && data.error.errors.some(e => e.domain === 'usageLimits' || e.reason === 'quotaExceeded')) {
-                        console.warn(`מפתח ${currentKeyIndex} נוצל. עובר למפתח הבא...`);
+                        console.warn(`Mפתח ${currentKeyIndex} נוצל. עובר למפתח הבא...`);
                         currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
                         attempts++;
                         continue;
@@ -1559,7 +1598,6 @@
             return "QUOTA_EXHAUSTED";
         }
 
-        // רינדור רשת הערוצים המשופרת (כולל תיבות סימון לבחירה המונית וכפתורי סריקה סלקטיביים)
         function renderScannedDatabaseGrid() {
             const grid = document.getElementById('scannedDatabaseGrid');
             if (!grid) return;
@@ -1630,14 +1668,12 @@
             });
         }
 
-        // מנגנון סימון גלובלי (בחר / נקה הכל)
         function toggleSelectAllChannels() {
             const checkboxes = document.querySelectorAll('.channel-bulk-checkbox');
             const anyUnchecked = Array.from(checkboxes).some(cb => !cb.checked);
             checkboxes.forEach(cb => cb.checked = anyUnchecked);
         }
 
-        // מנגנון הרצה המונית מבוסס מקבץ תיבות סימון
         function runBulkOperation(mode) {
             const checkedBoxes = document.querySelectorAll('.channel-bulk-checkbox:checked');
             if (checkedBoxes.length === 0) {
@@ -1656,7 +1692,7 @@
 
                     pushToQueue(cid, item.title, mode, count);
                     pushedCount++;
-                    cb.checked = false; // איפוס תיבת הסימון לאחר ההוספה לתור
+                    cb.checked = false;
                 }
             });
             
