@@ -32,6 +32,9 @@
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
+            <button onclick="copyAllChannelUrls()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition shadow-lg">
+                <i class="fas fa-copy"></i> העתקת כתובות הערוצים
+            </button>
             <button onclick="openReconciliationModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition shadow-lg relative">
                 <i class="fas fa-code-compare"></i> דוח שינויים מנטפרי (<span id="globalConflictCountLabel">0</span>)
             </button>
@@ -412,6 +415,21 @@
         let filterAnomaliesOnly = false;
         let currentPage = 1;
         const PAGE_SIZE = 48; // תצוגת מקבצים לחסכון בזיכרון DOM
+
+        function copyAllChannelUrls() {
+            let keys = Object.keys(db).filter(k => k !== "_standalone_videos");
+            if (keys.length === 0) {
+                alert("אין ערוצים במאגר להעתקה.");
+                return;
+            }
+            let urls = keys.map(id => `https://www.youtube.com/channel/${id}`).join('\n');
+            navigator.clipboard.writeText(urls).then(() => {
+                alert(`הועתקו בהצלחה ${keys.length} כתובות ערוצים ללוח!`);
+            }).catch(err => {
+                console.error("שגיאה בהעתקה ללוח:", err);
+                alert("אירעה שגיאה בהעתקה ללוח.");
+            });
+        }
 
         function clearLiveDisplay() {
             document.getElementById('liveOpenCount').innerText = "0";
