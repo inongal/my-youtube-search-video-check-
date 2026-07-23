@@ -28,7 +28,7 @@
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
                 <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 8.5 DB</h1>
-                <p class="text-xs text-zinc-400">תמיכה במאגרי ענק, המרה אוטומטית בענן וסנכרון Google Drive</p>
+                <p class="text-xs text-zinc-400">תמיכה במאגרי ענק, המרה אוטומטית בענן, סריקה מקובצת וסנכרון Google Drive</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -140,7 +140,7 @@
                 </div>
 
                 <div class="bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 mb-3 text-xs space-y-2">
-                    <div class="flex justify-between"><span class="text-zinc-500">ערוץ בבדיקה:</span> <span id="liveChannelName" class="font-bold text-white truncate max-w-[60%]">-</span></div>
+                    <div class="flex justify-between"><span class="text-zinc-500">ערוץ/מקבץ בבדיקה:</span> <span id="liveChannelName" class="font-bold text-white truncate max-w-[60%]">-</span></div>
                     <div class="flex justify-between"><span class="text-zinc-500">סוג משימה:</span> <span id="liveScanType" class="font-bold text-blue-400">-</span></div>
                     <div class="flex justify-between"><span class="text-zinc-500">סרטונים במקבץ:</span> <span id="liveOfficialCount" class="font-mono text-zinc-300 font-bold">0</span></div>
                     
@@ -471,7 +471,6 @@
             }
         }
 
-        // 🛠️ פונקציית נרמול והמרה אוטומטית (One-time Migration / Safe Parsing)
         function normalizeDatabaseStructure() {
             if (!db) db = {};
             if (!db._standalone_videos) db._standalone_videos = { open: [], blocked: [], untested: [] };
@@ -485,7 +484,6 @@
                     ch.blockedVideos = Array.from(new Set(ch.blockedVideos || []));
                     ch.untestedVideos = Array.from(new Set(ch.untestedVideos || []));
 
-                    // ניקוי כפילויות חופפות
                     ch.blockedVideos = ch.blockedVideos.filter(id => !ch.openVideos.includes(id));
                     ch.untestedVideos = ch.untestedVideos.filter(id => !ch.openVideos.includes(id) && !ch.blockedVideos.includes(id));
                     
@@ -706,7 +704,7 @@
             updateProgress(keys.length, keys.length, "בדיקת סרטונים חסרים הסתיימה.");
             if (totalNewFound > 0) {
                 saveDatabaseAndTriggerSync();
-                alert(`הסריקה הסתיימה!\nנמצאו ${totalNewFound} סרטונים חסרים (חדשים וישנים) ב-${channelsWithNew} ערוצים שונים.\nהם הוכנסו בצורה ממוקדת לתור לבדיקה ברשת.`);
+                alert(`האיתור הסתיים!\nנמצאו ${totalNewFound} סרטונים חסרים ב-${channelsWithNew} ערוצים שונים.\nהם הוכנסו לתור ויסרקו אוטומטית במקבצים מרוכזים של 100.`);
             } else {
                 alert("הסריקה הסתיימה! המאגר שלך מעודכן ב-100% ולא נמצאו שום סרטונים חסרים ביוטיוב.");
             }
@@ -1096,6 +1094,121 @@
             renderQueue(); calculateGlobalStats(); if (!isProcessing) processQueueNext();
         }
 
+        // 🚀 פונקציית איגוד משימות קטנות בתור למקבצים מרוכזים של 100 סרטונים
+        async function processBatchedQueueItems(targetMode) {
+            let batchedItems = []; 
+            let processedQueueIndices = new Set();
+            
+            for (let i = 0; i < queue.length; i++) {
+                if (batchedItems.length >= 100) break;
+                const qItem = queue[i];
+                if (qItem.mode !== targetMode || qItem.status === 'paused') continue;
+                
+                const cid = qItem.id;
+                const channelData = db[cid];
+                let videoIdsToScan = [];
+
+                if (targetMode === 'untested_only' && channelData?.untestedVideos) {
+                    videoIdsToScan = [...channelData.untestedVideos];
+                } else if (targetMode === 'blocked_only' && channelData?.blockedVideos) {
+                    videoIdsToScan = [...channelData.blockedVideos];
+                } else if (targetMode === 'new_only' && qItem.customIds) {
+                    videoIdsToScan = [...qItem.customIds];
+                }
+
+                if (videoIdsToScan.length === 0) {
+                    processedQueueIndices.add(i);
+                    continue;
+                }
+
+                let addedForThisItem = 0;
+                for (const vId of videoIdsToScan) {
+                    if (batchedItems.length >= 100) break;
+                    if (!batchedItems.some(b => b.videoId === vId)) {
+                        batchedItems.push({
+                            videoId: vId,
+                            channelId: cid,
+                            channelTitle: qItem.title || cid,
+                            queueIndex: i
+                        });
+                        addedForThisItem++;
+                    }
+                }
+                
+                if (addedForThisItem === videoIdsToScan.length) {
+                    processedQueueIndices.add(i);
+                }
+            }
+
+            if (batchedItems.length === 0) {
+                queue = queue.filter((_, idx) => !processedQueueIndices.has(idx));
+                return;
+            }
+
+            const modeLabels = {
+                'untested_only': 'לא נבדקו',
+                'blocked_only': 'חסומים',
+                'new_only': 'חדשים'
+            };
+
+            const uniqueChannelTitles = Array.from(new Set(batchedItems.map(b => b.channelTitle)));
+            const titleSummary = uniqueChannelTitles.length === 1 ? uniqueChannelTitles[0] : `${uniqueChannelTitles.length} ערוצים במקבץ`;
+
+            document.getElementById('liveChannelName').innerText = titleSummary;
+            document.getElementById('liveScanType').innerText = `מקבץ מרוכז: ${modeLabels[targetMode] || targetMode}`;
+            document.getElementById('liveOfficialCount').innerText = batchedItems.length;
+
+            scanStartTime = Date.now();
+            const batchVideoIds = batchedItems.map(b => b.videoId);
+
+            let scanMap = await runLocalPuppeteerScan(batchVideoIds, (processed, total) => {
+                updateProgress(processed, total, `סורק מקבץ מרוכז: ${processed}/${total}`);
+            });
+
+            const scannedVideoIds = Object.keys(scanMap);
+
+            // עדכון הנתונים לכל ערוץ
+            batchedItems.forEach(item => {
+                const cid = item.channelId;
+                const vId = item.videoId;
+                const resStatus = scanMap[vId] || 'blocked';
+                const channelData = db[cid];
+                if (!channelData) return;
+
+                if (!channelData.openVideos) channelData.openVideos = [];
+                if (!channelData.blockedVideos) channelData.blockedVideos = [];
+                if (!channelData.untestedVideos) channelData.untestedVideos = [];
+
+                channelData.openVideos = channelData.openVideos.filter(id => id !== vId);
+                channelData.blockedVideos = channelData.blockedVideos.filter(id => id !== vId);
+                channelData.untestedVideos = channelData.untestedVideos.filter(id => id !== vId);
+
+                if (resStatus === 'open') channelData.openVideos.push(vId);
+                else if (resStatus === 'untested') channelData.untestedVideos.push(vId);
+                else channelData.blockedVideos.push(vId);
+
+                channelData.totalVideos = (channelData.openVideos.length) + (channelData.blockedVideos.length) + (channelData.untestedVideos.length);
+                channelData.scannedAt = new Date().toLocaleDateString('he-IL');
+                channelData.updatedTimestamp = Date.now();
+            });
+
+            // עדכון רשימות מותאמות אישית של משימות new_only
+            queue.forEach(qItem => {
+                if (qItem.mode === 'new_only' && qItem.customIds) {
+                    qItem.customIds = qItem.customIds.filter(id => !scannedVideoIds.includes(id));
+                    qItem.videoCount = qItem.customIds.length;
+                    if (qItem.customIds.length === 0) {
+                        const idx = queue.indexOf(qItem);
+                        if (idx !== -1) processedQueueIndices.add(idx);
+                    }
+                }
+            });
+
+            queue = queue.filter((_, idx) => !processedQueueIndices.has(idx));
+
+            saveDatabaseAndTriggerSync();
+        }
+
         async function processQueueNext() {
             localStorage.setItem('yt_active_queue_backup', JSON.stringify(queue));
 
@@ -1110,16 +1223,19 @@
             const current = queue[0];
             if(current.status === 'paused') { await new Promise(r => setTimeout(r, 1000)); return processQueueNext(); }
             if(current.status === 'cancelled') { queue.shift(); return processQueueNext(); }
+
             try { 
                 currentLiveChannelId = current.id;
                 clearLiveDisplay(); 
                 
-                if (current.mode === 'blocked_only') await scanChannelBlockedOnly(current.id, current.title);
-                else if (current.mode === 'untested_only') await scanChannelUntestedOnly(current.id, current.title);
-                else if (current.mode === 'new_only') await scanChannelNewOnly(current.id, current.title, current.customIds);
-                else await scanChannelVideosMssive(current.id, current.title); 
-            } catch (err) { console.error(err); logErrorToConsoleOnScreen(`שגיאת קריסה זמנית בערוץ: ${current.title}`); }
-            if(queue.length > 0 && queue[0].id === current.id && queue[0].mode === current.mode) { queue.shift(); }
+                if (['untested_only', 'blocked_only', 'new_only'].includes(current.mode)) {
+                    await processBatchedQueueItems(current.mode);
+                } else {
+                    await scanChannelVideosMssive(current.id, current.title); 
+                    if(queue.length > 0 && queue[0].id === current.id && queue[0].mode === current.mode) { queue.shift(); }
+                }
+            } catch (err) { console.error(err); logErrorToConsoleOnScreen(`שגיאת קריסה זמנית בערוץ: ${current.title}`); queue.shift(); }
+
             processQueueNext();
         }
 
@@ -1637,7 +1753,6 @@
             return "QUOTA_EXHAUSTED";
         }
 
-        // 🛡️ תיקון באג הרינדור + מנגנון Pagination מוגן מפני הקפאת דפדפן
         function renderScannedDatabaseGrid() {
             const grid = document.getElementById('scannedDatabaseGrid');
             if (!grid) return;
@@ -1648,7 +1763,6 @@
             const sortVal = document.getElementById('localDbSortSelect')?.value || 'timestamp';
             let keys = Object.keys(db).filter(k => k !== "_standalone_videos");
 
-            // סינון בטוח
             keys = keys.filter(k => {
                 const item = db[k];
                 if (!item) return false;
@@ -1662,7 +1776,6 @@
                 return true;
             });
 
-            // מיון
             if (sortVal === 'alphabetical') {
                 keys.sort((a, b) => (db[a]?.title || a).localeCompare(db[b]?.title || b, 'he'));
             } else if (sortVal === 'scans') {
@@ -1671,7 +1784,6 @@
                 keys.sort((a, b) => (db[b]?.updatedTimestamp || 0) - (db[a]?.updatedTimestamp || 0));
             }
 
-            // חישוב עמודים (Pagination)
             const totalItems = keys.length;
             const totalPages = Math.ceil(totalItems / PAGE_SIZE) || 1;
             if (currentPage > totalPages) currentPage = totalPages;
