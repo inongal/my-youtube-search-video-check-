@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube NetFree Scan Control Hub v8.5 Turbo DB</title>
+    <title>YouTube NetFree Scan Control Hub v8.6 Local DB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://apis.google.com/js/api.js" async defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
         :root {
@@ -27,8 +25,8 @@
         <div class="flex items-center gap-3">
             <i class="fas fa-shield-halved text-blue-500 text-3xl animate-pulse"></i>
             <div>
-                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 8.5 DB</h1>
-                <p class="text-xs text-zinc-400">תמיכה במאגרי ענק, המרה אוטומטית בענן, סריקה מקובצת וסנכרון Google Drive</p>
+                <h1 class="text-2xl font-bold">מרכז סריקה ושליטה יוטיוב לנטפרי - גרסה 8.6 Local DB</h1>
+                <p class="text-xs text-zinc-400">עבודה ישירה מול מסד נתונים מקומי (SQLite DB), סריקה מקובצת ללא תלות בענן</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -44,34 +42,15 @@
             <button onclick="exportFullBackup()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition">
                 <i class="fas fa-database"></i> גיבוי מאגר מלא
             </button>
+            <button onclick="document.getElementById('dbFileInput').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition shadow-lg">
+                <i class="fas fa-file-import"></i> טעינת / שחזור גיבוי DB
+            </button>
+            <input type="file" id="dbFileInput" accept=".json,.db" onchange="importFullBackup(event)" class="hidden">
             <button onclick="toggleConfigModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition">
                 <i class="fas fa-key"></i> מפתחות יוטיוב API (<span id="keyCountLabel">0</span>)
             </button>
         </div>
     </header>
-
-    <section class="max-w-[1600px] mx-auto mb-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-md">
-        <div class="flex items-center gap-3">
-            <div class="p-2 bg-blue-600/10 text-blue-400 rounded-xl border border-blue-900/30">
-                <i class="fab fa-google-drive text-xl"></i>
-            </div>
-            <div>
-                <h3 class="text-xs font-bold text-zinc-300">סנכרון ענן גלובלי - Google Drive</h3>
-                <span id="driveStatusLabel" class="text-[11px] text-zinc-500">טוען הגדרות ענן...</span>
-            </div>
-        </div>
-        <div class="flex flex-wrap gap-2">
-            <button onclick="toggleDriveConfigModal()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-400 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs font-bold transition">
-                <i class="fas fa-cogs ml-1"></i> הגדרות ענן
-            </button>
-            <button id="btnDriveAuth" onclick="handleAuthClick()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
-                <i class="fas fa-user-shield"></i> התחבר לחשבון גוגל
-            </button>
-            <button id="btnDriveSync" disabled onclick="syncWithGoogleDrive()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 opacity-40 cursor-not-allowed shadow-sm">
-                <i class="fas fa-cloud-upload-alt"></i> 🔄 סנכרן ומזג כעת
-            </button>
-        </div>
-    </section>
 
     <section class="max-w-[1600px] mx-auto mb-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between shadow">
@@ -280,28 +259,6 @@
         </div>
     </section>
 
-    <!-- מודאל הגדרות ענן -->
-    <div id="driveConfigModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
-            <h2 class="text-xl font-bold mb-2 flex items-center gap-2 text-blue-400"><i class="fab fa-google-drive"></i> הגדרות סנכרון ענן Google Drive</h2>
-            <p class="text-xs text-zinc-400 mb-4">הזן את מפתחות הגישה שלך לחשבון גוגל כדי לאפשר מיזוג וסנכרון אוטומטי:</p>
-            <div class="space-y-3 mb-4">
-                <div>
-                    <label class="text-xs text-zinc-400 block mb-1">Google Client ID:</label>
-                    <input type="text" id="driveClientIdInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-left font-mono outline-none focus:border-zinc-700">
-                </div>
-                <div>
-                    <label class="text-xs text-zinc-400 block mb-1">Google API Key:</label>
-                    <input type="text" id="driveApiKeyInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-left font-mono outline-none focus:border-zinc-700">
-                </div>
-            </div>
-            <div class="flex gap-3">
-                <button onclick="saveDriveConfig()" class="flex-1 bg-white text-black py-2.5 rounded-xl font-bold text-sm hover:bg-zinc-200 transition">שמור הגדרות ענן</button>
-                <button onclick="toggleDriveConfigModal()" class="px-5 bg-zinc-800 text-white py-2.5 rounded-xl text-sm">ביטול</button>
-            </div>
-        </div>
-    </div>
-
     <!-- מודאל מפתחות API -->
     <div id="configModal" class="fixed inset-0 z-[500] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="p-6 rounded-2xl w-full max-w-lg bg-zinc-900 border border-zinc-800 text-right">
@@ -383,7 +340,6 @@
 
     <script>
         let db = { _standalone_videos: { open: [], blocked: [], untested: [] } };
-        let driveConfig = JSON.parse(localStorage.getItem('yt_drive_config') || '{"clientId":"","apiKey":""}');
         let apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
         let currentKeyIndex = 0;
         
@@ -396,11 +352,6 @@
         let modalQaPlayerInstance = null;
         let reconQaPlayerInstance = null;
         let activeReconciliationPlayingVideoId = null;
-
-        let googleTokenClient = null;
-        let googleAccessToken = null;
-        let googleDriveFileId = null;
-        const DRIVE_FILENAME = "netfree_yt_hub_cloud_sync.json";
 
         let scanStartTime = 0;
         let hourlyScanLog = [];
@@ -703,7 +654,7 @@
             
             updateProgress(keys.length, keys.length, "בדיקת סרטונים חסרים הסתיימה.");
             if (totalNewFound > 0) {
-                saveDatabaseAndTriggerSync();
+                saveDatabase();
                 alert(`האיתור הסתיים!\nנמצאו ${totalNewFound} סרטונים חסרים ב-${channelsWithNew} ערוצים שונים.\nהם הוכנסו לתור ויסרקו אוטומטית במקבצים מרוכזים של 100.`);
             } else {
                 alert("הסריקה הסתיימה! המאגר שלך מעודכן ב-100% ולא נמצאו שום סרטונים חסרים ביוטיוב.");
@@ -750,7 +701,7 @@
             db[currentLiveChannelId].untestedVideos = [...currentLiveUntestedIds];
             
             db[currentLiveChannelId].updatedTimestamp = Date.now();
-            saveDatabaseAndTriggerSync();
+            saveDatabase();
 
             document.getElementById('liveOpenList').innerHTML = ''; 
             document.getElementById('liveBlockedList').innerHTML = '';
@@ -763,20 +714,6 @@
             currentLiveOpenIds.forEach(id => appendLiveList('liveOpenList', id, 'emerald')); 
             currentLiveBlockedIds.forEach(id => appendLiveList('liveBlockedList', id, 'rose'));
             currentLiveUntestedIds.forEach(id => appendLiveList('liveUntestedList', id, 'amber'));
-        }
-
-        function toggleDriveConfigModal() {
-            const m = document.getElementById('driveConfigModal');
-            if(!m) return;
-            if(m.classList.contains('hidden')) {
-                m.classList.remove('hidden');
-                m.classList.add('flex');
-                document.getElementById('driveClientIdInput').value = driveConfig.clientId || '';
-                document.getElementById('driveApiKeyInput').value = driveConfig.apiKey || '';
-            } else {
-                m.classList.add('hidden');
-                m.classList.remove('flex');
-            }
         }
 
         function toggleConfigModal() {
@@ -792,13 +729,6 @@
             }
         }
 
-        function saveDriveConfig() {
-            driveConfig.clientId = document.getElementById('driveClientIdInput').value.trim();
-            driveConfig.apiKey = document.getElementById('driveApiKeyInput').value.trim();
-            localStorage.setItem('yt_drive_config', JSON.stringify(driveConfig));
-            toggleDriveConfigModal(); initGoogleDriveLibraries();
-        }
-
         function saveApiKeys() {
             apiKeys = document.getElementById('apiKeysTextArea').value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             localStorage.setItem('yt_api_keys_v2', JSON.stringify(apiKeys));
@@ -807,86 +737,10 @@
             toggleConfigModal();
         }
 
-        function initGoogleDriveLibraries() {
-            if (!driveConfig.clientId || !driveConfig.apiKey) {
-                document.getElementById('driveStatusLabel').innerText = "הסנכרון המקומי לתיקיית הפרויקט המקורית פעיל."; return;
-            }
-            try {
-                googleTokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file',
-                    callback: (tokenResponse) => {
-                        if (tokenResponse.error !== undefined) { throw (tokenResponse); }
-                        googleAccessToken = tokenResponse.access_token;
-                        
-                        localStorage.setItem('yt_google_access_token', googleAccessToken);
-                        
-                        document.getElementById('btnDriveAuth').innerText = "✓ מחובר לגוגל";
-                        document.getElementById('btnDriveAuth').className = "bg-emerald-600/20 text-emerald-400 border border-emerald-800 px-4 py-1.5 rounded-xl text-xs font-bold cursor-default";
-                        document.getElementById('btnDriveSync').disabled = false;
-                        document.getElementById('btnDriveSync').className = "bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md";
-                        document.getElementById('driveStatusLabel').innerText = "מחובר בהצלחה לענן!"; syncWithGoogleDrive();
-                    },
-                });
-            } catch(e) { console.error(e); }
-        } 
-
-        function handleAuthClick() { if (googleTokenClient === null) return alert("הזן קודם מפתחות בהגדרות ענן."); googleTokenClient.requestAccessToken({prompt: 'consent'}); }
-
-        async function syncWithGoogleDrive(isDeletionSync = false) { 
-            if (!googleAccessToken) return;
-            document.getElementById('driveStatusLabel').innerText = "🔄 מבצע מיזוג נתונים מול הענן...";
-            try {
-                let searchUrl = `https://www.googleapis.com/drive/v3/files?q=name='${DRIVE_FILENAME}' and trashed=false&key=${driveConfig.apiKey}`;
-                let response = await fetch(searchUrl, { headers: { 'Authorization': `Bearer ${googleAccessToken}` } });
-                let searchResult = await response.json(); let cloudData = null;
-
-                if (searchResult.files && searchResult.files.length > 0) {
-                    googleDriveFileId = searchResult.files[0].id;
-                    let contentUrl = `https://www.googleapis.com/drive/v3/files/${googleDriveFileId}?alt=media`;
-                    let contentRes = await fetch(contentUrl, { headers: { 'Authorization': `Bearer ${googleAccessToken}` } });
-                    cloudData = await contentRes.json();
-                }
-
-                if (cloudData && !isDeletionSync) {
-                    let localUpdated = false;
-                    Object.keys(cloudData).forEach(key => {
-                        if (key === "_standalone_videos") {
-                            cloudData[key].open?.forEach(v => { if(!db._standalone_videos.open.includes(v)) { db._standalone_videos.open.push(v); localUpdated = true; } });
-                            cloudData[key].blocked?.forEach(v => { if(!db._standalone_videos.blocked.includes(v)) { db._standalone_videos.blocked.push(v); localUpdated = true; } });
-                            if(cloudData[key].untested) cloudData[key].untested.forEach(v => { if(!db._standalone_videos.untested.includes(v)) { db._standalone_videos.untested.push(v); localUpdated = true; } });
-                        } else {
-                            if (!db[key]) { db[key] = cloudData[key]; localUpdated = true; } 
-                            else {
-                                let cloudTime = cloudData[key].updatedTimestamp || 0; let localTime = db[key].updatedTimestamp || 0;
-                                if (cloudTime > localTime) { db[key] = cloudData[key]; localUpdated = true; }
-                            }
-                        }
-                    });
-                    if (localUpdated) { 
-                        normalizeDatabaseStructure();
-                        await syncWithLocalFolderAAA(); 
-                    }
-                }
-
-                let metadata = { name: DRIVE_FILENAME, mimeType: 'application/json' }; let fileContent = JSON.stringify(db);
-                let form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', new Blob([fileContent], { type: 'application/json' }));
-
-                let uploadUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"; let uploadMethod = "POST";
-                if (googleDriveFileId) { uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${googleDriveFileId}?uploadType=multipart`; uploadMethod = "PATCH"; }
-
-                let uploadRes = await fetch(uploadUrl, { method: uploadMethod, headers: { 'Authorization': `Bearer ${googleAccessToken}` }, body: form });
-                if(uploadRes.ok) {
-                    let finalUploadJson = await uploadRes.json(); googleDriveFileId = finalUploadJson.id;
-                    document.getElementById('driveStatusLabel').innerText = `✓ סנכרון ומיזוג מלא הושלמו! (${new Date().toLocaleTimeString('he-IL')})`; calculateGlobalStats();
-                }
-            } catch (err) { document.getElementById('driveStatusLabel').innerText = "⚠️ שגיאה בסנכרון ענן."; }
-        }
-
-        function saveDatabaseAndTriggerSync(isDeletionSync = false) { 
+        function saveDatabase() { 
             syncWithLocalFolderAAA().then(() => {
                 calculateGlobalStats(); 
                 renderScannedDatabaseGrid(); 
-                if (googleAccessToken) syncWithGoogleDrive(isDeletionSync);
             });
         }
 
@@ -1094,7 +948,7 @@
             renderQueue(); calculateGlobalStats(); if (!isProcessing) processQueueNext();
         }
 
-        // 🚀 פונקציית איגוד משימות קטנות בתור למקבצים מרוכזים של 100 סרטונים
+        // 🚀 איגוד משימות קטנות בתור למקבצים מרוכזים של 100 סרטונים
         async function processBatchedQueueItems(targetMode) {
             let batchedItems = []; 
             let processedQueueIndices = new Set();
@@ -1167,7 +1021,6 @@
 
             const scannedVideoIds = Object.keys(scanMap);
 
-            // עדכון הנתונים לכל ערוץ
             batchedItems.forEach(item => {
                 const cid = item.channelId;
                 const vId = item.videoId;
@@ -1192,7 +1045,6 @@
                 channelData.updatedTimestamp = Date.now();
             });
 
-            // עדכון רשימות מותאמות אישית של משימות new_only
             queue.forEach(qItem => {
                 if (qItem.mode === 'new_only' && qItem.customIds) {
                     qItem.customIds = qItem.customIds.filter(id => !scannedVideoIds.includes(id));
@@ -1206,7 +1058,7 @@
 
             queue = queue.filter((_, idx) => !processedQueueIndices.has(idx));
 
-            saveDatabaseAndTriggerSync();
+            saveDatabase();
         }
 
         async function processQueueNext() {
@@ -1254,7 +1106,7 @@
                 updateProgress(20, 100, `משחזר ומאשר רשימה...`); 
                 let localCombinedIds = [...localOpenVideos, ...localBlockedVideos, ...localUntestedVideos];
                 db[channelId] = { title: channelTitle, totalVideos: localCombinedIds.length, openVideos: localCombinedIds, blockedVideos: [], untestedVideos: [], scannedAt: new Date().toLocaleDateString('he-IL'), updatedTimestamp: Date.now(), isNetfreeWhitelisted: true, scanCount: currentScansCount + 1 };
-                saveDatabaseAndTriggerSync(); updateProgress(100, 100, `הסתיים בהצלחה.`); return;
+                saveDatabase(); updateProgress(100, 100, `הסתיים בהצלחה.`); return;
             }
 
             updateProgress(10, 100, `מתחבר לנתונים...`);
@@ -1322,7 +1174,7 @@
                 isNetfreeWhitelisted: false, 
                 scanCount: currentScansCount + 1 
             };
-            saveDatabaseAndTriggerSync();
+            saveDatabase();
             renderReconciliationRows();
         }
 
@@ -1364,7 +1216,7 @@
             existingData.scanCount = currentScansCount + 1; 
             
             db[channelId] = existingData; 
-            saveDatabaseAndTriggerSync();
+            saveDatabase();
         }
 
         async function scanChannelBlockedOnly(channelId, channelTitle) {
@@ -1407,7 +1259,7 @@
             existingData.scanCount = currentScansCount + 1; 
             
             db[channelId] = existingData; 
-            saveDatabaseAndTriggerSync();
+            saveDatabase();
         }
 
         async function scanChannelNewOnly(channelId, channelTitle, targetVideoIds) {
@@ -1442,7 +1294,7 @@
             existingData.totalVideos = (existingData.openVideos?.length || 0) + (existingData.blockedVideos?.length || 0) + (existingData.untestedVideos?.length || 0);
             existingData.updatedTimestamp = Date.now();
             db[channelId] = existingData;
-            saveDatabaseAndTriggerSync();
+            saveDatabase();
         }
 
         async function searchChannels() {
@@ -1498,7 +1350,7 @@
 
         function deleteChannel(id) { 
             if(confirm("להסיר ערוץ זה מהמחשב לצמיתות?")) { 
-                delete db[id]; saveDatabaseAndTriggerSync(true); 
+                delete db[id]; saveDatabase(); 
             } 
         }
 
@@ -1506,7 +1358,7 @@
             if(!db[channelId]) return;
             db[channelId].isNetfreeWhitelisted = !db[channelId].isNetfreeWhitelisted;
             db[channelId].updatedTimestamp = Date.now();
-            saveDatabaseAndTriggerSync();
+            saveDatabase();
         }
 
         function toggleAnomaliesFilter() {
@@ -1559,7 +1411,7 @@
             
             updateProgress(keys.length, keys.length, "בדיקת האנומליות הסתיימה.");
             if (fixedCount > 0) {
-                saveDatabaseAndTriggerSync();
+                saveDatabase();
                 alert(`הבדיקה הסתיימה! נמצאו ${fixedCount} ערוצים עם נתוני מונים שגויים. המונים שלהם עודכנו והם הוכנסו אוטומטית לתור לסריקה מלאה מחדש!`);
                 filterAnomaliesOnly = false;
                 toggleAnomaliesFilter();
@@ -1627,7 +1479,7 @@
             else { if(!data.openVideos) data.openVideos = []; data.openVideos.push(vId); }
 
             data.totalVideos = (data.openVideos?.length || 0) + (data.blockedVideos?.length || 0) + (data.untestedVideos?.length || 0);
-            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
+            data.updatedTimestamp = Date.now(); saveDatabase(); renderModalVideoLists();
         }
 
         function addVideoManually(targetType) {
@@ -1645,7 +1497,7 @@
             else data.blockedVideos.push(vId);
 
             data.totalVideos = (data.openVideos?.length || 0) + (data.blockedVideos?.length || 0) + (data.untestedVideos?.length || 0);
-            data.updatedTimestamp = Date.now(); saveDatabaseAndTriggerSync(); renderModalVideoLists();
+            data.updatedTimestamp = Date.now(); saveDatabase(); renderModalVideoLists();
         }
 
         function openReconciliationModal() {
@@ -1683,7 +1535,7 @@
             channel.totalVideos = (channel.openVideos?.length || 0) + (channel.blockedVideos?.length || 0) + (channel.untestedVideos?.length || 0);
             channel.updatedTimestamp = Date.now();
             pendingConflicts.splice(index, 1);
-            saveDatabaseAndTriggerSync();
+            saveDatabase();
             renderReconciliationRows();
         }
 
@@ -1714,7 +1566,7 @@
                 else if(status === 'untested') db._standalone_videos.untested.push(vId);
                 else db._standalone_videos.blocked.push(vId);
 
-                saveDatabaseAndTriggerSync();
+                saveDatabase();
                 renderStandaloneVideos();
             });
         }
@@ -1722,7 +1574,28 @@
         function exportCleanJSON() { let cleanDb = {}; Object.keys(db).forEach(key => { if(key === "_standalone_videos") { cleanDb["_standalone_videos"] = db[key].open; } else { cleanDb[key] = { title: db[key].title || key, openVideos: db[key].openVideos }; } }); triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanDb, null, 2)), "netfree_approved_channels_clean.json"); }
         function exportFullBackup() { triggerDownload("data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)), "system_full_backup.json"); }
         function triggerDownload(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
-        importFullBackup = function(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { db = JSON.parse(e.target.result); normalizeDatabaseStructure(); saveDatabaseAndTriggerSync(); } catch(err) { alert("קובץ גיבוי לא תקין"); } }; reader.readAsText(file); }
+        
+        function importFullBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (confirm("האם אתה בטוח שברצונך לטעון קובץ גיבוי זה ולהחליף את נתוני ה-DB הקיימים במחשב?")) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        db = importedData;
+                        normalizeDatabaseStructure();
+                        saveDatabase();
+                        alert("קובץ הגיבוי נטען ונשמר בהצלחה במסד הנתונים!");
+                    } catch(err) {
+                        alert("קובץ גיבוי לא תקין. ודא שאתה מעלה קובץ גיבוי תקין.");
+                    }
+                };
+                reader.readAsText(file);
+            }
+            event.target.value = '';
+        }
 
         async function fetchWithRotation(urlBuilderFunc) {
             if (!apiKeys || apiKeys.length === 0) {
@@ -1979,7 +1852,7 @@
         function deleteStandaloneVideo(vId, type) {
             if (db._standalone_videos && db._standalone_videos[type]) {
                 db._standalone_videos[type] = db._standalone_videos[type].filter(id => id !== vId);
-                saveDatabaseAndTriggerSync();
+                saveDatabase();
                 renderStandaloneVideos();
             }
         }
@@ -2002,22 +1875,10 @@
 
         window.onload = () => { 
             apiKeys = JSON.parse(localStorage.getItem('yt_api_keys_v2') || '[]');
-            document.getElementById('keyCountLabel').innerText = apiKeys.length; 
-
-            const savedToken = localStorage.getItem('yt_google_access_token');
-            if (savedToken && driveConfig.clientId && driveConfig.apiKey) {
-                googleAccessToken = savedToken;
-                document.getElementById('btnDriveAuth').innerText = "✓ מחובר אוטומטית";
-                document.getElementById('btnDriveAuth').className = "bg-emerald-600/20 text-emerald-400 border border-emerald-800 px-4 py-1.5 rounded-xl text-xs font-bold cursor-default";
-                document.getElementById('btnDriveSync').disabled = false;
-                document.getElementById('btnDriveSync').className = "bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md";
-            }
+            const keyLabel = document.getElementById('keyCountLabel');
+            if (keyLabel) keyLabel.innerText = apiKeys.length; 
 
             loadDatabaseFromLocalFolderAAA().then(() => {
-                initGoogleDriveLibraries(); 
-                if (googleAccessToken) {
-                    syncWithGoogleDrive();
-                }
                 if (queue.length > 0) {
                     renderQueue();
                     logErrorToConsoleOnScreen(`[תור שוחזר] נמצאו ${queue.length} משימות ממתינות בזיכרון.`);
